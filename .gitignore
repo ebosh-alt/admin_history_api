@@ -37,3 +37,5 @@ tmp/
 .env.*
 secrets/
 TODO.md
+go.mod
+go.sum
