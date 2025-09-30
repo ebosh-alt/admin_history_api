@@ -1,0 +1,155 @@
+syntax = "proto3";
+package todo_proto.v1;
+option go_package = "pkg/proto/gen/go;admin_history";
+
+import "google/protobuf/timestamp.proto";
+
+
+message Status {
+  bool ok = 1;
+  string message = 2;
+}
+
+message User{
+  int64 id = 1;
+  string username = 2;
+  bool status = 4;
+  bool accepted_offer = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message UpdateUserRequest{
+  User user = 1;
+}
+
+message UsersListRequest{
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message UsersListResponse{
+  repeated User users = 1;
+}
+
+message UserRequest{
+  int64 id = 1;
+}
+
+message UserResponse{
+  User user = 1;
+}
+
+message QuestionnairesListRequest{
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message Questionnaire{
+  int64 id = 1;
+  int64 user_id = 2;
+  string history = 3;
+  bool status = 5;
+  bool payment = 6;
+  repeated Answer answers = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message Answer{
+  string question = 1;
+  string answer = 2;
+}
+
+message QuestionnairesListResponse{
+  repeated Questionnaire questionnaires = 1;
+}
+
+message Photo{
+  string path = 1;
+  string questionnaire_id = 2;
+  string scene = 3;
+  google.protobuf.Timestamp created_at = 4;
+
+}
+message Video{
+  string path = 1;
+  string questionnaire_id = 2;
+}
+
+message QuestionnaireRequest{
+  int64 id = 1;
+}
+
+
+message QuestionnaireResponse{
+  Questionnaire questionnaire = 1;
+}
+
+message UpdateQuestionnaireRequest{
+  Questionnaire questionnaire = 1;
+}
+
+message MessageChat{
+  string role = 1;
+  string text = 2;
+  optional Photo photo = 3;
+}
+
+message ChatRequest{
+  int64 id = 1;
+}
+message ChatResponse{
+  User user = 1;
+  repeated MessageChat messages = 2;
+}
+
+message ChatsInfo{
+  int64 user_id = 1;
+  string username = 2;
+}
+
+message ChatsListRequest{
+  int32 page = 1;
+  int32 limit = 2;
+}
+message ChatsListResponse{
+  repeated ChatsInfo chats = 1;
+}
+
+message StatisticsRequest{
+  google.protobuf.Timestamp date_start = 1;
+  google.protobuf.Timestamp date_end = 2;
+}
+
+message StatisticsResponse{
+
+}
+
+message PhotoRequest{
+  int64 questionnaire_id = 1;
+  string type = 2;
+}
+
+message CreatePhoto{
+  Photo photo = 2;
+}
+message PhotoResponse{
+  repeated Photo photo = 1;
+}
+
+service AdminHistoryService {
+  rpc GetUser(UserRequest) returns (UserResponse);
+  rpc UsersList(UsersListRequest) returns (UsersListResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (Status);
+
+  rpc GetQuestionnaire(QuestionnaireRequest) returns (QuestionnaireResponse);
+  rpc QuestionnairesList(QuestionnairesListRequest) returns (QuestionnairesListResponse);
+  rpc UpdateQuestionnaire(UpdateQuestionnaireRequest) returns (Status);
+
+  rpc GetPhotosQuestionnaire(PhotoRequest) returns (PhotoResponse);
+  rpc CreatePhoto(PhotoResponse) returns (Status);
+
+  rpc GetChat(ChatRequest) returns (ChatResponse);
+  rpc ChatsList(ChatsListRequest) returns (ChatsListResponse);
+
+  rpc GetStatistics(StatisticsRequest) returns (StatisticsResponse);
+}

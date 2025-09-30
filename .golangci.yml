@@ -1,0 +1,18 @@
+version: "2"
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - gofmt
+    - goimports
+    - golint
+    - ineffassign
+    - gocyclo
+    - gosec
+  disable:
+    - megacheck
+run:
+  timeout: 5m
+
+

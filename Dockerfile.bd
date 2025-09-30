@@ -1,0 +1,27 @@
+FROM golang:1.24-alpine AS builder
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Копируем код мигратора и SQL-скрипты
+COPY cmd/migrator ./cmd/migrator
+COPY migrations ./migrations
+
+COPY . .
+
+WORKDIR /src/cmd/migrator
+RUN CGO_ENABLED=0 GOOS=linux go build -o migrator
+
+FROM postgres:15
+
+# Копируем собранный мигратор и миграции из билд-стейджа
+COPY --from=builder /src/cmd/migrator/migrator /usr/local/bin/migrator
+COPY --from=builder /src/migrations /migrations
+
+# Наш entrypmoint
+COPY docker-entrypoint-with-migrations.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint-with-migrations.sh
+
+ENTRYPOINT ["docker-entrypoint-with-migrations.sh"]
+CMD ["postgres"]

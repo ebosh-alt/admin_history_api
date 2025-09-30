@@ -1,0 +1,20 @@
+service_name: "admin_history"
+
+Postgres:
+  port: 6132
+  host: localhost
+  user: postgres
+  password: postgres
+  DBName: db_history_bot
+  sslMode: disable
+
+JWT:
+  Secret: "lio2UbeLoKlYuJ7LDR+kSxUPQDHbaekq"
+  AccessTTL: "15m"
+  RefreshTTL: "24h"
+
+Server:
+  host: "0.0.0.0"
+  port: "3000"
+
+Pepper: "PASSWORD_PEPPER"
