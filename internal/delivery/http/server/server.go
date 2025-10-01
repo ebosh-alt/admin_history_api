@@ -107,6 +107,7 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 	}
 
 	qProto, err := s.Usecase.GetQuestionnairesList(c, req)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Не корректные данные"})
 		return

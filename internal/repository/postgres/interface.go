@@ -15,6 +15,7 @@ type InterfaceUserRepo interface {
 	GetUser(ctx context.Context, user *entities.User) (*entities.User, error)
 	UsersList(ctx context.Context, page int32, limit int32) ([]entities.User, error)
 	UpdateUser(ctx context.Context, user *entities.User) error
+	DeleteUser(ctx context.Context, user *entities.User) error
 }
 
 type InterfaceQuestionnaireRepo interface {
