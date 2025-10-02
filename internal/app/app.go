@@ -3,6 +3,9 @@
 package app
 
 import (
+	"admin_history/internal/delivery/http/handlers"
+	"admin_history/internal/delivery/http/middleware"
+	"admin_history/internal/delivery/http/server"
 	"context"
 
 	"go.uber.org/fx"
@@ -10,8 +13,6 @@ import (
 	"go.uber.org/zap"
 
 	"admin_history/config"
-	"admin_history/internal/delivery/http/middleware"
-	"admin_history/internal/delivery/http/server"
 	"admin_history/internal/repository/postgres"
 	"admin_history/internal/usecase"
 )
@@ -38,7 +39,7 @@ func New() *fx.App {
 			},
 			// HTTP-мiddleware и сервер
 			middleware.NewMiddleware,
-			server.NewServer,
+			handlers.NewServer,
 		),
 		// Lifecycle: сначала поднимаем репозиторий
 		fx.Invoke(func(lc fx.Lifecycle, repo *postgres.Repository) {

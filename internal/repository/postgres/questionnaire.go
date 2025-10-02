@@ -19,21 +19,21 @@ type QuestionnaireRepo struct {
 const (
 	questionnaireByIDQuery = `SELECT id, user_id, history, status, payment, created_at, answers
 FROM questionnaires WHERE id = $1 order by created_at desc`
-	photosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, scene
-FROM photos WHERE questionnaire_id = $1 ORDER BY id`
-	generatePhotosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, NULL::text as scene
-FROM generate_photos WHERE questionnaire_id = $1 ORDER BY id`
+	//	photosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, scene
+	//FROM photos WHERE questionnaire_id = $1 ORDER BY id`
+	//	generatePhotosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, NULL::text as scene
+	//FROM generate_photos WHERE questionnaire_id = $1 ORDER BY id`
 	listQuestionnairesQuery = `SELECT id, user_id, answers, history, status, payment, created_at
 FROM questionnaires
 ORDER BY id
 LIMIT $1 OFFSET $2;`
-	insertPhotoQuery = `INSERT INTO photos (questionnaire_id, path, scene, created_at)
-VALUES ($1, $2, $3, NOW())
-ON CONFLICT (questionnaire_id, path) DO UPDATE
-SET scene = COALESCE(EXCLUDED.scene, photos.scene);`
-	insertGeneratePhotoQuery = `INSERT INTO generate_photos (questionnaire_id, path, created_at)
-VALUES ($1, $2, NOW())
-ON CONFLICT (questionnaire_id, path) DO NOTHING;`
+	//	insertPhotoQuery = `INSERT INTO photos (questionnaire_id, path, scene, created_at)
+	//VALUES ($1, $2, $3, NOW())
+	//ON CONFLICT (questionnaire_id, path) DO UPDATE
+	//SET scene = COALESCE(EXCLUDED.scene, photos.scene);`
+	//	insertGeneratePhotoQuery = `INSERT INTO generate_photos (questionnaire_id, path, created_at)
+	//VALUES ($1, $2, NOW())
+	//ON CONFLICT (questionnaire_id, path) DO NOTHING;`
 )
 
 func (r *Repository) GetQuestionnaire(ctx context.Context, q *entities.Questionnaire) (*entities.Questionnaire, error) {
@@ -113,7 +113,7 @@ func (r *Repository) UpdateQuestionnaire(ctx context.Context, q *entities.Questi
 	if q.Answers != nil {
 		i++
 		set = append(set, fmt.Sprintf("answers = $%d", i))
-		args = append(args, []byte(q.Answers))
+		args = append(args, q.Answers)
 	}
 
 	sql := fmt.Sprintf(`UPDATE questionnaires SET %s WHERE id = $1`, strings.Join(set, ", "))

@@ -1,8 +1,8 @@
 package usecase
 
 import (
+	"admin_history/internal/misc"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -56,7 +56,7 @@ func (u *Usecase) UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQue
 		return nil, fmt.Errorf("invalid request")
 	}
 
-	ent, err := buildEntityForUpdate(req.Questionnaire)
+	ent, err := misc.BuildEntityForUpdate(req.Questionnaire)
 	if err != nil {
 		return nil, err
 	}
@@ -69,24 +69,4 @@ func (u *Usecase) UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQue
 	}
 
 	return &protos.Status{Ok: true, Message: "updated"}, nil
-}
-
-func buildEntityForUpdate(p *protos.Questionnaire) (*entities.Questionnaire, error) {
-	q := &entities.Questionnaire{
-		ID:      p.Id,
-		UserID:  p.UserId,
-		History: p.History,
-		Status:  p.Status,
-		Payment: p.Payment,
-	}
-
-	if p.Answers != nil {
-		b, err := json.Marshal(p.Answers)
-		if err != nil {
-			return nil, fmt.Errorf("marshal answers: %w", err)
-		}
-		q.Answers = b
-	}
-
-	return q, nil
 }
