@@ -13,6 +13,9 @@ type User struct {
 	Status        bool
 	AcceptedOffer bool
 	CreatedAt     time.Time
+	QTotal        int64
+	QPaid         int64
+	QUnpaid       int64
 }
 
 type UserDTO struct {
@@ -21,6 +24,9 @@ type UserDTO struct {
 	Status        *bool
 	AcceptedOffer *bool
 	CreatedAt     *time.Time
+	QTotal        *int64
+	QPaid         *int64
+	QUnpaid       *int64
 }
 
 func (u *User) ToDTO() *UserDTO {
@@ -30,6 +36,9 @@ func (u *User) ToDTO() *UserDTO {
 		Status:        &u.Status,
 		AcceptedOffer: &u.AcceptedOffer,
 		CreatedAt:     &u.CreatedAt,
+		QTotal:        &u.QTotal,
+		QPaid:         &u.QPaid,
+		QUnpaid:       &u.QUnpaid,
 	}
 }
 
@@ -49,6 +58,15 @@ func (d *UserDTO) ToEntity() *User {
 	}
 	if d.CreatedAt != nil {
 		u.CreatedAt = *d.CreatedAt
+	}
+	if d.QTotal != nil {
+		u.QTotal = *d.QTotal
+	}
+	if d.QPaid != nil {
+		u.QPaid = *d.QPaid
+	}
+	if d.QUnpaid != nil {
+		u.QUnpaid = *d.QUnpaid
 	}
 	return u
 }
@@ -190,4 +208,18 @@ func (d *QuestionnaireDTO) ToEntity() *Questionnaire {
 	}
 
 	return &q
+}
+
+type QuestionnaireFilter struct {
+	Payment  *bool
+	Status   *bool
+	DateFrom *time.Time
+	DateTo   *time.Time
+}
+
+type UsersFilter struct {
+	Status        *bool
+	AcceptedOffer *bool
+	DateFrom      *time.Time
+	DateTo        *time.Time
 }

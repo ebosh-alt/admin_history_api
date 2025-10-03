@@ -5,6 +5,7 @@ import (
 	protos "admin_history/pkg/proto/gen/go"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -32,32 +33,55 @@ func (u *Usecase) GetUser(ctx context.Context, req *protos.UserRequest) (*protos
 }
 
 func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (*protos.UsersListResponse, error) {
-	page := req.Page
-	limit := req.Limit
-	if page == 0 {
+	page, limit := req.GetPage(), req.GetLimit()
+	if page < 1 {
 		page = 1
 	}
-	if limit == 0 {
+	if limit <= 0 {
 		limit = 50
 	}
 
-	usersList, err := u.Postgres.UsersList(ctx, page, limit)
+	var f entities.UsersFilter
+	if req.Status != nil {
+		v := req.Status.Value
+		f.Status = &v
+	}
+	if req.AcceptedOffer != nil {
+		v := req.AcceptedOffer.Value
+		f.AcceptedOffer = &v
+	}
+	if req.DateFrom != nil {
+		t := req.DateFrom.AsTime()
+		f.DateFrom = &t
+	}
+	if req.DateTo != nil {
+		t := req.DateTo.AsTime()
+		f.DateTo = &t
+	}
+
+	items, err := u.Postgres.UsersList(ctx, page, limit, f)
 	if err != nil {
-		return nil, errors.New("users not found")
+		return nil, fmt.Errorf("users list: %w", err)
 	}
-	protosUsers := make([]*protos.User, len(usersList))
-	for i := 0; i < len(usersList); i++ {
-		user := usersList[i]
-		protosUsers[i] = &protos.User{
-			Id:            user.ID,
-			Username:      user.Username,
-			Status:        user.Status,
-			AcceptedOffer: user.AcceptedOffer,
-			CreatedAt:     timestamppb.New(user.CreatedAt),
-		}
+
+	rows := make([]*protos.User, 0, len(items))
+	for i := range items {
+		it := items[i]
+		rows = append(rows, &protos.User{
+			Id:            it.ID,
+			Username:      it.Username,
+			Status:        it.Status,
+			AcceptedOffer: it.AcceptedOffer,
+			CreatedAt:     timestamppb.New(it.CreatedAt),
+			Total:         it.QTotal,
+			Paid:          it.QPaid,
+			Unpaid:        it.QUnpaid,
+		})
 	}
+
 	return &protos.UsersListResponse{
-		Users: protosUsers,
+		Users: rows,
+		Total: int64(len(items)),
 	}, nil
 }
 

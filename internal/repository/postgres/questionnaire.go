@@ -50,7 +50,11 @@ func (r *Repository) GetQuestionnaire(ctx context.Context, q *entities.Questionn
 	return q, nil
 }
 
-func (r *Repository) GetQuestionnairesList(ctx context.Context, page int32, limit int32) ([]entities.Questionnaire, error) {
+func (r *Repository) GetQuestionnairesList(
+	ctx context.Context,
+	page, limit int32,
+	f entities.QuestionnaireFilter,
+) ([]entities.Questionnaire, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -62,7 +66,44 @@ func (r *Repository) GetQuestionnairesList(ctx context.Context, page int32, limi
 	}
 	offset := (page - 1) * limit
 
-	rows, err := r.DB.Query(ctx, listQuestionnairesQuery, limit, offset)
+	sb := strings.Builder{}
+	sb.WriteString(`
+SELECT id, user_id, answers, history, status, payment, created_at
+FROM questionnaires
+WHERE 1=1`)
+
+	args := make([]any, 0, 6)
+	i := 0
+
+	if f.Payment != nil {
+		i++
+		sb.WriteString(fmt.Sprintf(" AND payment = $%d", i))
+		args = append(args, *f.Payment)
+	}
+	if f.Status != nil {
+		i++
+		sb.WriteString(fmt.Sprintf(" AND status = $%d", i))
+		args = append(args, *f.Status)
+	}
+	if f.DateFrom != nil {
+		i++
+		sb.WriteString(fmt.Sprintf(" AND created_at >= $%d", i))
+		args = append(args, *f.DateFrom)
+	}
+	if f.DateTo != nil {
+		i++
+		sb.WriteString(fmt.Sprintf(" AND created_at < $%d", i))
+		args = append(args, *f.DateTo)
+	}
+
+	i++
+	sb.WriteString(fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d", i))
+	args = append(args, limit)
+	i++
+	sb.WriteString(fmt.Sprintf(" OFFSET $%d", i))
+	args = append(args, offset)
+
+	rows, err := r.DB.Query(ctx, sb.String(), args...)
 	if err != nil {
 		return nil, fmt.Errorf("list questionnaires: %w", err)
 	}

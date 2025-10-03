@@ -23,13 +23,32 @@ func (u *Usecase) GetQuestionnairesList(ctx context.Context, req *protos.Questio
 		req.Limit = 10
 	}
 
-	items, err := u.Postgres.GetQuestionnairesList(ctx, req.Page, req.Limit)
+	var f entities.QuestionnaireFilter
+	if req.Payment != nil {
+		v := req.Payment.Value
+		f.Payment = &v
+	}
+	if req.Status != nil {
+		v := req.Status.Value
+		f.Status = &v
+	}
+	if req.DateFrom != nil {
+		t := req.DateFrom.AsTime()
+		f.DateFrom = &t
+	}
+	if req.DateTo != nil {
+		t := req.DateTo.AsTime()
+		f.DateTo = &t
+	} // полузакрытый интервал: < date_to
+
+	items, err := u.Postgres.GetQuestionnairesList(ctx, req.Page, req.Limit, f)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &protos.QuestionnairesListResponse{
 		Questionnaires: make([]*protos.Questionnaire, 0, len(items)),
+		Total:          int64(len(items)),
 	}
 	for i := range items {
 		resp.Questionnaires = append(resp.Questionnaires, items[i].ToProto())

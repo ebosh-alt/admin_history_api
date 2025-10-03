@@ -14,13 +14,13 @@ type InterfaceRepo interface {
 
 type InterfaceUserRepo interface {
 	GetUser(ctx context.Context, user *entities.User) (*entities.User, error)
-	UsersList(ctx context.Context, page int32, limit int32) ([]entities.User, error)
+	UsersList(ctx context.Context, page int32, limit int32, f entities.UsersFilter) ([]entities.User, error)
 	UpdateUser(ctx context.Context, user *entities.User) error
 }
 
 type InterfaceQuestionnaireRepo interface {
 	GetQuestionnaire(ctx context.Context, questionnaire *entities.Questionnaire) (*entities.Questionnaire, error)
-	GetQuestionnairesList(ctx context.Context, page int32, limit int32) ([]entities.Questionnaire, error)
+	GetQuestionnairesList(ctx context.Context, page int32, limit int32, f entities.QuestionnaireFilter) ([]entities.Questionnaire, error)
 	UpdateQuestionnaire(ctx context.Context, req *entities.Questionnaire) error
 }
 

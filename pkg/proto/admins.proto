@@ -3,7 +3,7 @@ package todo_proto.v1;
 option go_package = "pkg/proto/gen/go;admin_history";
 
 import "google/protobuf/timestamp.proto";
-
+import "google/protobuf/wrappers.proto";
 
 message Status {
   bool ok = 1;
@@ -16,19 +16,32 @@ message User{
   bool status = 4;
   bool accepted_offer = 5;
   google.protobuf.Timestamp created_at = 6;
+  int64 total = 7;
+  int64 paid = 8;
+  int64 unpaid = 9;
+
 }
 
 message UpdateUserRequest{
   User user = 1;
 }
 
-message UsersListRequest{
+message UsersListRequest {
   int32 page = 1;
   int32 limit = 2;
+
+  // Фильтры по пользователю (presence через wrappers)
+  google.protobuf.BoolValue status = 3; // активен/неактивен
+  google.protobuf.BoolValue accepted_offer = 4; // принял оффер/нет
+  google.protobuf.Timestamp date_from = 5; // created_at >=
+  google.protobuf.Timestamp date_to = 6; // created_at < (полуинтервал)
 }
 
 message UsersListResponse{
   repeated User users = 1;
+  int64 total = 2;
+
+
 }
 
 message UserRequest{
@@ -37,11 +50,16 @@ message UserRequest{
 
 message UserResponse{
   User user = 1;
+
 }
 
 message QuestionnairesListRequest{
   int32 page = 1;
   int32 limit = 2;
+  google.protobuf.BoolValue payment = 3;
+  google.protobuf.BoolValue  status = 4;
+  google.protobuf.Timestamp  date_from = 5;
+  google.protobuf.Timestamp  date_to = 6;
 }
 
 message Questionnaire{
@@ -61,6 +79,7 @@ message Answer{
 
 message QuestionnairesListResponse{
   repeated Questionnaire questionnaires = 1;
+  int64 total = 4;
 }
 
 message Photo{

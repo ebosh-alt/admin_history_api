@@ -10,6 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -81,6 +82,9 @@ type User struct {
 	Status        bool                   `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
 	AcceptedOffer bool                   `protobuf:"varint,5,opt,name=accepted_offer,json=acceptedOffer,proto3" json:"accepted_offer,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Total         int64                  `protobuf:"varint,7,opt,name=total,proto3" json:"total,omitempty"`
+	Paid          int64                  `protobuf:"varint,8,opt,name=paid,proto3" json:"paid,omitempty"`
+	Unpaid        int64                  `protobuf:"varint,9,opt,name=unpaid,proto3" json:"unpaid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -150,6 +154,27 @@ func (x *User) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *User) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *User) GetPaid() int64 {
+	if x != nil {
+		return x.Paid
+	}
+	return 0
+}
+
+func (x *User) GetUnpaid() int64 {
+	if x != nil {
+		return x.Unpaid
+	}
+	return 0
+}
+
 type UpdateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
@@ -195,9 +220,14 @@ func (x *UpdateUserRequest) GetUser() *User {
 }
 
 type UsersListRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Page  int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Фильтры по пользователю (presence через wrappers)
+	Status        *wrapperspb.BoolValue  `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`                                    // активен/неактивен
+	AcceptedOffer *wrapperspb.BoolValue  `protobuf:"bytes,4,opt,name=accepted_offer,json=acceptedOffer,proto3" json:"accepted_offer,omitempty"` // принял оффер/нет
+	DateFrom      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`                // created_at >=
+	DateTo        *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`                      // created_at < (полуинтервал)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -246,9 +276,38 @@ func (x *UsersListRequest) GetLimit() int32 {
 	return 0
 }
 
+func (x *UsersListRequest) GetStatus() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetAcceptedOffer() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.AcceptedOffer
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetDateFrom() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateFrom
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetDateTo() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateTo
+	}
+	return nil
+}
+
 type UsersListResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -288,6 +347,13 @@ func (x *UsersListResponse) GetUsers() []*User {
 		return x.Users
 	}
 	return nil
+}
+
+func (x *UsersListResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
 }
 
 type UserRequest struct {
@@ -382,6 +448,10 @@ type QuestionnairesListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Payment       *wrapperspb.BoolValue  `protobuf:"bytes,3,opt,name=payment,proto3" json:"payment,omitempty"`
+	Status        *wrapperspb.BoolValue  `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	DateFrom      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
+	DateTo        *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -428,6 +498,34 @@ func (x *QuestionnairesListRequest) GetLimit() int32 {
 		return x.Limit
 	}
 	return 0
+}
+
+func (x *QuestionnairesListRequest) GetPayment() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.Payment
+	}
+	return nil
+}
+
+func (x *QuestionnairesListRequest) GetStatus() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+func (x *QuestionnairesListRequest) GetDateFrom() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateFrom
+	}
+	return nil
+}
+
+func (x *QuestionnairesListRequest) GetDateTo() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateTo
+	}
+	return nil
 }
 
 type Questionnaire struct {
@@ -577,6 +675,7 @@ func (x *Answer) GetAnswer() string {
 type QuestionnairesListResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Questionnaires []*Questionnaire       `protobuf:"bytes,1,rep,name=questionnaires,proto3" json:"questionnaires,omitempty"`
+	Total          int64                  `protobuf:"varint,4,opt,name=total,proto3" json:"total,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -616,6 +715,13 @@ func (x *QuestionnairesListResponse) GetQuestionnaires() []*Questionnaire {
 		return x.Questionnaires
 	}
 	return nil
+}
+
+func (x *QuestionnairesListResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
 }
 
 type Photo struct {
@@ -1406,31 +1512,43 @@ var File_pkg_proto_admins_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\n" +
-	"\x16pkg/proto/admins.proto\x12\rtodo_proto.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"2\n" +
+	"\x16pkg/proto/admins.proto\x12\rtodo_proto.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\"2\n" +
 	"\x06Status\x12\x0e\n" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xac\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xee\x01\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\bR\x06status\x12%\n" +
 	"\x0eaccepted_offer\x18\x05 \x01(\bR\racceptedOffer\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"<\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x14\n" +
+	"\x05total\x18\a \x01(\x03R\x05total\x12\x12\n" +
+	"\x04paid\x18\b \x01(\x03R\x04paid\x12\x16\n" +
+	"\x06unpaid\x18\t \x01(\x03R\x06unpaid\"<\n" +
 	"\x11UpdateUserRequest\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"<\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"\xa1\x02\n" +
 	"\x10UsersListRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\">\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x122\n" +
+	"\x06status\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\x06status\x12A\n" +
+	"\x0eaccepted_offer\x18\x04 \x01(\v2\x1a.google.protobuf.BoolValueR\racceptedOffer\x127\n" +
+	"\tdate_from\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bdateFrom\x123\n" +
+	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\"T\n" +
 	"\x11UsersListResponse\x12)\n" +
-	"\x05users\x18\x01 \x03(\v2\x13.todo_proto.v1.UserR\x05users\"\x1d\n" +
+	"\x05users\x18\x01 \x03(\v2\x13.todo_proto.v1.UserR\x05users\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\"\x1d\n" +
 	"\vUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"7\n" +
 	"\fUserResponse\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"E\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"\x9d\x02\n" +
 	"\x19QuestionnairesListRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\xf0\x01\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x124\n" +
+	"\apayment\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\apayment\x122\n" +
+	"\x06status\x18\x04 \x01(\v2\x1a.google.protobuf.BoolValueR\x06status\x127\n" +
+	"\tdate_from\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bdateFrom\x123\n" +
+	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\"\xf0\x01\n" +
 	"\rQuestionnaire\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x18\n" +
@@ -1442,9 +1560,10 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"<\n" +
 	"\x06Answer\x12\x1a\n" +
 	"\bquestion\x18\x01 \x01(\tR\bquestion\x12\x16\n" +
-	"\x06answer\x18\x02 \x01(\tR\x06answer\"b\n" +
+	"\x06answer\x18\x02 \x01(\tR\x06answer\"x\n" +
 	"\x1aQuestionnairesListResponse\x12D\n" +
-	"\x0equestionnaires\x18\x01 \x03(\v2\x1c.todo_proto.v1.QuestionnaireR\x0equestionnaires\"{\n" +
+	"\x0equestionnaires\x18\x01 \x03(\v2\x1c.todo_proto.v1.QuestionnaireR\x0equestionnaires\x12\x14\n" +
+	"\x05total\x18\x04 \x01(\x03R\x05total\"{\n" +
 	"\x05Photo\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12)\n" +
 	"\x10questionnaire_id\x18\x02 \x01(\x03R\x0fquestionnaireId\x12\x14\n" +
@@ -1546,52 +1665,61 @@ var file_pkg_proto_admins_proto_goTypes = []any{
 	(*CreatePhotoRequest)(nil),         // 25: todo_proto.v1.CreatePhotoRequest
 	(*PhotoResponse)(nil),              // 26: todo_proto.v1.PhotoResponse
 	(*timestamppb.Timestamp)(nil),      // 27: google.protobuf.Timestamp
+	(*wrapperspb.BoolValue)(nil),       // 28: google.protobuf.BoolValue
 }
 var file_pkg_proto_admins_proto_depIdxs = []int32{
 	27, // 0: todo_proto.v1.User.created_at:type_name -> google.protobuf.Timestamp
 	1,  // 1: todo_proto.v1.UpdateUserRequest.user:type_name -> todo_proto.v1.User
-	1,  // 2: todo_proto.v1.UsersListResponse.users:type_name -> todo_proto.v1.User
-	1,  // 3: todo_proto.v1.UserResponse.user:type_name -> todo_proto.v1.User
-	9,  // 4: todo_proto.v1.Questionnaire.answers:type_name -> todo_proto.v1.Answer
-	27, // 5: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 6: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
-	8,  // 7: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	8,  // 8: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	11, // 9: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
-	1,  // 10: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
-	16, // 11: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
-	19, // 12: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
-	27, // 13: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
-	27, // 14: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
-	11, // 15: todo_proto.v1.CreatePhotoRequest.photo:type_name -> todo_proto.v1.Photo
-	11, // 16: todo_proto.v1.PhotoResponse.photo:type_name -> todo_proto.v1.Photo
-	5,  // 17: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
-	3,  // 18: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
-	2,  // 19: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
-	13, // 20: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
-	7,  // 21: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
-	15, // 22: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
-	24, // 23: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:input_type -> todo_proto.v1.PhotoRequest
-	25, // 24: todo_proto.v1.AdminHistoryService.CreatePhoto:input_type -> todo_proto.v1.CreatePhotoRequest
-	17, // 25: todo_proto.v1.AdminHistoryService.GetChat:input_type -> todo_proto.v1.ChatRequest
-	20, // 26: todo_proto.v1.AdminHistoryService.ChatsList:input_type -> todo_proto.v1.ChatsListRequest
-	22, // 27: todo_proto.v1.AdminHistoryService.GetStatistics:input_type -> todo_proto.v1.StatisticsRequest
-	6,  // 28: todo_proto.v1.AdminHistoryService.GetUser:output_type -> todo_proto.v1.UserResponse
-	4,  // 29: todo_proto.v1.AdminHistoryService.UsersList:output_type -> todo_proto.v1.UsersListResponse
-	0,  // 30: todo_proto.v1.AdminHistoryService.UpdateUser:output_type -> todo_proto.v1.Status
-	14, // 31: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
-	10, // 32: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
-	0,  // 33: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:output_type -> todo_proto.v1.Status
-	26, // 34: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:output_type -> todo_proto.v1.PhotoResponse
-	0,  // 35: todo_proto.v1.AdminHistoryService.CreatePhoto:output_type -> todo_proto.v1.Status
-	18, // 36: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
-	21, // 37: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
-	23, // 38: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
-	28, // [28:39] is the sub-list for method output_type
-	17, // [17:28] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	28, // 2: todo_proto.v1.UsersListRequest.status:type_name -> google.protobuf.BoolValue
+	28, // 3: todo_proto.v1.UsersListRequest.accepted_offer:type_name -> google.protobuf.BoolValue
+	27, // 4: todo_proto.v1.UsersListRequest.date_from:type_name -> google.protobuf.Timestamp
+	27, // 5: todo_proto.v1.UsersListRequest.date_to:type_name -> google.protobuf.Timestamp
+	1,  // 6: todo_proto.v1.UsersListResponse.users:type_name -> todo_proto.v1.User
+	1,  // 7: todo_proto.v1.UserResponse.user:type_name -> todo_proto.v1.User
+	28, // 8: todo_proto.v1.QuestionnairesListRequest.payment:type_name -> google.protobuf.BoolValue
+	28, // 9: todo_proto.v1.QuestionnairesListRequest.status:type_name -> google.protobuf.BoolValue
+	27, // 10: todo_proto.v1.QuestionnairesListRequest.date_from:type_name -> google.protobuf.Timestamp
+	27, // 11: todo_proto.v1.QuestionnairesListRequest.date_to:type_name -> google.protobuf.Timestamp
+	9,  // 12: todo_proto.v1.Questionnaire.answers:type_name -> todo_proto.v1.Answer
+	27, // 13: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 14: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
+	8,  // 15: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	8,  // 16: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	11, // 17: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
+	1,  // 18: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
+	16, // 19: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
+	19, // 20: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
+	27, // 21: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
+	27, // 22: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
+	11, // 23: todo_proto.v1.CreatePhotoRequest.photo:type_name -> todo_proto.v1.Photo
+	11, // 24: todo_proto.v1.PhotoResponse.photo:type_name -> todo_proto.v1.Photo
+	5,  // 25: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
+	3,  // 26: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
+	2,  // 27: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
+	13, // 28: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
+	7,  // 29: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
+	15, // 30: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
+	24, // 31: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:input_type -> todo_proto.v1.PhotoRequest
+	25, // 32: todo_proto.v1.AdminHistoryService.CreatePhoto:input_type -> todo_proto.v1.CreatePhotoRequest
+	17, // 33: todo_proto.v1.AdminHistoryService.GetChat:input_type -> todo_proto.v1.ChatRequest
+	20, // 34: todo_proto.v1.AdminHistoryService.ChatsList:input_type -> todo_proto.v1.ChatsListRequest
+	22, // 35: todo_proto.v1.AdminHistoryService.GetStatistics:input_type -> todo_proto.v1.StatisticsRequest
+	6,  // 36: todo_proto.v1.AdminHistoryService.GetUser:output_type -> todo_proto.v1.UserResponse
+	4,  // 37: todo_proto.v1.AdminHistoryService.UsersList:output_type -> todo_proto.v1.UsersListResponse
+	0,  // 38: todo_proto.v1.AdminHistoryService.UpdateUser:output_type -> todo_proto.v1.Status
+	14, // 39: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
+	10, // 40: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
+	0,  // 41: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:output_type -> todo_proto.v1.Status
+	26, // 42: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:output_type -> todo_proto.v1.PhotoResponse
+	0,  // 43: todo_proto.v1.AdminHistoryService.CreatePhoto:output_type -> todo_proto.v1.Status
+	18, // 44: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
+	21, // 45: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
+	23, // 46: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
+	36, // [36:47] is the sub-list for method output_type
+	25, // [25:36] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_admins_proto_init() }
