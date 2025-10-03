@@ -8,7 +8,6 @@ import (
 	_ "fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Server struct {
@@ -35,8 +34,3 @@ func (s *Server) OnStop(_ context.Context) error {
 	s.log.Debug("stop server")
 	return nil
 }
-
-var (
-	unmarshalJSON = protojson.UnmarshalOptions{DiscardUnknown: true}
-	marshalJSON   = protojson.MarshalOptions{EmitUnpopulated: true}
-)

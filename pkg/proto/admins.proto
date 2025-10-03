@@ -65,11 +65,11 @@ message QuestionnairesListResponse{
 
 message Photo{
   string path = 1;
-  string questionnaire_id = 2;
+  int64 questionnaire_id = 2;
   string scene = 3;
-  google.protobuf.Timestamp created_at = 4;
-
+  string type_photo = 4;
 }
+
 message Video{
   string path = 1;
   string questionnaire_id = 2;
@@ -129,8 +129,8 @@ message PhotoRequest{
   string type = 2;
 }
 
-message CreatePhoto{
-  Photo photo = 2;
+message CreatePhotoRequest{
+  Photo photo = 1;
 }
 message PhotoResponse{
   repeated Photo photo = 1;
@@ -146,7 +146,7 @@ service AdminHistoryService {
   rpc UpdateQuestionnaire(UpdateQuestionnaireRequest) returns (Status);
 
   rpc GetPhotosQuestionnaire(PhotoRequest) returns (PhotoResponse);
-  rpc CreatePhoto(PhotoResponse) returns (Status);
+  rpc CreatePhoto(CreatePhotoRequest) returns (Status);
 
   rpc GetChat(ChatRequest) returns (ChatResponse);
   rpc ChatsList(ChatsListRequest) returns (ChatsListResponse);

@@ -40,3 +40,4 @@ secrets/
 TODO.md
 go.mod
 go.sum
+data/photos/*

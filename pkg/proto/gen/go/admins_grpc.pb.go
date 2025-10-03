@@ -19,15 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AdminHistoryService_GetUser_FullMethodName             = "/todo_proto.v1.AdminHistoryService/GetUser"
-	AdminHistoryService_UsersList_FullMethodName           = "/todo_proto.v1.AdminHistoryService/UsersList"
-	AdminHistoryService_UpdateUser_FullMethodName          = "/todo_proto.v1.AdminHistoryService/UpdateUser"
-	AdminHistoryService_QuestionnairesList_FullMethodName  = "/todo_proto.v1.AdminHistoryService/QuestionnairesList"
-	AdminHistoryService_GetQuestionnaire_FullMethodName    = "/todo_proto.v1.AdminHistoryService/GetQuestionnaire"
-	AdminHistoryService_UpdateQuestionnaire_FullMethodName = "/todo_proto.v1.AdminHistoryService/UpdateQuestionnaire"
-	AdminHistoryService_GetChat_FullMethodName             = "/todo_proto.v1.AdminHistoryService/GetChat"
-	AdminHistoryService_ChatsList_FullMethodName           = "/todo_proto.v1.AdminHistoryService/ChatsList"
-	AdminHistoryService_GetStatistics_FullMethodName       = "/todo_proto.v1.AdminHistoryService/GetStatistics"
+	AdminHistoryService_GetUser_FullMethodName                = "/todo_proto.v1.AdminHistoryService/GetUser"
+	AdminHistoryService_UsersList_FullMethodName              = "/todo_proto.v1.AdminHistoryService/UsersList"
+	AdminHistoryService_UpdateUser_FullMethodName             = "/todo_proto.v1.AdminHistoryService/UpdateUser"
+	AdminHistoryService_GetQuestionnaire_FullMethodName       = "/todo_proto.v1.AdminHistoryService/GetQuestionnaire"
+	AdminHistoryService_QuestionnairesList_FullMethodName     = "/todo_proto.v1.AdminHistoryService/QuestionnairesList"
+	AdminHistoryService_UpdateQuestionnaire_FullMethodName    = "/todo_proto.v1.AdminHistoryService/UpdateQuestionnaire"
+	AdminHistoryService_GetPhotosQuestionnaire_FullMethodName = "/todo_proto.v1.AdminHistoryService/GetPhotosQuestionnaire"
+	AdminHistoryService_CreatePhoto_FullMethodName            = "/todo_proto.v1.AdminHistoryService/CreatePhoto"
+	AdminHistoryService_GetChat_FullMethodName                = "/todo_proto.v1.AdminHistoryService/GetChat"
+	AdminHistoryService_ChatsList_FullMethodName              = "/todo_proto.v1.AdminHistoryService/ChatsList"
+	AdminHistoryService_GetStatistics_FullMethodName          = "/todo_proto.v1.AdminHistoryService/GetStatistics"
 )
 
 // AdminHistoryServiceClient is the client API for AdminHistoryService service.
@@ -37,9 +39,11 @@ type AdminHistoryServiceClient interface {
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	UsersList(ctx context.Context, in *UsersListRequest, opts ...grpc.CallOption) (*UsersListResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*Status, error)
-	QuestionnairesList(ctx context.Context, in *QuestionnairesListRequest, opts ...grpc.CallOption) (*QuestionnairesListResponse, error)
 	GetQuestionnaire(ctx context.Context, in *QuestionnaireRequest, opts ...grpc.CallOption) (*QuestionnaireResponse, error)
+	QuestionnairesList(ctx context.Context, in *QuestionnairesListRequest, opts ...grpc.CallOption) (*QuestionnairesListResponse, error)
 	UpdateQuestionnaire(ctx context.Context, in *UpdateQuestionnaireRequest, opts ...grpc.CallOption) (*Status, error)
+	GetPhotosQuestionnaire(ctx context.Context, in *PhotoRequest, opts ...grpc.CallOption) (*PhotoResponse, error)
+	CreatePhoto(ctx context.Context, in *CreatePhotoRequest, opts ...grpc.CallOption) (*Status, error)
 	GetChat(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (*ChatResponse, error)
 	ChatsList(ctx context.Context, in *ChatsListRequest, opts ...grpc.CallOption) (*ChatsListResponse, error)
 	GetStatistics(ctx context.Context, in *StatisticsRequest, opts ...grpc.CallOption) (*StatisticsResponse, error)
@@ -83,16 +87,6 @@ func (c *adminHistoryServiceClient) UpdateUser(ctx context.Context, in *UpdateUs
 	return out, nil
 }
 
-func (c *adminHistoryServiceClient) QuestionnairesList(ctx context.Context, in *QuestionnairesListRequest, opts ...grpc.CallOption) (*QuestionnairesListResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QuestionnairesListResponse)
-	err := c.cc.Invoke(ctx, AdminHistoryService_QuestionnairesList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *adminHistoryServiceClient) GetQuestionnaire(ctx context.Context, in *QuestionnaireRequest, opts ...grpc.CallOption) (*QuestionnaireResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(QuestionnaireResponse)
@@ -103,10 +97,40 @@ func (c *adminHistoryServiceClient) GetQuestionnaire(ctx context.Context, in *Qu
 	return out, nil
 }
 
+func (c *adminHistoryServiceClient) QuestionnairesList(ctx context.Context, in *QuestionnairesListRequest, opts ...grpc.CallOption) (*QuestionnairesListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QuestionnairesListResponse)
+	err := c.cc.Invoke(ctx, AdminHistoryService_QuestionnairesList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *adminHistoryServiceClient) UpdateQuestionnaire(ctx context.Context, in *UpdateQuestionnaireRequest, opts ...grpc.CallOption) (*Status, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Status)
 	err := c.cc.Invoke(ctx, AdminHistoryService_UpdateQuestionnaire_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) GetPhotosQuestionnaire(ctx context.Context, in *PhotoRequest, opts ...grpc.CallOption) (*PhotoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PhotoResponse)
+	err := c.cc.Invoke(ctx, AdminHistoryService_GetPhotosQuestionnaire_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) CreatePhoto(ctx context.Context, in *CreatePhotoRequest, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, AdminHistoryService_CreatePhoto_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,9 +174,11 @@ type AdminHistoryServiceServer interface {
 	GetUser(context.Context, *UserRequest) (*UserResponse, error)
 	UsersList(context.Context, *UsersListRequest) (*UsersListResponse, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*Status, error)
-	QuestionnairesList(context.Context, *QuestionnairesListRequest) (*QuestionnairesListResponse, error)
 	GetQuestionnaire(context.Context, *QuestionnaireRequest) (*QuestionnaireResponse, error)
+	QuestionnairesList(context.Context, *QuestionnairesListRequest) (*QuestionnairesListResponse, error)
 	UpdateQuestionnaire(context.Context, *UpdateQuestionnaireRequest) (*Status, error)
+	GetPhotosQuestionnaire(context.Context, *PhotoRequest) (*PhotoResponse, error)
+	CreatePhoto(context.Context, *CreatePhotoRequest) (*Status, error)
 	GetChat(context.Context, *ChatRequest) (*ChatResponse, error)
 	ChatsList(context.Context, *ChatsListRequest) (*ChatsListResponse, error)
 	GetStatistics(context.Context, *StatisticsRequest) (*StatisticsResponse, error)
@@ -175,14 +201,20 @@ func (UnimplementedAdminHistoryServiceServer) UsersList(context.Context, *UsersL
 func (UnimplementedAdminHistoryServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
-func (UnimplementedAdminHistoryServiceServer) QuestionnairesList(context.Context, *QuestionnairesListRequest) (*QuestionnairesListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method QuestionnairesList not implemented")
-}
 func (UnimplementedAdminHistoryServiceServer) GetQuestionnaire(context.Context, *QuestionnaireRequest) (*QuestionnaireResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQuestionnaire not implemented")
 }
+func (UnimplementedAdminHistoryServiceServer) QuestionnairesList(context.Context, *QuestionnairesListRequest) (*QuestionnairesListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QuestionnairesList not implemented")
+}
 func (UnimplementedAdminHistoryServiceServer) UpdateQuestionnaire(context.Context, *UpdateQuestionnaireRequest) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateQuestionnaire not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) GetPhotosQuestionnaire(context.Context, *PhotoRequest) (*PhotoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPhotosQuestionnaire not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) CreatePhoto(context.Context, *CreatePhotoRequest) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePhoto not implemented")
 }
 func (UnimplementedAdminHistoryServiceServer) GetChat(context.Context, *ChatRequest) (*ChatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChat not implemented")
@@ -268,24 +300,6 @@ func _AdminHistoryService_UpdateUser_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminHistoryService_QuestionnairesList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QuestionnairesListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AdminHistoryServiceServer).QuestionnairesList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AdminHistoryService_QuestionnairesList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminHistoryServiceServer).QuestionnairesList(ctx, req.(*QuestionnairesListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _AdminHistoryService_GetQuestionnaire_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QuestionnaireRequest)
 	if err := dec(in); err != nil {
@@ -304,6 +318,24 @@ func _AdminHistoryService_GetQuestionnaire_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminHistoryService_QuestionnairesList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuestionnairesListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).QuestionnairesList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_QuestionnairesList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).QuestionnairesList(ctx, req.(*QuestionnairesListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AdminHistoryService_UpdateQuestionnaire_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateQuestionnaireRequest)
 	if err := dec(in); err != nil {
@@ -318,6 +350,42 @@ func _AdminHistoryService_UpdateQuestionnaire_Handler(srv interface{}, ctx conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AdminHistoryServiceServer).UpdateQuestionnaire(ctx, req.(*UpdateQuestionnaireRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_GetPhotosQuestionnaire_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PhotoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).GetPhotosQuestionnaire(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_GetPhotosQuestionnaire_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).GetPhotosQuestionnaire(ctx, req.(*PhotoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_CreatePhoto_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePhotoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).CreatePhoto(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_CreatePhoto_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).CreatePhoto(ctx, req.(*CreatePhotoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -396,16 +464,24 @@ var AdminHistoryService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AdminHistoryService_UpdateUser_Handler,
 		},
 		{
-			MethodName: "QuestionnairesList",
-			Handler:    _AdminHistoryService_QuestionnairesList_Handler,
-		},
-		{
 			MethodName: "GetQuestionnaire",
 			Handler:    _AdminHistoryService_GetQuestionnaire_Handler,
 		},
 		{
+			MethodName: "QuestionnairesList",
+			Handler:    _AdminHistoryService_QuestionnairesList_Handler,
+		},
+		{
 			MethodName: "UpdateQuestionnaire",
 			Handler:    _AdminHistoryService_UpdateQuestionnaire_Handler,
+		},
+		{
+			MethodName: "GetPhotosQuestionnaire",
+			Handler:    _AdminHistoryService_GetPhotosQuestionnaire_Handler,
+		},
+		{
+			MethodName: "CreatePhoto",
+			Handler:    _AdminHistoryService_CreatePhoto_Handler,
 		},
 		{
 			MethodName: "GetChat",

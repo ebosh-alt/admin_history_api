@@ -431,19 +431,16 @@ func (x *QuestionnairesListRequest) GetLimit() int32 {
 }
 
 type Questionnaire struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId         int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	History        string                 `protobuf:"bytes,3,opt,name=history,proto3" json:"history,omitempty"`
-	Status         bool                   `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
-	Payment        bool                   `protobuf:"varint,6,opt,name=payment,proto3" json:"payment,omitempty"`
-	Answers        []*Answer              `protobuf:"bytes,7,rep,name=answers,proto3" json:"answers,omitempty"`
-	Photos         []*Photo               `protobuf:"bytes,8,rep,name=photos,proto3" json:"photos,omitempty"`
-	GeneratePhotos []*Photo               `protobuf:"bytes,9,rep,name=generate_photos,json=generatePhotos,proto3" json:"generate_photos,omitempty"`
-	Videos         []*Video               `protobuf:"bytes,10,rep,name=videos,proto3" json:"videos,omitempty"`
-	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	History       string                 `protobuf:"bytes,3,opt,name=history,proto3" json:"history,omitempty"`
+	Status        bool                   `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	Payment       bool                   `protobuf:"varint,6,opt,name=payment,proto3" json:"payment,omitempty"`
+	Answers       []*Answer              `protobuf:"bytes,7,rep,name=answers,proto3" json:"answers,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Questionnaire) Reset() {
@@ -514,27 +511,6 @@ func (x *Questionnaire) GetPayment() bool {
 func (x *Questionnaire) GetAnswers() []*Answer {
 	if x != nil {
 		return x.Answers
-	}
-	return nil
-}
-
-func (x *Questionnaire) GetPhotos() []*Photo {
-	if x != nil {
-		return x.Photos
-	}
-	return nil
-}
-
-func (x *Questionnaire) GetGeneratePhotos() []*Photo {
-	if x != nil {
-		return x.GeneratePhotos
-	}
-	return nil
-}
-
-func (x *Questionnaire) GetVideos() []*Video {
-	if x != nil {
-		return x.Videos
 	}
 	return nil
 }
@@ -645,9 +621,9 @@ func (x *QuestionnairesListResponse) GetQuestionnaires() []*Questionnaire {
 type Photo struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Path            string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	QuestionnaireId string                 `protobuf:"bytes,2,opt,name=questionnaire_id,json=questionnaireId,proto3" json:"questionnaire_id,omitempty"`
+	QuestionnaireId int64                  `protobuf:"varint,2,opt,name=questionnaire_id,json=questionnaireId,proto3" json:"questionnaire_id,omitempty"`
 	Scene           string                 `protobuf:"bytes,3,opt,name=scene,proto3" json:"scene,omitempty"`
-	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	TypePhoto       string                 `protobuf:"bytes,4,opt,name=type_photo,json=typePhoto,proto3" json:"type_photo,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -689,11 +665,11 @@ func (x *Photo) GetPath() string {
 	return ""
 }
 
-func (x *Photo) GetQuestionnaireId() string {
+func (x *Photo) GetQuestionnaireId() int64 {
 	if x != nil {
 		return x.QuestionnaireId
 	}
-	return ""
+	return 0
 }
 
 func (x *Photo) GetScene() string {
@@ -703,11 +679,11 @@ func (x *Photo) GetScene() string {
 	return ""
 }
 
-func (x *Photo) GetCreatedAt() *timestamppb.Timestamp {
+func (x *Photo) GetTypePhoto() string {
 	if x != nil {
-		return x.CreatedAt
+		return x.TypePhoto
 	}
-	return nil
+	return ""
 }
 
 type Video struct {
@@ -1286,6 +1262,146 @@ func (*StatisticsResponse) Descriptor() ([]byte, []int) {
 	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{23}
 }
 
+type PhotoRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	QuestionnaireId int64                  `protobuf:"varint,1,opt,name=questionnaire_id,json=questionnaireId,proto3" json:"questionnaire_id,omitempty"`
+	Type            string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *PhotoRequest) Reset() {
+	*x = PhotoRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PhotoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PhotoRequest) ProtoMessage() {}
+
+func (x *PhotoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PhotoRequest.ProtoReflect.Descriptor instead.
+func (*PhotoRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *PhotoRequest) GetQuestionnaireId() int64 {
+	if x != nil {
+		return x.QuestionnaireId
+	}
+	return 0
+}
+
+func (x *PhotoRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type CreatePhotoRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Photo         *Photo                 `protobuf:"bytes,1,opt,name=photo,proto3" json:"photo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreatePhotoRequest) Reset() {
+	*x = CreatePhotoRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreatePhotoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatePhotoRequest) ProtoMessage() {}
+
+func (x *CreatePhotoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatePhotoRequest.ProtoReflect.Descriptor instead.
+func (*CreatePhotoRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *CreatePhotoRequest) GetPhoto() *Photo {
+	if x != nil {
+		return x.Photo
+	}
+	return nil
+}
+
+type PhotoResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Photo         []*Photo               `protobuf:"bytes,1,rep,name=photo,proto3" json:"photo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PhotoResponse) Reset() {
+	*x = PhotoResponse{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PhotoResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PhotoResponse) ProtoMessage() {}
+
+func (x *PhotoResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PhotoResponse.ProtoReflect.Descriptor instead.
+func (*PhotoResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *PhotoResponse) GetPhoto() []*Photo {
+	if x != nil {
+		return x.Photo
+	}
+	return nil
+}
+
 var File_pkg_proto_admins_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_admins_proto_rawDesc = "" +
@@ -1314,31 +1430,27 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"E\n" +
 	"\x19QuestionnairesListRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\x8b\x03\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\xf0\x01\n" +
 	"\rQuestionnaire\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x18\n" +
 	"\ahistory\x18\x03 \x01(\tR\ahistory\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\bR\x06status\x12\x18\n" +
 	"\apayment\x18\x06 \x01(\bR\apayment\x12/\n" +
-	"\aanswers\x18\a \x03(\v2\x15.todo_proto.v1.AnswerR\aanswers\x12,\n" +
-	"\x06photos\x18\b \x03(\v2\x14.todo_proto.v1.PhotoR\x06photos\x12=\n" +
-	"\x0fgenerate_photos\x18\t \x03(\v2\x14.todo_proto.v1.PhotoR\x0egeneratePhotos\x12,\n" +
-	"\x06videos\x18\n" +
-	" \x03(\v2\x14.todo_proto.v1.VideoR\x06videos\x129\n" +
+	"\aanswers\x18\a \x03(\v2\x15.todo_proto.v1.AnswerR\aanswers\x129\n" +
 	"\n" +
-	"created_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"<\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"<\n" +
 	"\x06Answer\x12\x1a\n" +
 	"\bquestion\x18\x01 \x01(\tR\bquestion\x12\x16\n" +
 	"\x06answer\x18\x02 \x01(\tR\x06answer\"b\n" +
 	"\x1aQuestionnairesListResponse\x12D\n" +
-	"\x0equestionnaires\x18\x01 \x03(\v2\x1c.todo_proto.v1.QuestionnaireR\x0equestionnaires\"\x97\x01\n" +
+	"\x0equestionnaires\x18\x01 \x03(\v2\x1c.todo_proto.v1.QuestionnaireR\x0equestionnaires\"{\n" +
 	"\x05Photo\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12)\n" +
-	"\x10questionnaire_id\x18\x02 \x01(\tR\x0fquestionnaireId\x12\x14\n" +
-	"\x05scene\x18\x03 \x01(\tR\x05scene\x129\n" +
+	"\x10questionnaire_id\x18\x02 \x01(\x03R\x0fquestionnaireId\x12\x14\n" +
+	"\x05scene\x18\x03 \x01(\tR\x05scene\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"F\n" +
+	"type_photo\x18\x04 \x01(\tR\ttypePhoto\"F\n" +
 	"\x05Video\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12)\n" +
 	"\x10questionnaire_id\x18\x02 \x01(\tR\x0fquestionnaireId\"&\n" +
@@ -1370,15 +1482,24 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\n" +
 	"date_start\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tdateStart\x125\n" +
 	"\bdate_end\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\adateEnd\"\x14\n" +
-	"\x12StatisticsResponse2\xfd\x05\n" +
+	"\x12StatisticsResponse\"M\n" +
+	"\fPhotoRequest\x12)\n" +
+	"\x10questionnaire_id\x18\x01 \x01(\x03R\x0fquestionnaireId\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\"@\n" +
+	"\x12CreatePhotoRequest\x12*\n" +
+	"\x05photo\x18\x01 \x01(\v2\x14.todo_proto.v1.PhotoR\x05photo\";\n" +
+	"\rPhotoResponse\x12*\n" +
+	"\x05photo\x18\x01 \x03(\v2\x14.todo_proto.v1.PhotoR\x05photo2\x9b\a\n" +
 	"\x13AdminHistoryService\x12B\n" +
 	"\aGetUser\x12\x1a.todo_proto.v1.UserRequest\x1a\x1b.todo_proto.v1.UserResponse\x12N\n" +
 	"\tUsersList\x12\x1f.todo_proto.v1.UsersListRequest\x1a .todo_proto.v1.UsersListResponse\x12E\n" +
 	"\n" +
-	"UpdateUser\x12 .todo_proto.v1.UpdateUserRequest\x1a\x15.todo_proto.v1.Status\x12i\n" +
-	"\x12QuestionnairesList\x12(.todo_proto.v1.QuestionnairesListRequest\x1a).todo_proto.v1.QuestionnairesListResponse\x12]\n" +
-	"\x10GetQuestionnaire\x12#.todo_proto.v1.QuestionnaireRequest\x1a$.todo_proto.v1.QuestionnaireResponse\x12W\n" +
-	"\x13UpdateQuestionnaire\x12).todo_proto.v1.UpdateQuestionnaireRequest\x1a\x15.todo_proto.v1.Status\x12B\n" +
+	"UpdateUser\x12 .todo_proto.v1.UpdateUserRequest\x1a\x15.todo_proto.v1.Status\x12]\n" +
+	"\x10GetQuestionnaire\x12#.todo_proto.v1.QuestionnaireRequest\x1a$.todo_proto.v1.QuestionnaireResponse\x12i\n" +
+	"\x12QuestionnairesList\x12(.todo_proto.v1.QuestionnairesListRequest\x1a).todo_proto.v1.QuestionnairesListResponse\x12W\n" +
+	"\x13UpdateQuestionnaire\x12).todo_proto.v1.UpdateQuestionnaireRequest\x1a\x15.todo_proto.v1.Status\x12S\n" +
+	"\x16GetPhotosQuestionnaire\x12\x1b.todo_proto.v1.PhotoRequest\x1a\x1c.todo_proto.v1.PhotoResponse\x12G\n" +
+	"\vCreatePhoto\x12!.todo_proto.v1.CreatePhotoRequest\x1a\x15.todo_proto.v1.Status\x12B\n" +
 	"\aGetChat\x12\x1a.todo_proto.v1.ChatRequest\x1a\x1b.todo_proto.v1.ChatResponse\x12N\n" +
 	"\tChatsList\x12\x1f.todo_proto.v1.ChatsListRequest\x1a .todo_proto.v1.ChatsListResponse\x12T\n" +
 	"\rGetStatistics\x12 .todo_proto.v1.StatisticsRequest\x1a!.todo_proto.v1.StatisticsResponseB Z\x1epkg/proto/gen/go;admin_historyb\x06proto3"
@@ -1395,7 +1516,7 @@ func file_pkg_proto_admins_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_admins_proto_rawDescData
 }
 
-var file_pkg_proto_admins_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_pkg_proto_admins_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_pkg_proto_admins_proto_goTypes = []any{
 	(*Status)(nil),                     // 0: todo_proto.v1.Status
 	(*User)(nil),                       // 1: todo_proto.v1.User
@@ -1421,51 +1542,56 @@ var file_pkg_proto_admins_proto_goTypes = []any{
 	(*ChatsListResponse)(nil),          // 21: todo_proto.v1.ChatsListResponse
 	(*StatisticsRequest)(nil),          // 22: todo_proto.v1.StatisticsRequest
 	(*StatisticsResponse)(nil),         // 23: todo_proto.v1.StatisticsResponse
-	(*timestamppb.Timestamp)(nil),      // 24: google.protobuf.Timestamp
+	(*PhotoRequest)(nil),               // 24: todo_proto.v1.PhotoRequest
+	(*CreatePhotoRequest)(nil),         // 25: todo_proto.v1.CreatePhotoRequest
+	(*PhotoResponse)(nil),              // 26: todo_proto.v1.PhotoResponse
+	(*timestamppb.Timestamp)(nil),      // 27: google.protobuf.Timestamp
 }
 var file_pkg_proto_admins_proto_depIdxs = []int32{
-	24, // 0: todo_proto.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	27, // 0: todo_proto.v1.User.created_at:type_name -> google.protobuf.Timestamp
 	1,  // 1: todo_proto.v1.UpdateUserRequest.user:type_name -> todo_proto.v1.User
 	1,  // 2: todo_proto.v1.UsersListResponse.users:type_name -> todo_proto.v1.User
 	1,  // 3: todo_proto.v1.UserResponse.user:type_name -> todo_proto.v1.User
 	9,  // 4: todo_proto.v1.Questionnaire.answers:type_name -> todo_proto.v1.Answer
-	11, // 5: todo_proto.v1.Questionnaire.photos:type_name -> todo_proto.v1.Photo
-	11, // 6: todo_proto.v1.Questionnaire.generate_photos:type_name -> todo_proto.v1.Photo
-	12, // 7: todo_proto.v1.Questionnaire.videos:type_name -> todo_proto.v1.Video
-	24, // 8: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 9: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
-	24, // 10: todo_proto.v1.Photo.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 11: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	8,  // 12: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	11, // 13: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
-	1,  // 14: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
-	16, // 15: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
-	19, // 16: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
-	24, // 17: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
-	24, // 18: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
-	5,  // 19: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
-	3,  // 20: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
-	2,  // 21: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
-	7,  // 22: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
-	13, // 23: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
-	15, // 24: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
+	27, // 5: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 6: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
+	8,  // 7: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	8,  // 8: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	11, // 9: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
+	1,  // 10: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
+	16, // 11: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
+	19, // 12: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
+	27, // 13: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
+	27, // 14: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
+	11, // 15: todo_proto.v1.CreatePhotoRequest.photo:type_name -> todo_proto.v1.Photo
+	11, // 16: todo_proto.v1.PhotoResponse.photo:type_name -> todo_proto.v1.Photo
+	5,  // 17: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
+	3,  // 18: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
+	2,  // 19: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
+	13, // 20: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
+	7,  // 21: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
+	15, // 22: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
+	24, // 23: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:input_type -> todo_proto.v1.PhotoRequest
+	25, // 24: todo_proto.v1.AdminHistoryService.CreatePhoto:input_type -> todo_proto.v1.CreatePhotoRequest
 	17, // 25: todo_proto.v1.AdminHistoryService.GetChat:input_type -> todo_proto.v1.ChatRequest
 	20, // 26: todo_proto.v1.AdminHistoryService.ChatsList:input_type -> todo_proto.v1.ChatsListRequest
 	22, // 27: todo_proto.v1.AdminHistoryService.GetStatistics:input_type -> todo_proto.v1.StatisticsRequest
 	6,  // 28: todo_proto.v1.AdminHistoryService.GetUser:output_type -> todo_proto.v1.UserResponse
 	4,  // 29: todo_proto.v1.AdminHistoryService.UsersList:output_type -> todo_proto.v1.UsersListResponse
 	0,  // 30: todo_proto.v1.AdminHistoryService.UpdateUser:output_type -> todo_proto.v1.Status
-	10, // 31: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
-	14, // 32: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
+	14, // 31: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
+	10, // 32: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
 	0,  // 33: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:output_type -> todo_proto.v1.Status
-	18, // 34: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
-	21, // 35: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
-	23, // 36: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
-	28, // [28:37] is the sub-list for method output_type
-	19, // [19:28] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	26, // 34: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:output_type -> todo_proto.v1.PhotoResponse
+	0,  // 35: todo_proto.v1.AdminHistoryService.CreatePhoto:output_type -> todo_proto.v1.Status
+	18, // 36: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
+	21, // 37: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
+	23, // 38: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
+	28, // [28:39] is the sub-list for method output_type
+	17, // [17:28] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_admins_proto_init() }
@@ -1480,7 +1606,7 @@ func file_pkg_proto_admins_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_admins_proto_rawDesc), len(file_pkg_proto_admins_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

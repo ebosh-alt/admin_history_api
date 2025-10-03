@@ -1,10 +1,13 @@
 package server
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 type InterfaceServer interface {
 	InterfaceUserServer
 	InterfaceQuestionnaireServer
+	InterfacePhotoServer
 	InterfaceChatServer
 	InterfaceStatisticServer
 }
@@ -19,6 +22,11 @@ type InterfaceQuestionnaireServer interface {
 	QuestionnairesList(c *gin.Context)
 	GetQuestionnaire(c *gin.Context)
 	UpdateQuestionnaire(c *gin.Context)
+}
+
+type InterfacePhotoServer interface {
+	GetPhotosQuestionnaire(c *gin.Context)
+	UploadPhoto(c *gin.Context)
 }
 
 type InterfaceChatServer interface {

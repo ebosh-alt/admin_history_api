@@ -9,19 +9,24 @@ import (
 type InterfaceRepo interface {
 	InterfaceUserRepo
 	InterfaceQuestionnaireRepo
+	InterfacePhotoRepo
 }
 
 type InterfaceUserRepo interface {
 	GetUser(ctx context.Context, user *entities.User) (*entities.User, error)
 	UsersList(ctx context.Context, page int32, limit int32) ([]entities.User, error)
 	UpdateUser(ctx context.Context, user *entities.User) error
-	DeleteUser(ctx context.Context, user *entities.User) error
 }
 
 type InterfaceQuestionnaireRepo interface {
 	GetQuestionnaire(ctx context.Context, questionnaire *entities.Questionnaire) (*entities.Questionnaire, error)
 	GetQuestionnairesList(ctx context.Context, page int32, limit int32) ([]entities.Questionnaire, error)
 	UpdateQuestionnaire(ctx context.Context, req *entities.Questionnaire) error
+}
+
+type InterfacePhotoRepo interface {
+	GetPhotosQuestionnaire(ctx context.Context, questionnaireID int64, typePhoto string) ([]entities.Photo, error)
+	UploadPhoto(ctx context.Context, photo *entities.Photo) error
 }
 
 type InterfaceChatRepo interface {

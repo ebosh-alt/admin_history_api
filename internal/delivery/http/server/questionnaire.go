@@ -4,8 +4,14 @@ import (
 	protos "admin_history/pkg/proto/gen/go"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 	"io"
 	"net/http"
+)
+
+var (
+	unmarshalJSON = protojson.UnmarshalOptions{DiscardUnknown: true}
+	marshalJSON   = protojson.MarshalOptions{EmitUnpopulated: true}
 )
 
 func (s *Server) GetQuestionnaire(c *gin.Context) {
@@ -57,20 +63,4 @@ func (s *Server) UpdateQuestionnaire(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json", b)
 }
 
-func (s *Server) GetChat(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *Server) ChatsList(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *Server) GetStatistics(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-//var _ usecase.InterfaceUsecase = (*usecase.Usecase)(nil)
-//var _ server.InterfaceServer = (*server.Server)(nil)
+var _ InterfaceQuestionnaireServer = (*Server)(nil)

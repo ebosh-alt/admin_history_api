@@ -31,9 +31,9 @@ func (s *Server) CreateController() {
 	}
 
 	{
-		apiStatistics := api.Group("/statistics")
+		apiPhoto := api.Group("/photos")
 		{
-			apiStatistics.GET("/chat", s.GetStatistics)
+			apiPhoto.POST("/upload", s.UploadPhoto)
 		}
 	}
 

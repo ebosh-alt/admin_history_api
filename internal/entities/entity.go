@@ -57,7 +57,46 @@ type Photo struct {
 	ID              int64
 	QuestionnaireID int64
 	Path            string
+	Scene           string
+	TypePhoto       string
+}
+
+type PhotoDTO struct {
+	ID              *int64
+	QuestionnaireID *int64
+	Path            *string
 	Scene           *string
+	TypePhoto       *string
+}
+
+func (p *Photo) ToDTO() *PhotoDTO {
+	return &PhotoDTO{
+		ID:              &p.ID,
+		QuestionnaireID: &p.QuestionnaireID,
+		Path:            &p.Path,
+		Scene:           &p.Scene,
+		TypePhoto:       &p.TypePhoto,
+	}
+}
+
+func (d *PhotoDTO) ToEntity() *Photo {
+	p := &Photo{}
+	if d.ID != nil {
+		p.ID = *d.ID
+	}
+	if d.QuestionnaireID != nil {
+		d.QuestionnaireID = &p.QuestionnaireID
+	}
+	if d.Path != nil {
+		d.Path = &p.Path
+	}
+	if d.Scene != nil {
+		d.Scene = &p.Scene
+	}
+	if d.TypePhoto != nil {
+		d.TypePhoto = &p.TypePhoto
+	}
+	return p
 }
 
 type Questionnaire struct {

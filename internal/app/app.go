@@ -1,11 +1,9 @@
-// internal/app/app.go
-
 package app
 
 import (
-	"admin_history/internal/delivery/http/handlers"
 	"admin_history/internal/delivery/http/middleware"
 	"admin_history/internal/delivery/http/server"
+	"admin_history/internal/storage"
 	"context"
 
 	"go.uber.org/fx"
@@ -36,10 +34,12 @@ func New() *fx.App {
 			usecase.NewUsecase,
 			func(u *usecase.Usecase) usecase.InterfaceUsecase {
 				return u
+
 			},
+			storage.NewFS,
 			// HTTP-мiddleware и сервер
 			middleware.NewMiddleware,
-			handlers.NewServer,
+			server.NewServer,
 		),
 		// Lifecycle: сначала поднимаем репозиторий
 		fx.Invoke(func(lc fx.Lifecycle, repo *postgres.Repository) {
