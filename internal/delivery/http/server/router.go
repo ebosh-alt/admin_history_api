@@ -34,6 +34,7 @@ func (s *Server) CreateController() {
 		apiPhoto := api.Group("/photos")
 		{
 			apiPhoto.POST("/upload", s.UploadPhoto)
+			apiPhoto.GET("", s.GetPhotosQuestionnaire)
 		}
 	}
 

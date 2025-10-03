@@ -11,6 +11,14 @@ import (
 
 func (s *Server) GetPhotosQuestionnaire(c *gin.Context) {
 	req := &protos.PhotoRequest{}
+	if v := c.Query("questionnaire_id"); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 32); err == nil {
+			req.QuestionnaireId = n
+		}
+	}
+	if v := c.Query("type"); v != "" {
+		req.Type = v
+	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		s.log.Error("failed to get questionnaire: ", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный запрос"})

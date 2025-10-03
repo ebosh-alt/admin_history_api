@@ -30,18 +30,15 @@ message UsersListRequest {
   int32 page = 1;
   int32 limit = 2;
 
-  // Фильтры по пользователю (presence через wrappers)
-  google.protobuf.BoolValue status = 3; // активен/неактивен
-  google.protobuf.BoolValue accepted_offer = 4; // принял оффер/нет
-  google.protobuf.Timestamp date_from = 5; // created_at >=
-  google.protobuf.Timestamp date_to = 6; // created_at < (полуинтервал)
+  google.protobuf.BoolValue status = 3;
+  google.protobuf.BoolValue accepted_offer = 4;
+  google.protobuf.Timestamp date_from = 5;
+  google.protobuf.Timestamp date_to = 6;
 }
 
 message UsersListResponse{
   repeated User users = 1;
   int64 total = 2;
-
-
 }
 
 message UserRequest{

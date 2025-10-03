@@ -2,7 +2,6 @@ package server
 
 import (
 	protos "admin_history/pkg/proto/gen/go"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -21,15 +20,11 @@ var (
 
 func (s *Server) GetQuestionnaire(c *gin.Context) {
 	req := &protos.QuestionnaireRequest{}
-	//if err := c.ShouldBindJSON(&req); err != nil {
-	//	s.log.Error("failed to get questionnaire: ", zap.Error(err))
-	//	c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный запрос"})
-	//	return
-	//}
-	err := c.ShouldBindJSON(&req)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": fmt.Sprintf("failed to unmarshar request: %v", err)})
-		return
+
+	if v := c.Query("id"); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 32); err == nil {
+			req.Id = n
+		}
 	}
 
 	qProto, err := s.Usecase.GetQuestionnaire(c, req)

@@ -15,10 +15,10 @@ import (
 
 func (s *Server) GetUser(c *gin.Context) {
 	req := &protos.UserRequest{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		s.log.Error("failed to get user: ", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if v := c.Query("id"); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 32); err == nil {
+			req.Id = n
+		}
 	}
 	userProto, err := s.Usecase.GetUser(c, req)
 	if err != nil {
