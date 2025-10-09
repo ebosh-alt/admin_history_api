@@ -63,6 +63,7 @@ func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (
 	if err != nil {
 		return nil, fmt.Errorf("users list: %w", err)
 	}
+	countUsers, err := u.Postgres.CountUsers(ctx, f)
 
 	rows := make([]*protos.User, 0, len(items))
 	for i := range items {
@@ -81,7 +82,7 @@ func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (
 
 	return &protos.UsersListResponse{
 		Users: rows,
-		Total: int64(len(items)),
+		Total: countUsers,
 	}, nil
 }
 

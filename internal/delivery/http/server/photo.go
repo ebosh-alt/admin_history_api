@@ -3,7 +3,6 @@ package server
 import (
 	protos "admin_history/pkg/proto/gen/go"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -19,11 +18,11 @@ func (s *Server) GetPhotosQuestionnaire(c *gin.Context) {
 	if v := c.Query("type"); v != "" {
 		req.Type = v
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		s.log.Error("failed to get questionnaire: ", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный запрос"})
-		return
-	}
+	//if err := c.ShouldBindJSON(&req); err != nil {
+	//	s.log.Error("failed to get questionnaire: ", zap.Error(err))
+	//	c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный запрос"})
+	//	return
+	//}
 
 	proto, err := s.Usecase.GetPhotosQuestionnaire(c, req)
 	if err != nil {

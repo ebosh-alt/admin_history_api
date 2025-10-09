@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
 
 	"admin_history/internal/entities"
 )
@@ -50,6 +49,47 @@ func (r *Repository) GetQuestionnaire(ctx context.Context, q *entities.Questionn
 	return q, nil
 }
 
+func (r *Repository) CountQuestionnaires(ctx context.Context, f entities.QuestionnaireFilter) (int64, error) {
+	var (
+		args  []any
+		where []string
+		i     = 1
+	)
+
+	if f.Payment != nil {
+		where = append(where, fmt.Sprintf("payment = $%d", i))
+		args = append(args, *f.Payment)
+		i++
+	}
+	if f.Status != nil {
+		where = append(where, fmt.Sprintf("status = $%d", i))
+		args = append(args, *f.Status)
+		i++
+	}
+	if f.DateFrom != nil {
+		where = append(where, fmt.Sprintf("created_at >= $%d", i))
+		args = append(args, *f.DateFrom)
+		i++
+	}
+	if f.DateTo != nil {
+		where = append(where, fmt.Sprintf("created_at < $%d", i))
+		args = append(args, *f.DateTo)
+		i++
+	}
+
+	whereSQL := ""
+	if len(where) > 0 {
+		whereSQL = "WHERE " + strings.Join(where, " AND ")
+	}
+
+	var total int64
+	q := "SELECT COUNT(*) FROM questionnaires " + whereSQL
+	if err := r.DB.QueryRow(ctx, q, args...).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
 func (r *Repository) GetQuestionnairesList(
 	ctx context.Context,
 	page, limit int32,
@@ -88,7 +128,7 @@ WHERE 1=1`)
 	if f.DateFrom != nil {
 		i++
 		sb.WriteString(fmt.Sprintf(" AND created_at >= $%d", i))
-		args = append(args, *f.DateFrom)
+		args = append(args, *f.DateFrom) // time.Time → драйвер передаст timestamptz
 	}
 	if f.DateTo != nil {
 		i++
@@ -102,13 +142,11 @@ WHERE 1=1`)
 	i++
 	sb.WriteString(fmt.Sprintf(" OFFSET $%d", i))
 	args = append(args, offset)
-
 	rows, err := r.DB.Query(ctx, sb.String(), args...)
 	if err != nil {
 		return nil, fmt.Errorf("list questionnaires: %w", err)
 	}
 	defer rows.Close()
-
 	out := make([]entities.Questionnaire, 0, limit)
 	for rows.Next() {
 		var item entities.Questionnaire

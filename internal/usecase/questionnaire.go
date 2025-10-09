@@ -33,22 +33,22 @@ func (u *Usecase) GetQuestionnairesList(ctx context.Context, req *protos.Questio
 		f.Status = &v
 	}
 	if req.DateFrom != nil {
-		t := req.DateFrom.AsTime()
+		t := req.DateFrom.AsTime().UTC()
 		f.DateFrom = &t
 	}
 	if req.DateTo != nil {
-		t := req.DateTo.AsTime()
+		t := req.DateTo.AsTime().UTC()
 		f.DateTo = &t
-	} // полузакрытый интервал: < date_to
+	}
 
 	items, err := u.Postgres.GetQuestionnairesList(ctx, req.Page, req.Limit, f)
 	if err != nil {
 		return nil, err
 	}
-
+	count, err := u.Postgres.CountQuestionnaires(ctx, f)
 	resp := &protos.QuestionnairesListResponse{
 		Questionnaires: make([]*protos.Questionnaire, 0, len(items)),
-		Total:          int64(len(items)),
+		Total:          count,
 	}
 	for i := range items {
 		resp.Questionnaires = append(resp.Questionnaires, items[i].ToProto())

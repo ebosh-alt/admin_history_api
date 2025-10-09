@@ -15,7 +15,7 @@ import (
 
 func (s *Server) GetUser(c *gin.Context) {
 	req := &protos.UserRequest{}
-	if v := c.Query("id"); v != "" {
+	if v := c.Param("id"); v != "" {
 		if n, err := strconv.ParseInt(v, 10, 32); err == nil {
 			req.Id = n
 		}
