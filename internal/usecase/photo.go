@@ -21,7 +21,7 @@ func (u *Usecase) GetPhotosQuestionnaire(ctx context.Context, req *protos.PhotoR
 	if err != nil {
 		return nil, err
 	}
-	photoProto := make([]*protos.Photo, len(photo))
+	photoProto := make([]*protos.Photo, 0, len(photo))
 	for _, p := range photo {
 		pProtos := &protos.Photo{
 			QuestionnaireId: p.QuestionnaireID,

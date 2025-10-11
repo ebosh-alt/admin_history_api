@@ -27,12 +27,23 @@ func (f *FS) OnStop(_ context.Context) error {
 }
 
 func (f *FS) Save(ctx context.Context, r io.Reader, ext string) (string, error) {
+	return f.save(ctx, f.prefix, r, ext)
+}
+
+func (f *FS) SaveTo(ctx context.Context, prefix string, r io.Reader, ext string) (string, error) {
+	if prefix == "" {
+		prefix = f.prefix
+	}
+	return f.save(ctx, strings.Trim(prefix, "/"), r, ext)
+}
+
+func (f *FS) save(ctx context.Context, prefix string, r io.Reader, ext string) (string, error) {
 	if f == nil || f.baseDir == "" {
 		return "", errors.New("storage FS is not configured")
 	}
 	ext = normalizeExt(ext)
 
-	absDir := filepath.Join(f.baseDir, f.prefix)
+	absDir := filepath.Join(f.baseDir, prefix)
 
 	if err := os.MkdirAll(absDir, 0o755); err != nil {
 		return "", err
@@ -63,7 +74,11 @@ func (f *FS) Save(ctx context.Context, r io.Reader, ext string) (string, error) 
 		return "", err
 	}
 
-	relPath := filepath.ToSlash(filepath.Join(f.prefix, filename))
+	if prefix != "" {
+		relPath := filepath.ToSlash(filepath.Join(prefix, filename))
+		return relPath, nil
+	}
+	relPath := filepath.ToSlash(filename)
 	return relPath, nil
 }
 
@@ -129,4 +144,26 @@ func (f *FS) Remove(ctx context.Context, rel string) error {
 		return err
 	}
 	return nil
+}
+
+func (f *FS) PublicRoute() string {
+	if f == nil {
+		return ""
+	}
+	prefix := strings.Trim(f.prefix, "/")
+	if prefix == "" {
+		return ""
+	}
+	return "/" + prefix
+}
+
+func (f *FS) PublicDir() string {
+	if f == nil || f.baseDir == "" {
+		return ""
+	}
+	prefix := strings.Trim(f.prefix, "/")
+	if prefix == "" {
+		return f.baseDir
+	}
+	return filepath.Join(f.baseDir, filepath.FromSlash(prefix))
 }

@@ -16,13 +16,13 @@ type QuestionnaireRepo struct {
 }
 
 const (
-	questionnaireByIDQuery = `SELECT id, user_id, history, status, payment, created_at, answers
+	questionnaireByIDQuery = `SELECT id, user_id, history, storyboard, status, payment, created_at, answers
 FROM questionnaires WHERE id = $1 order by created_at desc`
 	//	photosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, scene
 	//FROM photos WHERE questionnaire_id = $1 ORDER BY id`
 	//	generatePhotosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, NULL::text as scene
 	//FROM generate_photos WHERE questionnaire_id = $1 ORDER BY id`
-	listQuestionnairesQuery = `SELECT id, user_id, answers, history, status, payment, created_at
+	listQuestionnairesQuery = `SELECT id, user_id, answers, history, storyboard, status, payment, created_at
 FROM questionnaires
 ORDER BY id
 LIMIT $1 OFFSET $2;`
@@ -38,7 +38,7 @@ LIMIT $1 OFFSET $2;`
 func (r *Repository) GetQuestionnaire(ctx context.Context, q *entities.Questionnaire) (*entities.Questionnaire, error) {
 	qDTO := q.ToDTO()
 	if err := r.DB.QueryRow(ctx, questionnaireByIDQuery, qDTO.ID).Scan(
-		&q.ID, &q.UserID, &q.History, &q.Status, &q.Payment, &q.CreatedAt, &q.Answers,
+		&q.ID, &q.UserID, &q.History, &q.Storyboard, &q.Status, &q.Payment, &q.CreatedAt, &q.Answers,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, pgx.ErrNoRows
@@ -108,7 +108,7 @@ func (r *Repository) GetQuestionnairesList(
 
 	sb := strings.Builder{}
 	sb.WriteString(`
-SELECT id, user_id, answers, history, status, payment, created_at
+SELECT id, user_id, answers, history, storyboard, status, payment, created_at
 FROM questionnaires
 WHERE 1=1`)
 
@@ -155,6 +155,7 @@ WHERE 1=1`)
 			&item.UserID,
 			&item.Answers,
 			&item.History,
+			&item.Storyboard,
 			&item.Status,
 			&item.Payment,
 			&item.CreatedAt,
@@ -179,6 +180,7 @@ func (r *Repository) UpdateQuestionnaire(ctx context.Context, q *entities.Questi
 		"history = $3",
 		"status  = $4",
 		"payment = $5",
+		"storyboard = $6",
 	}
 	args := []any{
 		q.ID,
@@ -186,8 +188,9 @@ func (r *Repository) UpdateQuestionnaire(ctx context.Context, q *entities.Questi
 		q.History,
 		q.Status,
 		q.Payment,
+		q.Storyboard,
 	}
-	i := 5
+	i := len(args)
 
 	if q.Answers != nil {
 		i++

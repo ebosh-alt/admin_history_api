@@ -76,15 +76,21 @@ func (x *Status) GetMessage() string {
 }
 
 type User struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
-	Status        bool                   `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
-	AcceptedOffer bool                   `protobuf:"varint,5,opt,name=accepted_offer,json=acceptedOffer,proto3" json:"accepted_offer,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	Total         int64                  `protobuf:"varint,7,opt,name=total,proto3" json:"total,omitempty"`
-	Paid          int64                  `protobuf:"varint,8,opt,name=paid,proto3" json:"paid,omitempty"`
-	Unpaid        int64                  `protobuf:"varint,9,opt,name=unpaid,proto3" json:"unpaid,omitempty"`
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Id            int64                   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Username      string                  `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Language      *wrapperspb.StringValue `protobuf:"bytes,3,opt,name=language,proto3" json:"language,omitempty"`
+	RefBossId     *wrapperspb.Int64Value  `protobuf:"bytes,4,opt,name=ref_boss_id,json=refBossId,proto3" json:"ref_boss_id,omitempty"`
+	Status        bool                    `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
+	AcceptedOffer bool                    `protobuf:"varint,6,opt,name=accepted_offer,json=acceptedOffer,proto3" json:"accepted_offer,omitempty"`
+	CreatedAt     *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Promocode     *wrapperspb.StringValue `protobuf:"bytes,8,opt,name=promocode,proto3" json:"promocode,omitempty"`
+	Age           *wrapperspb.Int64Value  `protobuf:"bytes,9,opt,name=age,proto3" json:"age,omitempty"`
+	Gender        *wrapperspb.StringValue `protobuf:"bytes,10,opt,name=gender,proto3" json:"gender,omitempty"`
+	MapBinding    *wrapperspb.BoolValue   `protobuf:"bytes,11,opt,name=map_binding,json=mapBinding,proto3" json:"map_binding,omitempty"`
+	Total         int64                   `protobuf:"varint,12,opt,name=total,proto3" json:"total,omitempty"`
+	Paid          int64                   `protobuf:"varint,13,opt,name=paid,proto3" json:"paid,omitempty"`
+	Unpaid        int64                   `protobuf:"varint,14,opt,name=unpaid,proto3" json:"unpaid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -133,6 +139,20 @@ func (x *User) GetUsername() string {
 	return ""
 }
 
+func (x *User) GetLanguage() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Language
+	}
+	return nil
+}
+
+func (x *User) GetRefBossId() *wrapperspb.Int64Value {
+	if x != nil {
+		return x.RefBossId
+	}
+	return nil
+}
+
 func (x *User) GetStatus() bool {
 	if x != nil {
 		return x.Status
@@ -150,6 +170,34 @@ func (x *User) GetAcceptedOffer() bool {
 func (x *User) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *User) GetPromocode() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Promocode
+	}
+	return nil
+}
+
+func (x *User) GetAge() *wrapperspb.Int64Value {
+	if x != nil {
+		return x.Age
+	}
+	return nil
+}
+
+func (x *User) GetGender() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Gender
+	}
+	return nil
+}
+
+func (x *User) GetMapBinding() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.MapBinding
 	}
 	return nil
 }
@@ -220,14 +268,18 @@ func (x *UpdateUserRequest) GetUser() *User {
 }
 
 type UsersListRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Page  int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	Limit int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	// Фильтры по пользователю (presence через wrappers)
-	Status        *wrapperspb.BoolValue  `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`                                    // активен/неактивен
-	AcceptedOffer *wrapperspb.BoolValue  `protobuf:"bytes,4,opt,name=accepted_offer,json=acceptedOffer,proto3" json:"accepted_offer,omitempty"` // принял оффер/нет
-	DateFrom      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`                // created_at >=
-	DateTo        *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`                      // created_at < (полуинтервал)
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Page          int32                   `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                   `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Status        *wrapperspb.BoolValue   `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	AcceptedOffer *wrapperspb.BoolValue   `protobuf:"bytes,4,opt,name=accepted_offer,json=acceptedOffer,proto3" json:"accepted_offer,omitempty"`
+	DateFrom      *timestamppb.Timestamp  `protobuf:"bytes,5,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
+	DateTo        *timestamppb.Timestamp  `protobuf:"bytes,6,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
+	Promocode     *wrapperspb.StringValue `protobuf:"bytes,7,opt,name=promocode,proto3" json:"promocode,omitempty"`
+	AgeFrom       *wrapperspb.Int64Value  `protobuf:"bytes,8,opt,name=age_from,json=ageFrom,proto3" json:"age_from,omitempty"`
+	AgeTo         *wrapperspb.Int64Value  `protobuf:"bytes,9,opt,name=age_to,json=ageTo,proto3" json:"age_to,omitempty"`
+	Gender        *wrapperspb.StringValue `protobuf:"bytes,10,opt,name=gender,proto3" json:"gender,omitempty"`
+	MapBinding    *wrapperspb.BoolValue   `protobuf:"bytes,11,opt,name=map_binding,json=mapBinding,proto3" json:"map_binding,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -300,6 +352,41 @@ func (x *UsersListRequest) GetDateFrom() *timestamppb.Timestamp {
 func (x *UsersListRequest) GetDateTo() *timestamppb.Timestamp {
 	if x != nil {
 		return x.DateTo
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetPromocode() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Promocode
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetAgeFrom() *wrapperspb.Int64Value {
+	if x != nil {
+		return x.AgeFrom
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetAgeTo() *wrapperspb.Int64Value {
+	if x != nil {
+		return x.AgeTo
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetGender() *wrapperspb.StringValue {
+	if x != nil {
+		return x.Gender
+	}
+	return nil
+}
+
+func (x *UsersListRequest) GetMapBinding() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.MapBinding
 	}
 	return nil
 }
@@ -533,6 +620,7 @@ type Questionnaire struct {
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	History       string                 `protobuf:"bytes,3,opt,name=history,proto3" json:"history,omitempty"`
+	Storyboard    string                 `protobuf:"bytes,4,opt,name=storyboard,proto3" json:"storyboard,omitempty"`
 	Status        bool                   `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
 	Payment       bool                   `protobuf:"varint,6,opt,name=payment,proto3" json:"payment,omitempty"`
 	Answers       []*Answer              `protobuf:"bytes,7,rep,name=answers,proto3" json:"answers,omitempty"`
@@ -588,6 +676,13 @@ func (x *Questionnaire) GetUserId() int64 {
 func (x *Questionnaire) GetHistory() string {
 	if x != nil {
 		return x.History
+	}
+	return ""
+}
+
+func (x *Questionnaire) GetStoryboard() string {
+	if x != nil {
+		return x.Storyboard
 	}
 	return ""
 }
@@ -795,7 +890,8 @@ func (x *Photo) GetTypePhoto() string {
 type Video struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Path            string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	QuestionnaireId string                 `protobuf:"bytes,2,opt,name=questionnaire_id,json=questionnaireId,proto3" json:"questionnaire_id,omitempty"`
+	QuestionnaireId int64                  `protobuf:"varint,2,opt,name=questionnaire_id,json=questionnaireId,proto3" json:"questionnaire_id,omitempty"`
+	TypeVideo       string                 `protobuf:"bytes,3,opt,name=type_video,json=typeVideo,proto3" json:"type_video,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -837,9 +933,16 @@ func (x *Video) GetPath() string {
 	return ""
 }
 
-func (x *Video) GetQuestionnaireId() string {
+func (x *Video) GetQuestionnaireId() int64 {
 	if x != nil {
 		return x.QuestionnaireId
+	}
+	return 0
+}
+
+func (x *Video) GetTypeVideo() string {
+	if x != nil {
+		return x.TypeVideo
 	}
 	return ""
 }
@@ -1508,6 +1611,886 @@ func (x *PhotoResponse) GetPhoto() []*Photo {
 	return nil
 }
 
+type SubmitQuestionnaireMediaRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	QuestionnaireId int64                  `protobuf:"varint,1,opt,name=questionnaire_id,json=questionnaireId,proto3" json:"questionnaire_id,omitempty"`
+	UserId          int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DemoPhotos      []string               `protobuf:"bytes,3,rep,name=demo_photos,json=demoPhotos,proto3" json:"demo_photos,omitempty"`
+	FinalPhotos     []*Photo               `protobuf:"bytes,4,rep,name=final_photos,json=finalPhotos,proto3" json:"final_photos,omitempty"`
+	DemoVideo       string                 `protobuf:"bytes,5,opt,name=demo_video,json=demoVideo,proto3" json:"demo_video,omitempty"`
+	GeneratedVideo  *Video                 `protobuf:"bytes,6,opt,name=generated_video,json=generatedVideo,proto3" json:"generated_video,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *SubmitQuestionnaireMediaRequest) Reset() {
+	*x = SubmitQuestionnaireMediaRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubmitQuestionnaireMediaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubmitQuestionnaireMediaRequest) ProtoMessage() {}
+
+func (x *SubmitQuestionnaireMediaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubmitQuestionnaireMediaRequest.ProtoReflect.Descriptor instead.
+func (*SubmitQuestionnaireMediaRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *SubmitQuestionnaireMediaRequest) GetQuestionnaireId() int64 {
+	if x != nil {
+		return x.QuestionnaireId
+	}
+	return 0
+}
+
+func (x *SubmitQuestionnaireMediaRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *SubmitQuestionnaireMediaRequest) GetDemoPhotos() []string {
+	if x != nil {
+		return x.DemoPhotos
+	}
+	return nil
+}
+
+func (x *SubmitQuestionnaireMediaRequest) GetFinalPhotos() []*Photo {
+	if x != nil {
+		return x.FinalPhotos
+	}
+	return nil
+}
+
+func (x *SubmitQuestionnaireMediaRequest) GetDemoVideo() string {
+	if x != nil {
+		return x.DemoVideo
+	}
+	return ""
+}
+
+func (x *SubmitQuestionnaireMediaRequest) GetGeneratedVideo() *Video {
+	if x != nil {
+		return x.GeneratedVideo
+	}
+	return nil
+}
+
+type VideoRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	QuestionnaireId int64                  `protobuf:"varint,1,opt,name=questionnaire_id,json=questionnaireId,proto3" json:"questionnaire_id,omitempty"`
+	Type            string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *VideoRequest) Reset() {
+	*x = VideoRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VideoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VideoRequest) ProtoMessage() {}
+
+func (x *VideoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VideoRequest.ProtoReflect.Descriptor instead.
+func (*VideoRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *VideoRequest) GetQuestionnaireId() int64 {
+	if x != nil {
+		return x.QuestionnaireId
+	}
+	return 0
+}
+
+func (x *VideoRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type CreateVideoRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Video         *Video                 `protobuf:"bytes,1,opt,name=video,proto3" json:"video,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateVideoRequest) Reset() {
+	*x = CreateVideoRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateVideoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateVideoRequest) ProtoMessage() {}
+
+func (x *CreateVideoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateVideoRequest.ProtoReflect.Descriptor instead.
+func (*CreateVideoRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *CreateVideoRequest) GetVideo() *Video {
+	if x != nil {
+		return x.Video
+	}
+	return nil
+}
+
+type VideoResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Video         []*Video               `protobuf:"bytes,1,rep,name=video,proto3" json:"video,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VideoResponse) Reset() {
+	*x = VideoResponse{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VideoResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VideoResponse) ProtoMessage() {}
+
+func (x *VideoResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VideoResponse.ProtoReflect.Descriptor instead.
+func (*VideoResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *VideoResponse) GetVideo() []*Video {
+	if x != nil {
+		return x.Video
+	}
+	return nil
+}
+
+type PromoCode struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	NumberUses    *wrapperspb.Int32Value `protobuf:"bytes,3,opt,name=number_uses,json=numberUses,proto3" json:"number_uses,omitempty"`
+	Status        *wrapperspb.BoolValue  `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	Percent       int64                  `protobuf:"varint,5,opt,name=percent,proto3" json:"percent,omitempty"`
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromoCode) Reset() {
+	*x = PromoCode{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromoCode) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromoCode) ProtoMessage() {}
+
+func (x *PromoCode) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromoCode.ProtoReflect.Descriptor instead.
+func (*PromoCode) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *PromoCode) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *PromoCode) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+func (x *PromoCode) GetNumberUses() *wrapperspb.Int32Value {
+	if x != nil {
+		return x.NumberUses
+	}
+	return nil
+}
+
+func (x *PromoCode) GetStatus() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+func (x *PromoCode) GetPercent() int64 {
+	if x != nil {
+		return x.Percent
+	}
+	return 0
+}
+
+func (x *PromoCode) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type PromoCodeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromoCodeRequest) Reset() {
+	*x = PromoCodeRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromoCodeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromoCodeRequest) ProtoMessage() {}
+
+func (x *PromoCodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromoCodeRequest.ProtoReflect.Descriptor instead.
+func (*PromoCodeRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *PromoCodeRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type PromoCodeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PromoCode     *PromoCode             `protobuf:"bytes,1,opt,name=promo_code,json=promoCode,proto3" json:"promo_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromoCodeResponse) Reset() {
+	*x = PromoCodeResponse{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromoCodeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromoCodeResponse) ProtoMessage() {}
+
+func (x *PromoCodeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromoCodeResponse.ProtoReflect.Descriptor instead.
+func (*PromoCodeResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *PromoCodeResponse) GetPromoCode() *PromoCode {
+	if x != nil {
+		return x.PromoCode
+	}
+	return nil
+}
+
+type PromoCodesListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Status        *wrapperspb.BoolValue  `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromoCodesListRequest) Reset() {
+	*x = PromoCodesListRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromoCodesListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromoCodesListRequest) ProtoMessage() {}
+
+func (x *PromoCodesListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromoCodesListRequest.ProtoReflect.Descriptor instead.
+func (*PromoCodesListRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *PromoCodesListRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *PromoCodesListRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *PromoCodesListRequest) GetStatus() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+type PromoCodesListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PromoCodes    []*PromoCode           `protobuf:"bytes,1,rep,name=promo_codes,json=promoCodes,proto3" json:"promo_codes,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PromoCodesListResponse) Reset() {
+	*x = PromoCodesListResponse{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PromoCodesListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PromoCodesListResponse) ProtoMessage() {}
+
+func (x *PromoCodesListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PromoCodesListResponse.ProtoReflect.Descriptor instead.
+func (*PromoCodesListResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *PromoCodesListResponse) GetPromoCodes() []*PromoCode {
+	if x != nil {
+		return x.PromoCodes
+	}
+	return nil
+}
+
+func (x *PromoCodesListResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type CreatePromoCodeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PromoCode     *PromoCode             `protobuf:"bytes,1,opt,name=promo_code,json=promoCode,proto3" json:"promo_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreatePromoCodeRequest) Reset() {
+	*x = CreatePromoCodeRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreatePromoCodeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatePromoCodeRequest) ProtoMessage() {}
+
+func (x *CreatePromoCodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatePromoCodeRequest.ProtoReflect.Descriptor instead.
+func (*CreatePromoCodeRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *CreatePromoCodeRequest) GetPromoCode() *PromoCode {
+	if x != nil {
+		return x.PromoCode
+	}
+	return nil
+}
+
+type UpdatePromoCodeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PromoCode     *PromoCode             `protobuf:"bytes,1,opt,name=promo_code,json=promoCode,proto3" json:"promo_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdatePromoCodeRequest) Reset() {
+	*x = UpdatePromoCodeRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdatePromoCodeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePromoCodeRequest) ProtoMessage() {}
+
+func (x *UpdatePromoCodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePromoCodeRequest.ProtoReflect.Descriptor instead.
+func (*UpdatePromoCodeRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *UpdatePromoCodeRequest) GetPromoCode() *PromoCode {
+	if x != nil {
+		return x.PromoCode
+	}
+	return nil
+}
+
+type Review struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Review) Reset() {
+	*x = Review{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Review) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Review) ProtoMessage() {}
+
+func (x *Review) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Review.ProtoReflect.Descriptor instead.
+func (*Review) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *Review) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Review) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *Review) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Review) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+type ReviewRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReviewRequest) Reset() {
+	*x = ReviewRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewRequest) ProtoMessage() {}
+
+func (x *ReviewRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewRequest.ProtoReflect.Descriptor instead.
+func (*ReviewRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *ReviewRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type ReviewResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Review        *Review                `protobuf:"bytes,1,opt,name=review,proto3" json:"review,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReviewResponse) Reset() {
+	*x = ReviewResponse{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewResponse) ProtoMessage() {}
+
+func (x *ReviewResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewResponse.ProtoReflect.Descriptor instead.
+func (*ReviewResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *ReviewResponse) GetReview() *Review {
+	if x != nil {
+		return x.Review
+	}
+	return nil
+}
+
+type ReviewsListRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	UserId        *wrapperspb.Int64Value `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DateFrom      *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
+	DateTo        *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReviewsListRequest) Reset() {
+	*x = ReviewsListRequest{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewsListRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewsListRequest) ProtoMessage() {}
+
+func (x *ReviewsListRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewsListRequest.ProtoReflect.Descriptor instead.
+func (*ReviewsListRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *ReviewsListRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ReviewsListRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ReviewsListRequest) GetUserId() *wrapperspb.Int64Value {
+	if x != nil {
+		return x.UserId
+	}
+	return nil
+}
+
+func (x *ReviewsListRequest) GetDateFrom() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateFrom
+	}
+	return nil
+}
+
+func (x *ReviewsListRequest) GetDateTo() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DateTo
+	}
+	return nil
+}
+
+type ReviewsListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Reviews       []*Review              `protobuf:"bytes,1,rep,name=reviews,proto3" json:"reviews,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReviewsListResponse) Reset() {
+	*x = ReviewsListResponse{}
+	mi := &file_pkg_proto_admins_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReviewsListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReviewsListResponse) ProtoMessage() {}
+
+func (x *ReviewsListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_proto_admins_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReviewsListResponse.ProtoReflect.Descriptor instead.
+func (*ReviewsListResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_proto_admins_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *ReviewsListResponse) GetReviews() []*Review {
+	if x != nil {
+		return x.Reviews
+	}
+	return nil
+}
+
+func (x *ReviewsListResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_pkg_proto_admins_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_admins_proto_rawDesc = "" +
@@ -1515,26 +2498,41 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\x16pkg/proto/admins.proto\x12\rtodo_proto.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\"2\n" +
 	"\x06Status\x12\x0e\n" +
 	"\x02ok\x18\x01 \x01(\bR\x02ok\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xee\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xc3\x04\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\bR\x06status\x12%\n" +
-	"\x0eaccepted_offer\x18\x05 \x01(\bR\racceptedOffer\x129\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x128\n" +
+	"\blanguage\x18\x03 \x01(\v2\x1c.google.protobuf.StringValueR\blanguage\x12;\n" +
+	"\vref_boss_id\x18\x04 \x01(\v2\x1b.google.protobuf.Int64ValueR\trefBossId\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\bR\x06status\x12%\n" +
+	"\x0eaccepted_offer\x18\x06 \x01(\bR\racceptedOffer\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x14\n" +
-	"\x05total\x18\a \x01(\x03R\x05total\x12\x12\n" +
-	"\x04paid\x18\b \x01(\x03R\x04paid\x12\x16\n" +
-	"\x06unpaid\x18\t \x01(\x03R\x06unpaid\"<\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12:\n" +
+	"\tpromocode\x18\b \x01(\v2\x1c.google.protobuf.StringValueR\tpromocode\x12-\n" +
+	"\x03age\x18\t \x01(\v2\x1b.google.protobuf.Int64ValueR\x03age\x124\n" +
+	"\x06gender\x18\n" +
+	" \x01(\v2\x1c.google.protobuf.StringValueR\x06gender\x12;\n" +
+	"\vmap_binding\x18\v \x01(\v2\x1a.google.protobuf.BoolValueR\n" +
+	"mapBinding\x12\x14\n" +
+	"\x05total\x18\f \x01(\x03R\x05total\x12\x12\n" +
+	"\x04paid\x18\r \x01(\x03R\x04paid\x12\x16\n" +
+	"\x06unpaid\x18\x0e \x01(\x03R\x06unpaid\"<\n" +
 	"\x11UpdateUserRequest\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"\xa1\x02\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"\xbc\x04\n" +
 	"\x10UsersListRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x122\n" +
 	"\x06status\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\x06status\x12A\n" +
 	"\x0eaccepted_offer\x18\x04 \x01(\v2\x1a.google.protobuf.BoolValueR\racceptedOffer\x127\n" +
 	"\tdate_from\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bdateFrom\x123\n" +
-	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\"T\n" +
+	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\x12:\n" +
+	"\tpromocode\x18\a \x01(\v2\x1c.google.protobuf.StringValueR\tpromocode\x126\n" +
+	"\bage_from\x18\b \x01(\v2\x1b.google.protobuf.Int64ValueR\aageFrom\x122\n" +
+	"\x06age_to\x18\t \x01(\v2\x1b.google.protobuf.Int64ValueR\x05ageTo\x124\n" +
+	"\x06gender\x18\n" +
+	" \x01(\v2\x1c.google.protobuf.StringValueR\x06gender\x12;\n" +
+	"\vmap_binding\x18\v \x01(\v2\x1a.google.protobuf.BoolValueR\n" +
+	"mapBinding\"T\n" +
 	"\x11UsersListResponse\x12)\n" +
 	"\x05users\x18\x01 \x03(\v2\x13.todo_proto.v1.UserR\x05users\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\"\x1d\n" +
@@ -1548,11 +2546,14 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\apayment\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\apayment\x122\n" +
 	"\x06status\x18\x04 \x01(\v2\x1a.google.protobuf.BoolValueR\x06status\x127\n" +
 	"\tdate_from\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bdateFrom\x123\n" +
-	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\"\xf0\x01\n" +
+	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\"\x90\x02\n" +
 	"\rQuestionnaire\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x18\n" +
-	"\ahistory\x18\x03 \x01(\tR\ahistory\x12\x16\n" +
+	"\ahistory\x18\x03 \x01(\tR\ahistory\x12\x1e\n" +
+	"\n" +
+	"storyboard\x18\x04 \x01(\tR\n" +
+	"storyboard\x12\x16\n" +
 	"\x06status\x18\x05 \x01(\bR\x06status\x12\x18\n" +
 	"\apayment\x18\x06 \x01(\bR\apayment\x12/\n" +
 	"\aanswers\x18\a \x03(\v2\x15.todo_proto.v1.AnswerR\aanswers\x129\n" +
@@ -1569,10 +2570,12 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\x10questionnaire_id\x18\x02 \x01(\x03R\x0fquestionnaireId\x12\x14\n" +
 	"\x05scene\x18\x03 \x01(\tR\x05scene\x12\x1d\n" +
 	"\n" +
-	"type_photo\x18\x04 \x01(\tR\ttypePhoto\"F\n" +
+	"type_photo\x18\x04 \x01(\tR\ttypePhoto\"e\n" +
 	"\x05Video\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12)\n" +
-	"\x10questionnaire_id\x18\x02 \x01(\tR\x0fquestionnaireId\"&\n" +
+	"\x10questionnaire_id\x18\x02 \x01(\x03R\x0fquestionnaireId\x12\x1d\n" +
+	"\n" +
+	"type_video\x18\x03 \x01(\tR\ttypeVideo\"&\n" +
 	"\x14QuestionnaireRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"[\n" +
 	"\x15QuestionnaireResponse\x12B\n" +
@@ -1608,7 +2611,69 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\x12CreatePhotoRequest\x12*\n" +
 	"\x05photo\x18\x01 \x01(\v2\x14.todo_proto.v1.PhotoR\x05photo\";\n" +
 	"\rPhotoResponse\x12*\n" +
-	"\x05photo\x18\x01 \x03(\v2\x14.todo_proto.v1.PhotoR\x05photo2\x9b\a\n" +
+	"\x05photo\x18\x01 \x03(\v2\x14.todo_proto.v1.PhotoR\x05photo\"\x9d\x02\n" +
+	"\x1fSubmitQuestionnaireMediaRequest\x12)\n" +
+	"\x10questionnaire_id\x18\x01 \x01(\x03R\x0fquestionnaireId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1f\n" +
+	"\vdemo_photos\x18\x03 \x03(\tR\n" +
+	"demoPhotos\x127\n" +
+	"\ffinal_photos\x18\x04 \x03(\v2\x14.todo_proto.v1.PhotoR\vfinalPhotos\x12\x1d\n" +
+	"\n" +
+	"demo_video\x18\x05 \x01(\tR\tdemoVideo\x12=\n" +
+	"\x0fgenerated_video\x18\x06 \x01(\v2\x14.todo_proto.v1.VideoR\x0egeneratedVideo\"M\n" +
+	"\fVideoRequest\x12)\n" +
+	"\x10questionnaire_id\x18\x01 \x01(\x03R\x0fquestionnaireId\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\"@\n" +
+	"\x12CreateVideoRequest\x12*\n" +
+	"\x05video\x18\x01 \x01(\v2\x14.todo_proto.v1.VideoR\x05video\";\n" +
+	"\rVideoResponse\x12*\n" +
+	"\x05video\x18\x01 \x03(\v2\x14.todo_proto.v1.VideoR\x05video\"\xdf\x01\n" +
+	"\tPromoCode\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\x12<\n" +
+	"\vnumber_uses\x18\x03 \x01(\v2\x1b.google.protobuf.Int32ValueR\n" +
+	"numberUses\x122\n" +
+	"\x06status\x18\x04 \x01(\v2\x1a.google.protobuf.BoolValueR\x06status\x12\x18\n" +
+	"\apercent\x18\x05 \x01(\x03R\apercent\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\"\"\n" +
+	"\x10PromoCodeRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"L\n" +
+	"\x11PromoCodeResponse\x127\n" +
+	"\n" +
+	"promo_code\x18\x01 \x01(\v2\x18.todo_proto.v1.PromoCodeR\tpromoCode\"u\n" +
+	"\x15PromoCodesListRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x122\n" +
+	"\x06status\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\x06status\"i\n" +
+	"\x16PromoCodesListResponse\x129\n" +
+	"\vpromo_codes\x18\x01 \x03(\v2\x18.todo_proto.v1.PromoCodeR\n" +
+	"promoCodes\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\"Q\n" +
+	"\x16CreatePromoCodeRequest\x127\n" +
+	"\n" +
+	"promo_code\x18\x01 \x01(\v2\x18.todo_proto.v1.PromoCodeR\tpromoCode\"Q\n" +
+	"\x16UpdatePromoCodeRequest\x127\n" +
+	"\n" +
+	"promo_code\x18\x01 \x01(\v2\x18.todo_proto.v1.PromoCodeR\tpromoCode\"\x8e\x01\n" +
+	"\x06Review\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x129\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x1f\n" +
+	"\rReviewRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"?\n" +
+	"\x0eReviewResponse\x12-\n" +
+	"\x06review\x18\x01 \x01(\v2\x15.todo_proto.v1.ReviewR\x06review\"\xe2\x01\n" +
+	"\x12ReviewsListRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x124\n" +
+	"\auser_id\x18\x03 \x01(\v2\x1b.google.protobuf.Int64ValueR\x06userId\x127\n" +
+	"\tdate_from\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\bdateFrom\x123\n" +
+	"\adate_to\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\"\\\n" +
+	"\x13ReviewsListResponse\x12/\n" +
+	"\areviews\x18\x01 \x03(\v2\x15.todo_proto.v1.ReviewR\areviews\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total2\x90\r\n" +
 	"\x13AdminHistoryService\x12B\n" +
 	"\aGetUser\x12\x1a.todo_proto.v1.UserRequest\x1a\x1b.todo_proto.v1.UserResponse\x12N\n" +
 	"\tUsersList\x12\x1f.todo_proto.v1.UsersListRequest\x1a .todo_proto.v1.UsersListResponse\x12E\n" +
@@ -1616,12 +2681,21 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"UpdateUser\x12 .todo_proto.v1.UpdateUserRequest\x1a\x15.todo_proto.v1.Status\x12]\n" +
 	"\x10GetQuestionnaire\x12#.todo_proto.v1.QuestionnaireRequest\x1a$.todo_proto.v1.QuestionnaireResponse\x12i\n" +
 	"\x12QuestionnairesList\x12(.todo_proto.v1.QuestionnairesListRequest\x1a).todo_proto.v1.QuestionnairesListResponse\x12W\n" +
-	"\x13UpdateQuestionnaire\x12).todo_proto.v1.UpdateQuestionnaireRequest\x1a\x15.todo_proto.v1.Status\x12S\n" +
+	"\x13UpdateQuestionnaire\x12).todo_proto.v1.UpdateQuestionnaireRequest\x1a\x15.todo_proto.v1.Status\x12a\n" +
+	"\x18SubmitQuestionnaireMedia\x12..todo_proto.v1.SubmitQuestionnaireMediaRequest\x1a\x15.todo_proto.v1.Status\x12S\n" +
 	"\x16GetPhotosQuestionnaire\x12\x1b.todo_proto.v1.PhotoRequest\x1a\x1c.todo_proto.v1.PhotoResponse\x12G\n" +
-	"\vCreatePhoto\x12!.todo_proto.v1.CreatePhotoRequest\x1a\x15.todo_proto.v1.Status\x12B\n" +
+	"\vCreatePhoto\x12!.todo_proto.v1.CreatePhotoRequest\x1a\x15.todo_proto.v1.Status\x12S\n" +
+	"\x16GetVideosQuestionnaire\x12\x1b.todo_proto.v1.VideoRequest\x1a\x1c.todo_proto.v1.VideoResponse\x12G\n" +
+	"\vCreateVideo\x12!.todo_proto.v1.CreateVideoRequest\x1a\x15.todo_proto.v1.Status\x12B\n" +
 	"\aGetChat\x12\x1a.todo_proto.v1.ChatRequest\x1a\x1b.todo_proto.v1.ChatResponse\x12N\n" +
 	"\tChatsList\x12\x1f.todo_proto.v1.ChatsListRequest\x1a .todo_proto.v1.ChatsListResponse\x12T\n" +
-	"\rGetStatistics\x12 .todo_proto.v1.StatisticsRequest\x1a!.todo_proto.v1.StatisticsResponseB Z\x1epkg/proto/gen/go;admin_historyb\x06proto3"
+	"\rGetStatistics\x12 .todo_proto.v1.StatisticsRequest\x1a!.todo_proto.v1.StatisticsResponse\x12Q\n" +
+	"\fGetPromoCode\x12\x1f.todo_proto.v1.PromoCodeRequest\x1a .todo_proto.v1.PromoCodeResponse\x12]\n" +
+	"\x0ePromoCodesList\x12$.todo_proto.v1.PromoCodesListRequest\x1a%.todo_proto.v1.PromoCodesListResponse\x12O\n" +
+	"\x0fCreatePromoCode\x12%.todo_proto.v1.CreatePromoCodeRequest\x1a\x15.todo_proto.v1.Status\x12O\n" +
+	"\x0fUpdatePromoCode\x12%.todo_proto.v1.UpdatePromoCodeRequest\x1a\x15.todo_proto.v1.Status\x12H\n" +
+	"\tGetReview\x12\x1c.todo_proto.v1.ReviewRequest\x1a\x1d.todo_proto.v1.ReviewResponse\x12T\n" +
+	"\vReviewsList\x12!.todo_proto.v1.ReviewsListRequest\x1a\".todo_proto.v1.ReviewsListResponseB Z\x1epkg/proto/gen/go;admin_historyb\x06proto3"
 
 var (
 	file_pkg_proto_admins_proto_rawDescOnce sync.Once
@@ -1635,91 +2709,156 @@ func file_pkg_proto_admins_proto_rawDescGZIP() []byte {
 	return file_pkg_proto_admins_proto_rawDescData
 }
 
-var file_pkg_proto_admins_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_pkg_proto_admins_proto_msgTypes = make([]protoimpl.MessageInfo, 43)
 var file_pkg_proto_admins_proto_goTypes = []any{
-	(*Status)(nil),                     // 0: todo_proto.v1.Status
-	(*User)(nil),                       // 1: todo_proto.v1.User
-	(*UpdateUserRequest)(nil),          // 2: todo_proto.v1.UpdateUserRequest
-	(*UsersListRequest)(nil),           // 3: todo_proto.v1.UsersListRequest
-	(*UsersListResponse)(nil),          // 4: todo_proto.v1.UsersListResponse
-	(*UserRequest)(nil),                // 5: todo_proto.v1.UserRequest
-	(*UserResponse)(nil),               // 6: todo_proto.v1.UserResponse
-	(*QuestionnairesListRequest)(nil),  // 7: todo_proto.v1.QuestionnairesListRequest
-	(*Questionnaire)(nil),              // 8: todo_proto.v1.Questionnaire
-	(*Answer)(nil),                     // 9: todo_proto.v1.Answer
-	(*QuestionnairesListResponse)(nil), // 10: todo_proto.v1.QuestionnairesListResponse
-	(*Photo)(nil),                      // 11: todo_proto.v1.Photo
-	(*Video)(nil),                      // 12: todo_proto.v1.Video
-	(*QuestionnaireRequest)(nil),       // 13: todo_proto.v1.QuestionnaireRequest
-	(*QuestionnaireResponse)(nil),      // 14: todo_proto.v1.QuestionnaireResponse
-	(*UpdateQuestionnaireRequest)(nil), // 15: todo_proto.v1.UpdateQuestionnaireRequest
-	(*MessageChat)(nil),                // 16: todo_proto.v1.MessageChat
-	(*ChatRequest)(nil),                // 17: todo_proto.v1.ChatRequest
-	(*ChatResponse)(nil),               // 18: todo_proto.v1.ChatResponse
-	(*ChatsInfo)(nil),                  // 19: todo_proto.v1.ChatsInfo
-	(*ChatsListRequest)(nil),           // 20: todo_proto.v1.ChatsListRequest
-	(*ChatsListResponse)(nil),          // 21: todo_proto.v1.ChatsListResponse
-	(*StatisticsRequest)(nil),          // 22: todo_proto.v1.StatisticsRequest
-	(*StatisticsResponse)(nil),         // 23: todo_proto.v1.StatisticsResponse
-	(*PhotoRequest)(nil),               // 24: todo_proto.v1.PhotoRequest
-	(*CreatePhotoRequest)(nil),         // 25: todo_proto.v1.CreatePhotoRequest
-	(*PhotoResponse)(nil),              // 26: todo_proto.v1.PhotoResponse
-	(*timestamppb.Timestamp)(nil),      // 27: google.protobuf.Timestamp
-	(*wrapperspb.BoolValue)(nil),       // 28: google.protobuf.BoolValue
+	(*Status)(nil),                          // 0: todo_proto.v1.Status
+	(*User)(nil),                            // 1: todo_proto.v1.User
+	(*UpdateUserRequest)(nil),               // 2: todo_proto.v1.UpdateUserRequest
+	(*UsersListRequest)(nil),                // 3: todo_proto.v1.UsersListRequest
+	(*UsersListResponse)(nil),               // 4: todo_proto.v1.UsersListResponse
+	(*UserRequest)(nil),                     // 5: todo_proto.v1.UserRequest
+	(*UserResponse)(nil),                    // 6: todo_proto.v1.UserResponse
+	(*QuestionnairesListRequest)(nil),       // 7: todo_proto.v1.QuestionnairesListRequest
+	(*Questionnaire)(nil),                   // 8: todo_proto.v1.Questionnaire
+	(*Answer)(nil),                          // 9: todo_proto.v1.Answer
+	(*QuestionnairesListResponse)(nil),      // 10: todo_proto.v1.QuestionnairesListResponse
+	(*Photo)(nil),                           // 11: todo_proto.v1.Photo
+	(*Video)(nil),                           // 12: todo_proto.v1.Video
+	(*QuestionnaireRequest)(nil),            // 13: todo_proto.v1.QuestionnaireRequest
+	(*QuestionnaireResponse)(nil),           // 14: todo_proto.v1.QuestionnaireResponse
+	(*UpdateQuestionnaireRequest)(nil),      // 15: todo_proto.v1.UpdateQuestionnaireRequest
+	(*MessageChat)(nil),                     // 16: todo_proto.v1.MessageChat
+	(*ChatRequest)(nil),                     // 17: todo_proto.v1.ChatRequest
+	(*ChatResponse)(nil),                    // 18: todo_proto.v1.ChatResponse
+	(*ChatsInfo)(nil),                       // 19: todo_proto.v1.ChatsInfo
+	(*ChatsListRequest)(nil),                // 20: todo_proto.v1.ChatsListRequest
+	(*ChatsListResponse)(nil),               // 21: todo_proto.v1.ChatsListResponse
+	(*StatisticsRequest)(nil),               // 22: todo_proto.v1.StatisticsRequest
+	(*StatisticsResponse)(nil),              // 23: todo_proto.v1.StatisticsResponse
+	(*PhotoRequest)(nil),                    // 24: todo_proto.v1.PhotoRequest
+	(*CreatePhotoRequest)(nil),              // 25: todo_proto.v1.CreatePhotoRequest
+	(*PhotoResponse)(nil),                   // 26: todo_proto.v1.PhotoResponse
+	(*SubmitQuestionnaireMediaRequest)(nil), // 27: todo_proto.v1.SubmitQuestionnaireMediaRequest
+	(*VideoRequest)(nil),                    // 28: todo_proto.v1.VideoRequest
+	(*CreateVideoRequest)(nil),              // 29: todo_proto.v1.CreateVideoRequest
+	(*VideoResponse)(nil),                   // 30: todo_proto.v1.VideoResponse
+	(*PromoCode)(nil),                       // 31: todo_proto.v1.PromoCode
+	(*PromoCodeRequest)(nil),                // 32: todo_proto.v1.PromoCodeRequest
+	(*PromoCodeResponse)(nil),               // 33: todo_proto.v1.PromoCodeResponse
+	(*PromoCodesListRequest)(nil),           // 34: todo_proto.v1.PromoCodesListRequest
+	(*PromoCodesListResponse)(nil),          // 35: todo_proto.v1.PromoCodesListResponse
+	(*CreatePromoCodeRequest)(nil),          // 36: todo_proto.v1.CreatePromoCodeRequest
+	(*UpdatePromoCodeRequest)(nil),          // 37: todo_proto.v1.UpdatePromoCodeRequest
+	(*Review)(nil),                          // 38: todo_proto.v1.Review
+	(*ReviewRequest)(nil),                   // 39: todo_proto.v1.ReviewRequest
+	(*ReviewResponse)(nil),                  // 40: todo_proto.v1.ReviewResponse
+	(*ReviewsListRequest)(nil),              // 41: todo_proto.v1.ReviewsListRequest
+	(*ReviewsListResponse)(nil),             // 42: todo_proto.v1.ReviewsListResponse
+	(*wrapperspb.StringValue)(nil),          // 43: google.protobuf.StringValue
+	(*wrapperspb.Int64Value)(nil),           // 44: google.protobuf.Int64Value
+	(*timestamppb.Timestamp)(nil),           // 45: google.protobuf.Timestamp
+	(*wrapperspb.BoolValue)(nil),            // 46: google.protobuf.BoolValue
+	(*wrapperspb.Int32Value)(nil),           // 47: google.protobuf.Int32Value
 }
 var file_pkg_proto_admins_proto_depIdxs = []int32{
-	27, // 0: todo_proto.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	1,  // 1: todo_proto.v1.UpdateUserRequest.user:type_name -> todo_proto.v1.User
-	28, // 2: todo_proto.v1.UsersListRequest.status:type_name -> google.protobuf.BoolValue
-	28, // 3: todo_proto.v1.UsersListRequest.accepted_offer:type_name -> google.protobuf.BoolValue
-	27, // 4: todo_proto.v1.UsersListRequest.date_from:type_name -> google.protobuf.Timestamp
-	27, // 5: todo_proto.v1.UsersListRequest.date_to:type_name -> google.protobuf.Timestamp
-	1,  // 6: todo_proto.v1.UsersListResponse.users:type_name -> todo_proto.v1.User
-	1,  // 7: todo_proto.v1.UserResponse.user:type_name -> todo_proto.v1.User
-	28, // 8: todo_proto.v1.QuestionnairesListRequest.payment:type_name -> google.protobuf.BoolValue
-	28, // 9: todo_proto.v1.QuestionnairesListRequest.status:type_name -> google.protobuf.BoolValue
-	27, // 10: todo_proto.v1.QuestionnairesListRequest.date_from:type_name -> google.protobuf.Timestamp
-	27, // 11: todo_proto.v1.QuestionnairesListRequest.date_to:type_name -> google.protobuf.Timestamp
-	9,  // 12: todo_proto.v1.Questionnaire.answers:type_name -> todo_proto.v1.Answer
-	27, // 13: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 14: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
-	8,  // 15: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	8,  // 16: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	11, // 17: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
-	1,  // 18: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
-	16, // 19: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
-	19, // 20: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
-	27, // 21: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
-	27, // 22: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
-	11, // 23: todo_proto.v1.CreatePhotoRequest.photo:type_name -> todo_proto.v1.Photo
-	11, // 24: todo_proto.v1.PhotoResponse.photo:type_name -> todo_proto.v1.Photo
-	5,  // 25: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
-	3,  // 26: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
-	2,  // 27: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
-	13, // 28: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
-	7,  // 29: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
-	15, // 30: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
-	24, // 31: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:input_type -> todo_proto.v1.PhotoRequest
-	25, // 32: todo_proto.v1.AdminHistoryService.CreatePhoto:input_type -> todo_proto.v1.CreatePhotoRequest
-	17, // 33: todo_proto.v1.AdminHistoryService.GetChat:input_type -> todo_proto.v1.ChatRequest
-	20, // 34: todo_proto.v1.AdminHistoryService.ChatsList:input_type -> todo_proto.v1.ChatsListRequest
-	22, // 35: todo_proto.v1.AdminHistoryService.GetStatistics:input_type -> todo_proto.v1.StatisticsRequest
-	6,  // 36: todo_proto.v1.AdminHistoryService.GetUser:output_type -> todo_proto.v1.UserResponse
-	4,  // 37: todo_proto.v1.AdminHistoryService.UsersList:output_type -> todo_proto.v1.UsersListResponse
-	0,  // 38: todo_proto.v1.AdminHistoryService.UpdateUser:output_type -> todo_proto.v1.Status
-	14, // 39: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
-	10, // 40: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
-	0,  // 41: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:output_type -> todo_proto.v1.Status
-	26, // 42: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:output_type -> todo_proto.v1.PhotoResponse
-	0,  // 43: todo_proto.v1.AdminHistoryService.CreatePhoto:output_type -> todo_proto.v1.Status
-	18, // 44: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
-	21, // 45: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
-	23, // 46: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
-	36, // [36:47] is the sub-list for method output_type
-	25, // [25:36] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	43, // 0: todo_proto.v1.User.language:type_name -> google.protobuf.StringValue
+	44, // 1: todo_proto.v1.User.ref_boss_id:type_name -> google.protobuf.Int64Value
+	45, // 2: todo_proto.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	43, // 3: todo_proto.v1.User.promocode:type_name -> google.protobuf.StringValue
+	44, // 4: todo_proto.v1.User.age:type_name -> google.protobuf.Int64Value
+	43, // 5: todo_proto.v1.User.gender:type_name -> google.protobuf.StringValue
+	46, // 6: todo_proto.v1.User.map_binding:type_name -> google.protobuf.BoolValue
+	1,  // 7: todo_proto.v1.UpdateUserRequest.user:type_name -> todo_proto.v1.User
+	46, // 8: todo_proto.v1.UsersListRequest.status:type_name -> google.protobuf.BoolValue
+	46, // 9: todo_proto.v1.UsersListRequest.accepted_offer:type_name -> google.protobuf.BoolValue
+	45, // 10: todo_proto.v1.UsersListRequest.date_from:type_name -> google.protobuf.Timestamp
+	45, // 11: todo_proto.v1.UsersListRequest.date_to:type_name -> google.protobuf.Timestamp
+	43, // 12: todo_proto.v1.UsersListRequest.promocode:type_name -> google.protobuf.StringValue
+	44, // 13: todo_proto.v1.UsersListRequest.age_from:type_name -> google.protobuf.Int64Value
+	44, // 14: todo_proto.v1.UsersListRequest.age_to:type_name -> google.protobuf.Int64Value
+	43, // 15: todo_proto.v1.UsersListRequest.gender:type_name -> google.protobuf.StringValue
+	46, // 16: todo_proto.v1.UsersListRequest.map_binding:type_name -> google.protobuf.BoolValue
+	1,  // 17: todo_proto.v1.UsersListResponse.users:type_name -> todo_proto.v1.User
+	1,  // 18: todo_proto.v1.UserResponse.user:type_name -> todo_proto.v1.User
+	46, // 19: todo_proto.v1.QuestionnairesListRequest.payment:type_name -> google.protobuf.BoolValue
+	46, // 20: todo_proto.v1.QuestionnairesListRequest.status:type_name -> google.protobuf.BoolValue
+	45, // 21: todo_proto.v1.QuestionnairesListRequest.date_from:type_name -> google.protobuf.Timestamp
+	45, // 22: todo_proto.v1.QuestionnairesListRequest.date_to:type_name -> google.protobuf.Timestamp
+	9,  // 23: todo_proto.v1.Questionnaire.answers:type_name -> todo_proto.v1.Answer
+	45, // 24: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 25: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
+	8,  // 26: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	8,  // 27: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	11, // 28: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
+	1,  // 29: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
+	16, // 30: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
+	19, // 31: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
+	45, // 32: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
+	45, // 33: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
+	11, // 34: todo_proto.v1.CreatePhotoRequest.photo:type_name -> todo_proto.v1.Photo
+	11, // 35: todo_proto.v1.PhotoResponse.photo:type_name -> todo_proto.v1.Photo
+	11, // 36: todo_proto.v1.SubmitQuestionnaireMediaRequest.final_photos:type_name -> todo_proto.v1.Photo
+	12, // 37: todo_proto.v1.SubmitQuestionnaireMediaRequest.generated_video:type_name -> todo_proto.v1.Video
+	12, // 38: todo_proto.v1.CreateVideoRequest.video:type_name -> todo_proto.v1.Video
+	12, // 39: todo_proto.v1.VideoResponse.video:type_name -> todo_proto.v1.Video
+	47, // 40: todo_proto.v1.PromoCode.number_uses:type_name -> google.protobuf.Int32Value
+	46, // 41: todo_proto.v1.PromoCode.status:type_name -> google.protobuf.BoolValue
+	31, // 42: todo_proto.v1.PromoCodeResponse.promo_code:type_name -> todo_proto.v1.PromoCode
+	46, // 43: todo_proto.v1.PromoCodesListRequest.status:type_name -> google.protobuf.BoolValue
+	31, // 44: todo_proto.v1.PromoCodesListResponse.promo_codes:type_name -> todo_proto.v1.PromoCode
+	31, // 45: todo_proto.v1.CreatePromoCodeRequest.promo_code:type_name -> todo_proto.v1.PromoCode
+	31, // 46: todo_proto.v1.UpdatePromoCodeRequest.promo_code:type_name -> todo_proto.v1.PromoCode
+	45, // 47: todo_proto.v1.Review.created_at:type_name -> google.protobuf.Timestamp
+	38, // 48: todo_proto.v1.ReviewResponse.review:type_name -> todo_proto.v1.Review
+	44, // 49: todo_proto.v1.ReviewsListRequest.user_id:type_name -> google.protobuf.Int64Value
+	45, // 50: todo_proto.v1.ReviewsListRequest.date_from:type_name -> google.protobuf.Timestamp
+	45, // 51: todo_proto.v1.ReviewsListRequest.date_to:type_name -> google.protobuf.Timestamp
+	38, // 52: todo_proto.v1.ReviewsListResponse.reviews:type_name -> todo_proto.v1.Review
+	5,  // 53: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
+	3,  // 54: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
+	2,  // 55: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
+	13, // 56: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
+	7,  // 57: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
+	15, // 58: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
+	27, // 59: todo_proto.v1.AdminHistoryService.SubmitQuestionnaireMedia:input_type -> todo_proto.v1.SubmitQuestionnaireMediaRequest
+	24, // 60: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:input_type -> todo_proto.v1.PhotoRequest
+	25, // 61: todo_proto.v1.AdminHistoryService.CreatePhoto:input_type -> todo_proto.v1.CreatePhotoRequest
+	28, // 62: todo_proto.v1.AdminHistoryService.GetVideosQuestionnaire:input_type -> todo_proto.v1.VideoRequest
+	29, // 63: todo_proto.v1.AdminHistoryService.CreateVideo:input_type -> todo_proto.v1.CreateVideoRequest
+	17, // 64: todo_proto.v1.AdminHistoryService.GetChat:input_type -> todo_proto.v1.ChatRequest
+	20, // 65: todo_proto.v1.AdminHistoryService.ChatsList:input_type -> todo_proto.v1.ChatsListRequest
+	22, // 66: todo_proto.v1.AdminHistoryService.GetStatistics:input_type -> todo_proto.v1.StatisticsRequest
+	32, // 67: todo_proto.v1.AdminHistoryService.GetPromoCode:input_type -> todo_proto.v1.PromoCodeRequest
+	34, // 68: todo_proto.v1.AdminHistoryService.PromoCodesList:input_type -> todo_proto.v1.PromoCodesListRequest
+	36, // 69: todo_proto.v1.AdminHistoryService.CreatePromoCode:input_type -> todo_proto.v1.CreatePromoCodeRequest
+	37, // 70: todo_proto.v1.AdminHistoryService.UpdatePromoCode:input_type -> todo_proto.v1.UpdatePromoCodeRequest
+	39, // 71: todo_proto.v1.AdminHistoryService.GetReview:input_type -> todo_proto.v1.ReviewRequest
+	41, // 72: todo_proto.v1.AdminHistoryService.ReviewsList:input_type -> todo_proto.v1.ReviewsListRequest
+	6,  // 73: todo_proto.v1.AdminHistoryService.GetUser:output_type -> todo_proto.v1.UserResponse
+	4,  // 74: todo_proto.v1.AdminHistoryService.UsersList:output_type -> todo_proto.v1.UsersListResponse
+	0,  // 75: todo_proto.v1.AdminHistoryService.UpdateUser:output_type -> todo_proto.v1.Status
+	14, // 76: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
+	10, // 77: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
+	0,  // 78: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:output_type -> todo_proto.v1.Status
+	0,  // 79: todo_proto.v1.AdminHistoryService.SubmitQuestionnaireMedia:output_type -> todo_proto.v1.Status
+	26, // 80: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:output_type -> todo_proto.v1.PhotoResponse
+	0,  // 81: todo_proto.v1.AdminHistoryService.CreatePhoto:output_type -> todo_proto.v1.Status
+	30, // 82: todo_proto.v1.AdminHistoryService.GetVideosQuestionnaire:output_type -> todo_proto.v1.VideoResponse
+	0,  // 83: todo_proto.v1.AdminHistoryService.CreateVideo:output_type -> todo_proto.v1.Status
+	18, // 84: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
+	21, // 85: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
+	23, // 86: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
+	33, // 87: todo_proto.v1.AdminHistoryService.GetPromoCode:output_type -> todo_proto.v1.PromoCodeResponse
+	35, // 88: todo_proto.v1.AdminHistoryService.PromoCodesList:output_type -> todo_proto.v1.PromoCodesListResponse
+	0,  // 89: todo_proto.v1.AdminHistoryService.CreatePromoCode:output_type -> todo_proto.v1.Status
+	0,  // 90: todo_proto.v1.AdminHistoryService.UpdatePromoCode:output_type -> todo_proto.v1.Status
+	40, // 91: todo_proto.v1.AdminHistoryService.GetReview:output_type -> todo_proto.v1.ReviewResponse
+	42, // 92: todo_proto.v1.AdminHistoryService.ReviewsList:output_type -> todo_proto.v1.ReviewsListResponse
+	73, // [73:93] is the sub-list for method output_type
+	53, // [53:73] is the sub-list for method input_type
+	53, // [53:53] is the sub-list for extension type_name
+	53, // [53:53] is the sub-list for extension extendee
+	0,  // [0:53] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_admins_proto_init() }
@@ -1734,7 +2873,7 @@ func file_pkg_proto_admins_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_proto_admins_proto_rawDesc), len(file_pkg_proto_admins_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   27,
+			NumMessages:   43,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

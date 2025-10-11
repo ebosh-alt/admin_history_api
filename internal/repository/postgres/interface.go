@@ -10,6 +10,9 @@ type InterfaceRepo interface {
 	InterfaceUserRepo
 	InterfaceQuestionnaireRepo
 	InterfacePhotoRepo
+	InterfaceVideoRepo
+	InterfacePromoCodeRepo
+	InterfaceReviewRepo
 }
 
 type InterfaceUserRepo interface {
@@ -31,6 +34,11 @@ type InterfacePhotoRepo interface {
 	UploadPhoto(ctx context.Context, photo *entities.Photo) error
 }
 
+type InterfaceVideoRepo interface {
+	GetVideosQuestionnaire(ctx context.Context, questionnaireID int64, typeVideo string) ([]entities.Video, error)
+	UploadVideo(ctx context.Context, video *entities.Video) error
+}
+
 type InterfaceChatRepo interface {
 	GetChat(ctx context.Context, req *protos.ChatRequest) (*protos.ChatResponse, error)
 	ChatsList(ctx context.Context, req *protos.ChatsListRequest) (*protos.ChatsListResponse, error)
@@ -38,4 +46,18 @@ type InterfaceChatRepo interface {
 
 type InterfaceStatisticRepo interface {
 	GetStatistics(ctx context.Context, req *protos.StatisticsRequest) (*protos.StatisticsResponse, error)
+}
+
+type InterfacePromoCodeRepo interface {
+	GetPromoCode(ctx context.Context, promoCode *entities.PromoCode) (*entities.PromoCode, error)
+	PromoCodesList(ctx context.Context, page int32, limit int32, f entities.PromoCodeFilter) ([]entities.PromoCode, error)
+	CreatePromoCode(ctx context.Context, promoCode *entities.PromoCode) error
+	CountPromoCodes(ctx context.Context, f entities.PromoCodeFilter) (int64, error)
+	UpdatePromoCode(ctx context.Context, promoCode *entities.PromoCode) error
+}
+
+type InterfaceReviewRepo interface {
+	GetReview(ctx context.Context, review *entities.Review) (*entities.Review, error)
+	ReviewsList(ctx context.Context, page int32, limit int32, f entities.ReviewFilter) ([]entities.Review, error)
+	CountReviews(ctx context.Context, f entities.ReviewFilter) (int64, error)
 }

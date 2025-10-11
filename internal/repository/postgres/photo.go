@@ -9,14 +9,14 @@ import (
 
 const (
 	listPhotosByQIDQuery = `
-		SELECT questionnaire_id, path, scene, type, created_at
+		SELECT questionnaire_id, path, scene, type
 		FROM photos
 		WHERE questionnaire_id = $1
 		ORDER BY created_at NULLS LAST, path
 	`
 
 	listPhotosByQIDTypeQuery = `
-		SELECT questionnaire_id, path, scene, type, created_at
+		SELECT questionnaire_id, path, scene, type
 		FROM photos
 		WHERE questionnaire_id = $1 AND type = $2
 		ORDER BY created_at NULLS LAST, path

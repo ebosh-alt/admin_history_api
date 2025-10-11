@@ -19,17 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AdminHistoryService_GetUser_FullMethodName                = "/todo_proto.v1.AdminHistoryService/GetUser"
-	AdminHistoryService_UsersList_FullMethodName              = "/todo_proto.v1.AdminHistoryService/UsersList"
-	AdminHistoryService_UpdateUser_FullMethodName             = "/todo_proto.v1.AdminHistoryService/UpdateUser"
-	AdminHistoryService_GetQuestionnaire_FullMethodName       = "/todo_proto.v1.AdminHistoryService/GetQuestionnaire"
-	AdminHistoryService_QuestionnairesList_FullMethodName     = "/todo_proto.v1.AdminHistoryService/QuestionnairesList"
-	AdminHistoryService_UpdateQuestionnaire_FullMethodName    = "/todo_proto.v1.AdminHistoryService/UpdateQuestionnaire"
-	AdminHistoryService_GetPhotosQuestionnaire_FullMethodName = "/todo_proto.v1.AdminHistoryService/GetPhotosQuestionnaire"
-	AdminHistoryService_CreatePhoto_FullMethodName            = "/todo_proto.v1.AdminHistoryService/CreatePhoto"
-	AdminHistoryService_GetChat_FullMethodName                = "/todo_proto.v1.AdminHistoryService/GetChat"
-	AdminHistoryService_ChatsList_FullMethodName              = "/todo_proto.v1.AdminHistoryService/ChatsList"
-	AdminHistoryService_GetStatistics_FullMethodName          = "/todo_proto.v1.AdminHistoryService/GetStatistics"
+	AdminHistoryService_GetUser_FullMethodName                  = "/todo_proto.v1.AdminHistoryService/GetUser"
+	AdminHistoryService_UsersList_FullMethodName                = "/todo_proto.v1.AdminHistoryService/UsersList"
+	AdminHistoryService_UpdateUser_FullMethodName               = "/todo_proto.v1.AdminHistoryService/UpdateUser"
+	AdminHistoryService_GetQuestionnaire_FullMethodName         = "/todo_proto.v1.AdminHistoryService/GetQuestionnaire"
+	AdminHistoryService_QuestionnairesList_FullMethodName       = "/todo_proto.v1.AdminHistoryService/QuestionnairesList"
+	AdminHistoryService_UpdateQuestionnaire_FullMethodName      = "/todo_proto.v1.AdminHistoryService/UpdateQuestionnaire"
+	AdminHistoryService_SubmitQuestionnaireMedia_FullMethodName = "/todo_proto.v1.AdminHistoryService/SubmitQuestionnaireMedia"
+	AdminHistoryService_GetPhotosQuestionnaire_FullMethodName   = "/todo_proto.v1.AdminHistoryService/GetPhotosQuestionnaire"
+	AdminHistoryService_CreatePhoto_FullMethodName              = "/todo_proto.v1.AdminHistoryService/CreatePhoto"
+	AdminHistoryService_GetVideosQuestionnaire_FullMethodName   = "/todo_proto.v1.AdminHistoryService/GetVideosQuestionnaire"
+	AdminHistoryService_CreateVideo_FullMethodName              = "/todo_proto.v1.AdminHistoryService/CreateVideo"
+	AdminHistoryService_GetChat_FullMethodName                  = "/todo_proto.v1.AdminHistoryService/GetChat"
+	AdminHistoryService_ChatsList_FullMethodName                = "/todo_proto.v1.AdminHistoryService/ChatsList"
+	AdminHistoryService_GetStatistics_FullMethodName            = "/todo_proto.v1.AdminHistoryService/GetStatistics"
+	AdminHistoryService_GetPromoCode_FullMethodName             = "/todo_proto.v1.AdminHistoryService/GetPromoCode"
+	AdminHistoryService_PromoCodesList_FullMethodName           = "/todo_proto.v1.AdminHistoryService/PromoCodesList"
+	AdminHistoryService_CreatePromoCode_FullMethodName          = "/todo_proto.v1.AdminHistoryService/CreatePromoCode"
+	AdminHistoryService_UpdatePromoCode_FullMethodName          = "/todo_proto.v1.AdminHistoryService/UpdatePromoCode"
+	AdminHistoryService_GetReview_FullMethodName                = "/todo_proto.v1.AdminHistoryService/GetReview"
+	AdminHistoryService_ReviewsList_FullMethodName              = "/todo_proto.v1.AdminHistoryService/ReviewsList"
 )
 
 // AdminHistoryServiceClient is the client API for AdminHistoryService service.
@@ -42,11 +51,20 @@ type AdminHistoryServiceClient interface {
 	GetQuestionnaire(ctx context.Context, in *QuestionnaireRequest, opts ...grpc.CallOption) (*QuestionnaireResponse, error)
 	QuestionnairesList(ctx context.Context, in *QuestionnairesListRequest, opts ...grpc.CallOption) (*QuestionnairesListResponse, error)
 	UpdateQuestionnaire(ctx context.Context, in *UpdateQuestionnaireRequest, opts ...grpc.CallOption) (*Status, error)
+	SubmitQuestionnaireMedia(ctx context.Context, in *SubmitQuestionnaireMediaRequest, opts ...grpc.CallOption) (*Status, error)
 	GetPhotosQuestionnaire(ctx context.Context, in *PhotoRequest, opts ...grpc.CallOption) (*PhotoResponse, error)
 	CreatePhoto(ctx context.Context, in *CreatePhotoRequest, opts ...grpc.CallOption) (*Status, error)
+	GetVideosQuestionnaire(ctx context.Context, in *VideoRequest, opts ...grpc.CallOption) (*VideoResponse, error)
+	CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*Status, error)
 	GetChat(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (*ChatResponse, error)
 	ChatsList(ctx context.Context, in *ChatsListRequest, opts ...grpc.CallOption) (*ChatsListResponse, error)
 	GetStatistics(ctx context.Context, in *StatisticsRequest, opts ...grpc.CallOption) (*StatisticsResponse, error)
+	GetPromoCode(ctx context.Context, in *PromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error)
+	PromoCodesList(ctx context.Context, in *PromoCodesListRequest, opts ...grpc.CallOption) (*PromoCodesListResponse, error)
+	CreatePromoCode(ctx context.Context, in *CreatePromoCodeRequest, opts ...grpc.CallOption) (*Status, error)
+	UpdatePromoCode(ctx context.Context, in *UpdatePromoCodeRequest, opts ...grpc.CallOption) (*Status, error)
+	GetReview(ctx context.Context, in *ReviewRequest, opts ...grpc.CallOption) (*ReviewResponse, error)
+	ReviewsList(ctx context.Context, in *ReviewsListRequest, opts ...grpc.CallOption) (*ReviewsListResponse, error)
 }
 
 type adminHistoryServiceClient struct {
@@ -117,6 +135,16 @@ func (c *adminHistoryServiceClient) UpdateQuestionnaire(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *adminHistoryServiceClient) SubmitQuestionnaireMedia(ctx context.Context, in *SubmitQuestionnaireMediaRequest, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, AdminHistoryService_SubmitQuestionnaireMedia_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *adminHistoryServiceClient) GetPhotosQuestionnaire(ctx context.Context, in *PhotoRequest, opts ...grpc.CallOption) (*PhotoResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PhotoResponse)
@@ -131,6 +159,26 @@ func (c *adminHistoryServiceClient) CreatePhoto(ctx context.Context, in *CreateP
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Status)
 	err := c.cc.Invoke(ctx, AdminHistoryService_CreatePhoto_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) GetVideosQuestionnaire(ctx context.Context, in *VideoRequest, opts ...grpc.CallOption) (*VideoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VideoResponse)
+	err := c.cc.Invoke(ctx, AdminHistoryService_GetVideosQuestionnaire_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, AdminHistoryService_CreateVideo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -167,6 +215,66 @@ func (c *adminHistoryServiceClient) GetStatistics(ctx context.Context, in *Stati
 	return out, nil
 }
 
+func (c *adminHistoryServiceClient) GetPromoCode(ctx context.Context, in *PromoCodeRequest, opts ...grpc.CallOption) (*PromoCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PromoCodeResponse)
+	err := c.cc.Invoke(ctx, AdminHistoryService_GetPromoCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) PromoCodesList(ctx context.Context, in *PromoCodesListRequest, opts ...grpc.CallOption) (*PromoCodesListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PromoCodesListResponse)
+	err := c.cc.Invoke(ctx, AdminHistoryService_PromoCodesList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) CreatePromoCode(ctx context.Context, in *CreatePromoCodeRequest, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, AdminHistoryService_CreatePromoCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) UpdatePromoCode(ctx context.Context, in *UpdatePromoCodeRequest, opts ...grpc.CallOption) (*Status, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Status)
+	err := c.cc.Invoke(ctx, AdminHistoryService_UpdatePromoCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) GetReview(ctx context.Context, in *ReviewRequest, opts ...grpc.CallOption) (*ReviewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReviewResponse)
+	err := c.cc.Invoke(ctx, AdminHistoryService_GetReview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminHistoryServiceClient) ReviewsList(ctx context.Context, in *ReviewsListRequest, opts ...grpc.CallOption) (*ReviewsListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReviewsListResponse)
+	err := c.cc.Invoke(ctx, AdminHistoryService_ReviewsList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminHistoryServiceServer is the server API for AdminHistoryService service.
 // All implementations must embed UnimplementedAdminHistoryServiceServer
 // for forward compatibility.
@@ -177,11 +285,20 @@ type AdminHistoryServiceServer interface {
 	GetQuestionnaire(context.Context, *QuestionnaireRequest) (*QuestionnaireResponse, error)
 	QuestionnairesList(context.Context, *QuestionnairesListRequest) (*QuestionnairesListResponse, error)
 	UpdateQuestionnaire(context.Context, *UpdateQuestionnaireRequest) (*Status, error)
+	SubmitQuestionnaireMedia(context.Context, *SubmitQuestionnaireMediaRequest) (*Status, error)
 	GetPhotosQuestionnaire(context.Context, *PhotoRequest) (*PhotoResponse, error)
 	CreatePhoto(context.Context, *CreatePhotoRequest) (*Status, error)
+	GetVideosQuestionnaire(context.Context, *VideoRequest) (*VideoResponse, error)
+	CreateVideo(context.Context, *CreateVideoRequest) (*Status, error)
 	GetChat(context.Context, *ChatRequest) (*ChatResponse, error)
 	ChatsList(context.Context, *ChatsListRequest) (*ChatsListResponse, error)
 	GetStatistics(context.Context, *StatisticsRequest) (*StatisticsResponse, error)
+	GetPromoCode(context.Context, *PromoCodeRequest) (*PromoCodeResponse, error)
+	PromoCodesList(context.Context, *PromoCodesListRequest) (*PromoCodesListResponse, error)
+	CreatePromoCode(context.Context, *CreatePromoCodeRequest) (*Status, error)
+	UpdatePromoCode(context.Context, *UpdatePromoCodeRequest) (*Status, error)
+	GetReview(context.Context, *ReviewRequest) (*ReviewResponse, error)
+	ReviewsList(context.Context, *ReviewsListRequest) (*ReviewsListResponse, error)
 	mustEmbedUnimplementedAdminHistoryServiceServer()
 }
 
@@ -210,11 +327,20 @@ func (UnimplementedAdminHistoryServiceServer) QuestionnairesList(context.Context
 func (UnimplementedAdminHistoryServiceServer) UpdateQuestionnaire(context.Context, *UpdateQuestionnaireRequest) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateQuestionnaire not implemented")
 }
+func (UnimplementedAdminHistoryServiceServer) SubmitQuestionnaireMedia(context.Context, *SubmitQuestionnaireMediaRequest) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitQuestionnaireMedia not implemented")
+}
 func (UnimplementedAdminHistoryServiceServer) GetPhotosQuestionnaire(context.Context, *PhotoRequest) (*PhotoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPhotosQuestionnaire not implemented")
 }
 func (UnimplementedAdminHistoryServiceServer) CreatePhoto(context.Context, *CreatePhotoRequest) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePhoto not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) GetVideosQuestionnaire(context.Context, *VideoRequest) (*VideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVideosQuestionnaire not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) CreateVideo(context.Context, *CreateVideoRequest) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVideo not implemented")
 }
 func (UnimplementedAdminHistoryServiceServer) GetChat(context.Context, *ChatRequest) (*ChatResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChat not implemented")
@@ -224,6 +350,24 @@ func (UnimplementedAdminHistoryServiceServer) ChatsList(context.Context, *ChatsL
 }
 func (UnimplementedAdminHistoryServiceServer) GetStatistics(context.Context, *StatisticsRequest) (*StatisticsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStatistics not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) GetPromoCode(context.Context, *PromoCodeRequest) (*PromoCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPromoCode not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) PromoCodesList(context.Context, *PromoCodesListRequest) (*PromoCodesListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PromoCodesList not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) CreatePromoCode(context.Context, *CreatePromoCodeRequest) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePromoCode not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) UpdatePromoCode(context.Context, *UpdatePromoCodeRequest) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePromoCode not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) GetReview(context.Context, *ReviewRequest) (*ReviewResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReview not implemented")
+}
+func (UnimplementedAdminHistoryServiceServer) ReviewsList(context.Context, *ReviewsListRequest) (*ReviewsListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReviewsList not implemented")
 }
 func (UnimplementedAdminHistoryServiceServer) mustEmbedUnimplementedAdminHistoryServiceServer() {}
 func (UnimplementedAdminHistoryServiceServer) testEmbeddedByValue()                             {}
@@ -354,6 +498,24 @@ func _AdminHistoryService_UpdateQuestionnaire_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminHistoryService_SubmitQuestionnaireMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubmitQuestionnaireMediaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).SubmitQuestionnaireMedia(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_SubmitQuestionnaireMedia_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).SubmitQuestionnaireMedia(ctx, req.(*SubmitQuestionnaireMediaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AdminHistoryService_GetPhotosQuestionnaire_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PhotoRequest)
 	if err := dec(in); err != nil {
@@ -386,6 +548,42 @@ func _AdminHistoryService_CreatePhoto_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AdminHistoryServiceServer).CreatePhoto(ctx, req.(*CreatePhotoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_GetVideosQuestionnaire_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).GetVideosQuestionnaire(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_GetVideosQuestionnaire_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).GetVideosQuestionnaire(ctx, req.(*VideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_CreateVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).CreateVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_CreateVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).CreateVideo(ctx, req.(*CreateVideoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -444,6 +642,114 @@ func _AdminHistoryService_GetStatistics_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminHistoryService_GetPromoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PromoCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).GetPromoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_GetPromoCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).GetPromoCode(ctx, req.(*PromoCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_PromoCodesList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PromoCodesListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).PromoCodesList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_PromoCodesList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).PromoCodesList(ctx, req.(*PromoCodesListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_CreatePromoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePromoCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).CreatePromoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_CreatePromoCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).CreatePromoCode(ctx, req.(*CreatePromoCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_UpdatePromoCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePromoCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).UpdatePromoCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_UpdatePromoCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).UpdatePromoCode(ctx, req.(*UpdatePromoCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_GetReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).GetReview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_GetReview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).GetReview(ctx, req.(*ReviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminHistoryService_ReviewsList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReviewsListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminHistoryServiceServer).ReviewsList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminHistoryService_ReviewsList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminHistoryServiceServer).ReviewsList(ctx, req.(*ReviewsListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminHistoryService_ServiceDesc is the grpc.ServiceDesc for AdminHistoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -476,12 +782,24 @@ var AdminHistoryService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AdminHistoryService_UpdateQuestionnaire_Handler,
 		},
 		{
+			MethodName: "SubmitQuestionnaireMedia",
+			Handler:    _AdminHistoryService_SubmitQuestionnaireMedia_Handler,
+		},
+		{
 			MethodName: "GetPhotosQuestionnaire",
 			Handler:    _AdminHistoryService_GetPhotosQuestionnaire_Handler,
 		},
 		{
 			MethodName: "CreatePhoto",
 			Handler:    _AdminHistoryService_CreatePhoto_Handler,
+		},
+		{
+			MethodName: "GetVideosQuestionnaire",
+			Handler:    _AdminHistoryService_GetVideosQuestionnaire_Handler,
+		},
+		{
+			MethodName: "CreateVideo",
+			Handler:    _AdminHistoryService_CreateVideo_Handler,
 		},
 		{
 			MethodName: "GetChat",
@@ -494,6 +812,30 @@ var AdminHistoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetStatistics",
 			Handler:    _AdminHistoryService_GetStatistics_Handler,
+		},
+		{
+			MethodName: "GetPromoCode",
+			Handler:    _AdminHistoryService_GetPromoCode_Handler,
+		},
+		{
+			MethodName: "PromoCodesList",
+			Handler:    _AdminHistoryService_PromoCodesList_Handler,
+		},
+		{
+			MethodName: "CreatePromoCode",
+			Handler:    _AdminHistoryService_CreatePromoCode_Handler,
+		},
+		{
+			MethodName: "UpdatePromoCode",
+			Handler:    _AdminHistoryService_UpdatePromoCode_Handler,
+		},
+		{
+			MethodName: "GetReview",
+			Handler:    _AdminHistoryService_GetReview_Handler,
+		},
+		{
+			MethodName: "ReviewsList",
+			Handler:    _AdminHistoryService_ReviewsList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

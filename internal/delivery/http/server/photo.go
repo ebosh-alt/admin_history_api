@@ -8,6 +8,16 @@ import (
 	"strconv"
 )
 
+// GetPhotosQuestionnaire godoc
+// @Summary      Получить фото анкеты
+// @Description  Возвращает список фотографий анкеты
+// @Tags         photos
+// @Produce      json
+// @Param        questionnaire_id  query     int     true   "ID анкеты"
+// @Param        type              query     string  false  "Тип фотографии (original по умолчанию)"
+// @Success      200               {object}  PhotoResponse
+// @Failure      404               {object}  ErrorResponse
+// @Router       /photos [get]
 func (s *Server) GetPhotosQuestionnaire(c *gin.Context) {
 	req := &protos.PhotoRequest{}
 	if v := c.Query("questionnaire_id"); v != "" {
@@ -32,6 +42,19 @@ func (s *Server) GetPhotosQuestionnaire(c *gin.Context) {
 	c.JSON(http.StatusOK, proto)
 }
 
+// UploadPhoto godoc
+// @Summary      Загрузить фото
+// @Description  Загружает фотографию для анкеты
+// @Tags         photos
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        questionnaire_id  formData  int     true   "ID анкеты"
+// @Param        scene             formData  string  false  "Сцена"
+// @Param        type              formData  string  false  "Тип фотографии"
+// @Param        file              formData  file    true   "Файл изображения"
+// @Success      200               {object}  Status
+// @Failure      400               {object}  ErrorResponse
+// @Router       /photos/upload [post]
 func (s *Server) UploadPhoto(c *gin.Context) {
 	if err := c.Request.ParseMultipartForm(20 << 20); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid multipart"})

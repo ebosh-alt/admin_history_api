@@ -3,17 +3,33 @@ package server
 import (
 	"admin_history/config"
 	"admin_history/internal/delivery/http/middleware"
+	"admin_history/internal/storage"
 	"admin_history/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
-func NewServer(logger *zap.Logger, cfg *config.Config, uc usecase.InterfaceUsecase, middleware *middleware.Middleware) (*Server, error) {
+func NewServer(
+	logger *zap.Logger,
+	cfg *config.Config,
+	uc usecase.InterfaceUsecase,
+	middleware *middleware.Middleware,
+	st *storage.FS,
+) (*Server, error) {
+	engine := gin.Default()
+	if st != nil {
+		if route := st.PublicRoute(); route != "" {
+			if dir := st.PublicDir(); dir != "" {
+				engine.Static(route, dir)
+			}
+		}
+	}
+
 	return &Server{
 		log:        logger,
 		cfg:        cfg,
-		serv:       gin.Default(),
+		serv:       engine,
 		Usecase:    uc,
 		middleware: middleware,
 	}, nil

@@ -13,12 +13,18 @@ message Status {
 message User{
   int64 id = 1;
   string username = 2;
-  bool status = 4;
-  bool accepted_offer = 5;
-  google.protobuf.Timestamp created_at = 6;
-  int64 total = 7;
-  int64 paid = 8;
-  int64 unpaid = 9;
+  google.protobuf.StringValue language = 3;
+  google.protobuf.Int64Value ref_boss_id = 4;
+  bool status = 5;
+  bool accepted_offer = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.StringValue promocode = 8;
+  google.protobuf.Int64Value age = 9;
+  google.protobuf.StringValue gender = 10;
+  google.protobuf.BoolValue map_binding = 11;
+  int64 total = 12;
+  int64 paid = 13;
+  int64 unpaid = 14;
 
 }
 
@@ -34,6 +40,11 @@ message UsersListRequest {
   google.protobuf.BoolValue accepted_offer = 4;
   google.protobuf.Timestamp date_from = 5;
   google.protobuf.Timestamp date_to = 6;
+  google.protobuf.StringValue promocode = 7;
+  google.protobuf.Int64Value age_from = 8;
+  google.protobuf.Int64Value age_to = 9;
+  google.protobuf.StringValue gender = 10;
+  google.protobuf.BoolValue map_binding = 11;
 }
 
 message UsersListResponse{
@@ -63,6 +74,7 @@ message Questionnaire{
   int64 id = 1;
   int64 user_id = 2;
   string history = 3;
+  string storyboard = 4;
   bool status = 5;
   bool payment = 6;
   repeated Answer answers = 7;
@@ -88,7 +100,8 @@ message Photo{
 
 message Video{
   string path = 1;
-  string questionnaire_id = 2;
+  int64 questionnaire_id = 2;
+  string type_video = 3;
 }
 
 message QuestionnaireRequest{
@@ -152,6 +165,92 @@ message PhotoResponse{
   repeated Photo photo = 1;
 }
 
+message SubmitQuestionnaireMediaRequest{
+  int64 questionnaire_id = 1;
+  int64 user_id = 2;
+  repeated string demo_photos = 3;
+  repeated Photo final_photos = 4;
+  string demo_video = 5;
+  Video generated_video = 6;
+}
+
+message VideoRequest{
+  int64 questionnaire_id = 1;
+  string type = 2;
+}
+
+message CreateVideoRequest{
+  Video video = 1;
+}
+
+message VideoResponse{
+  repeated Video video = 1;
+}
+
+message PromoCode{
+  int64 id = 1;
+  string value = 2;
+  google.protobuf.Int32Value number_uses = 3;
+  google.protobuf.BoolValue status = 4;
+  int64 percent = 5;
+  string description = 6;
+}
+
+message PromoCodeRequest{
+  int64 id = 1;
+}
+
+message PromoCodeResponse{
+  PromoCode promo_code = 1;
+}
+
+message PromoCodesListRequest{
+  int32 page = 1;
+  int32 limit = 2;
+  google.protobuf.BoolValue status = 3;
+}
+
+message PromoCodesListResponse{
+  repeated PromoCode promo_codes = 1;
+  int64 total = 2;
+}
+
+message CreatePromoCodeRequest{
+  PromoCode promo_code = 1;
+}
+
+message UpdatePromoCodeRequest{
+  PromoCode promo_code = 1;
+}
+
+message Review{
+  int64 id = 1;
+  int64 user_id = 2;
+  string description = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message ReviewRequest{
+  int64 id = 1;
+}
+
+message ReviewResponse{
+  Review review = 1;
+}
+
+message ReviewsListRequest{
+  int32 page = 1;
+  int32 limit = 2;
+  google.protobuf.Int64Value user_id = 3;
+  google.protobuf.Timestamp date_from = 4;
+  google.protobuf.Timestamp date_to = 5;
+}
+
+message ReviewsListResponse{
+  repeated Review reviews = 1;
+  int64 total = 2;
+}
+
 service AdminHistoryService {
   rpc GetUser(UserRequest) returns (UserResponse);
   rpc UsersList(UsersListRequest) returns (UsersListResponse);
@@ -160,12 +259,23 @@ service AdminHistoryService {
   rpc GetQuestionnaire(QuestionnaireRequest) returns (QuestionnaireResponse);
   rpc QuestionnairesList(QuestionnairesListRequest) returns (QuestionnairesListResponse);
   rpc UpdateQuestionnaire(UpdateQuestionnaireRequest) returns (Status);
+  rpc SubmitQuestionnaireMedia(SubmitQuestionnaireMediaRequest) returns (Status);
 
   rpc GetPhotosQuestionnaire(PhotoRequest) returns (PhotoResponse);
   rpc CreatePhoto(CreatePhotoRequest) returns (Status);
+  rpc GetVideosQuestionnaire(VideoRequest) returns (VideoResponse);
+  rpc CreateVideo(CreateVideoRequest) returns (Status);
 
   rpc GetChat(ChatRequest) returns (ChatResponse);
   rpc ChatsList(ChatsListRequest) returns (ChatsListResponse);
 
   rpc GetStatistics(StatisticsRequest) returns (StatisticsResponse);
+
+  rpc GetPromoCode(PromoCodeRequest) returns (PromoCodeResponse);
+  rpc PromoCodesList(PromoCodesListRequest) returns (PromoCodesListResponse);
+  rpc CreatePromoCode(CreatePromoCodeRequest) returns (Status);
+  rpc UpdatePromoCode(UpdatePromoCodeRequest) returns (Status);
+
+  rpc GetReview(ReviewRequest) returns (ReviewResponse);
+  rpc ReviewsList(ReviewsListRequest) returns (ReviewsListResponse);
 }

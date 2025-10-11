@@ -1,0 +1,706 @@
+definitions:
+  admin_history_pkg_proto_gen_go.Answer:
+    properties:
+      answer:
+        type: string
+      question:
+        type: string
+    type: object
+  admin_history_pkg_proto_gen_go.Photo:
+    properties:
+      path:
+        type: string
+      questionnaire_id:
+        type: integer
+      scene:
+        type: string
+      type_photo:
+        type: string
+    type: object
+  admin_history_pkg_proto_gen_go.PromoCode:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      number_uses:
+        $ref: '#/definitions/wrapperspb.Int32Value'
+      percent:
+        type: integer
+      status:
+        $ref: '#/definitions/wrapperspb.BoolValue'
+      value:
+        type: string
+    type: object
+  admin_history_pkg_proto_gen_go.Questionnaire:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Answer'
+        type: array
+      created_at:
+        $ref: '#/definitions/timestamppb.Timestamp'
+      history:
+        type: string
+      id:
+        type: integer
+      payment:
+        type: boolean
+      status:
+        type: boolean
+      user_id:
+        type: integer
+    type: object
+  admin_history_pkg_proto_gen_go.Review:
+    properties:
+      created_at:
+        $ref: '#/definitions/timestamppb.Timestamp'
+      description:
+        type: string
+      id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  admin_history_pkg_proto_gen_go.User:
+    properties:
+      accepted_offer:
+        type: boolean
+      age:
+        $ref: '#/definitions/wrapperspb.Int64Value'
+      created_at:
+        $ref: '#/definitions/timestamppb.Timestamp'
+      gender:
+        $ref: '#/definitions/wrapperspb.StringValue'
+      id:
+        type: integer
+      language:
+        $ref: '#/definitions/wrapperspb.StringValue'
+      map_binding:
+        $ref: '#/definitions/wrapperspb.BoolValue'
+      paid:
+        type: integer
+      promocode:
+        $ref: '#/definitions/wrapperspb.StringValue'
+      ref_boss_id:
+        $ref: '#/definitions/wrapperspb.Int64Value'
+      status:
+        type: boolean
+      total:
+        type: integer
+      unpaid:
+        type: integer
+      username:
+        type: string
+    type: object
+  server.CreatePromoCodeRequest:
+    properties:
+      promo_code:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+    type: object
+  server.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  server.PhotoResponse:
+    properties:
+      photo:
+        items:
+          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Photo'
+        type: array
+    type: object
+  server.PromoCodeResponse:
+    properties:
+      promo_code:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+    type: object
+  server.PromoCodesListResponse:
+    properties:
+      promo_codes:
+        items:
+          $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+        type: array
+      total:
+        type: integer
+    type: object
+  server.QuestionnaireResponse:
+    properties:
+      questionnaire:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.Questionnaire'
+    type: object
+  server.QuestionnairesListResponse:
+    properties:
+      questionnaires:
+        items:
+          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Questionnaire'
+        type: array
+      total:
+        type: integer
+    type: object
+  server.ReviewResponse:
+    properties:
+      review:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.Review'
+    type: object
+  server.ReviewsListResponse:
+    properties:
+      reviews:
+        items:
+          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Review'
+        type: array
+      total:
+        type: integer
+    type: object
+  server.Status:
+    properties:
+      message:
+        type: string
+      ok:
+        type: boolean
+    type: object
+  server.UpdatePromoCodeRequest:
+    properties:
+      promo_code:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+    type: object
+  server.UpdateQuestionnaireRequest:
+    properties:
+      questionnaire:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.Questionnaire'
+    type: object
+  server.UpdateUserRequest:
+    properties:
+      user:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.User'
+    type: object
+  server.UserResponse:
+    properties:
+      user:
+        $ref: '#/definitions/admin_history_pkg_proto_gen_go.User'
+    type: object
+  server.UsersListResponse:
+    properties:
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/admin_history_pkg_proto_gen_go.User'
+        type: array
+    type: object
+  timestamppb.Timestamp:
+    properties:
+      nanos:
+        description: |-
+          Non-negative fractions of a second at nanosecond resolution. Negative
+          second values with fractions must still have non-negative nanos values
+          that count forward in time. Must be from 0 to 999,999,999
+          inclusive.
+        type: integer
+      seconds:
+        description: |-
+          Represents seconds of UTC time since Unix epoch
+          1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
+          9999-12-31T23:59:59Z inclusive.
+        type: integer
+    type: object
+  wrapperspb.BoolValue:
+    properties:
+      value:
+        description: The bool value.
+        type: boolean
+    type: object
+  wrapperspb.Int32Value:
+    properties:
+      value:
+        description: The int32 value.
+        type: integer
+    type: object
+  wrapperspb.Int64Value:
+    properties:
+      value:
+        description: The int64 value.
+        type: integer
+    type: object
+  wrapperspb.StringValue:
+    properties:
+      value:
+        description: The string value.
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /photos:
+    get:
+      description: Возвращает список фотографий анкеты
+      parameters:
+      - description: ID анкеты
+        in: query
+        name: questionnaire_id
+        required: true
+        type: integer
+      - description: Тип фотографии (original по умолчанию)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.PhotoResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Получить фото анкеты
+      tags:
+      - photos
+  /photos/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает фотографию для анкеты
+      parameters:
+      - description: ID анкеты
+        in: formData
+        name: questionnaire_id
+        required: true
+        type: integer
+      - description: Сцена
+        in: formData
+        name: scene
+        type: string
+      - description: Тип фотографии
+        in: formData
+        name: type
+        type: string
+      - description: Файл изображения
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Загрузить фото
+      tags:
+      - photos
+  /promo-codes:
+    get:
+      description: Возвращает список промокодов с фильтрами и пагинацией
+      parameters:
+      - description: Номер страницы
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: Размер страницы
+        in: query
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.PromoCodesListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Список промокодов
+      tags:
+      - promo-codes
+    post:
+      consumes:
+      - application/json
+      description: Создает новый промокод
+      parameters:
+      - description: Данные промокода
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.CreatePromoCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/server.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Создать промокод
+      tags:
+      - promo-codes
+  /promo-codes/{id}:
+    get:
+      description: Возвращает информацию о промокоде по идентификатору
+      parameters:
+      - description: Promo Code ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.PromoCodeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Получить промокод
+      tags:
+      - promo-codes
+  /promo-codes/update:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет существующий промокод
+      parameters:
+      - description: Данные промокода
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.UpdatePromoCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Обновить промокод
+      tags:
+      - promo-codes
+  /questionnaires:
+    get:
+      description: Возвращает список анкет с фильтрами и пагинацией
+      parameters:
+      - description: Номер страницы
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: Размер страницы
+        in: query
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Фильтр по оплате
+        in: query
+        name: payment
+        type: boolean
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: boolean
+      - description: Дата с (unix или YYYY-MM-DD)
+        in: query
+        name: date_from
+        type: string
+      - description: Дата по (unix или YYYY-MM-DD)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.QuestionnairesListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Список анкет
+      tags:
+      - questionnaires
+  /questionnaires/{id}:
+    get:
+      description: Возвращает анкету по идентификатору
+      parameters:
+      - description: Questionnaire ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.QuestionnaireResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Получить анкету
+      tags:
+      - questionnaires
+  /questionnaires/update:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет данные анкеты
+      parameters:
+      - description: Данные анкеты
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.UpdateQuestionnaireRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Обновить анкету
+      tags:
+      - questionnaires
+  /reviews:
+    get:
+      description: Возвращает список отзывов с фильтрами и пагинацией
+      parameters:
+      - description: Номер страницы
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: Размер страницы
+        in: query
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Фильтр по ID пользователя
+        in: query
+        name: user_id
+        type: integer
+      - description: Дата с (unix или YYYY-MM-DD)
+        in: query
+        name: date_from
+        type: string
+      - description: Дата по (unix или YYYY-MM-DD)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.ReviewsListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Список отзывов
+      tags:
+      - reviews
+  /reviews/{id}:
+    get:
+      description: Возвращает отзыв по идентификатору
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.ReviewResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Получить отзыв
+      tags:
+      - reviews
+  /users:
+    get:
+      description: Возвращает список пользователей с фильтрами и пагинацией
+      parameters:
+      - description: Номер страницы
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: Размер страницы
+        in: query
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: boolean
+      - description: Фильтр по принятию оферты
+        in: query
+        name: accepted_offer
+        type: boolean
+      - description: Фильтр по промокоду
+        in: query
+        name: promocode
+        type: string
+      - description: Возраст от
+        in: query
+        name: age_from
+        type: integer
+      - description: Возраст до
+        in: query
+        name: age_to
+        type: integer
+      - description: Пол
+        in: query
+        name: gender
+        type: string
+      - description: Наличие привязки карты
+        in: query
+        name: map_binding
+        type: boolean
+      - description: Дата с (unix или YYYY-MM-DD)
+        in: query
+        name: date_from
+        type: string
+      - description: Дата по (unix или YYYY-MM-DD)
+        in: query
+        name: date_to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.UsersListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Список пользователей
+      tags:
+      - users
+  /users/{id}:
+    get:
+      description: Возвращает информацию о пользователе по идентификатору
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.UserResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Получить пользователя
+      tags:
+      - users
+  /users/update:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет данные пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Обновить пользователя
+      tags:
+      - users
+swagger: "2.0"

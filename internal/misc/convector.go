@@ -9,11 +9,12 @@ import (
 
 func BuildEntityForUpdate(p *protos.Questionnaire) (*entities.Questionnaire, error) {
 	q := &entities.Questionnaire{
-		ID:      p.Id,
-		UserID:  p.UserId,
-		History: p.History,
-		Status:  p.Status,
-		Payment: p.Payment,
+		ID:         p.Id,
+		UserID:     p.UserId,
+		History:    p.History,
+		Storyboard: p.Storyboard,
+		Status:     p.Status,
+		Payment:    p.Payment,
 	}
 
 	if p.Answers != nil {

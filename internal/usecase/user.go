@@ -6,8 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func (u *Usecase) GetUser(ctx context.Context, req *protos.UserRequest) (*protos.UserResponse, error) {
@@ -20,14 +22,35 @@ func (u *Usecase) GetUser(ctx context.Context, req *protos.UserRequest) (*protos
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
+	userProto := &protos.User{
+		Id:            user.ID,
+		Username:      user.Username,
+		Status:        user.Status,
+		AcceptedOffer: user.AcceptedOffer,
+		CreatedAt:     timestamppb.New(user.CreatedAt),
+	}
+
+	if user.Language != nil {
+		userProto.Language = &wrapperspb.StringValue{Value: *user.Language}
+	}
+	if user.RefBossID != nil {
+		userProto.RefBossId = &wrapperspb.Int64Value{Value: *user.RefBossID}
+	}
+	if user.Promocode != nil {
+		userProto.Promocode = &wrapperspb.StringValue{Value: *user.Promocode}
+	}
+	if user.Age != nil {
+		userProto.Age = &wrapperspb.Int64Value{Value: *user.Age}
+	}
+	if user.Gender != nil {
+		userProto.Gender = &wrapperspb.StringValue{Value: *user.Gender}
+	}
+	if user.MapBinding != nil {
+		userProto.MapBinding = &wrapperspb.BoolValue{Value: *user.MapBinding}
+	}
+
 	return &protos.UserResponse{
-		User: &protos.User{
-			Id:            user.ID,
-			Username:      user.Username,
-			Status:        user.Status,
-			AcceptedOffer: user.AcceptedOffer,
-			CreatedAt:     timestamppb.New(user.CreatedAt),
-		},
+		User: userProto,
 	}, err
 
 }
@@ -58,6 +81,22 @@ func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (
 		t := req.DateTo.AsTime()
 		f.DateTo = &t
 	}
+	if req.Promocode != nil {
+		f.Promocode = &req.Promocode.Value
+	}
+	if req.AgeFrom != nil {
+		f.AgeFrom = &req.AgeFrom.Value
+	}
+	if req.AgeTo != nil {
+		f.AgeTo = &req.AgeTo.Value
+	}
+	if req.Gender != nil {
+		f.Gender = &req.Gender.Value
+	}
+	if req.MapBinding != nil {
+		v := req.MapBinding.Value
+		f.MapBinding = &v
+	}
 
 	items, err := u.Postgres.UsersList(ctx, page, limit, f)
 	if err != nil {
@@ -68,16 +107,38 @@ func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (
 	rows := make([]*protos.User, 0, len(items))
 	for i := range items {
 		it := items[i]
-		rows = append(rows, &protos.User{
+		userProto := &protos.User{
 			Id:            it.ID,
 			Username:      it.Username,
 			Status:        it.Status,
 			AcceptedOffer: it.AcceptedOffer,
-			CreatedAt:     timestamppb.New(it.CreatedAt),
-			Total:         it.QTotal,
-			Paid:          it.QPaid,
-			Unpaid:        it.QUnpaid,
-		})
+
+			CreatedAt: timestamppb.New(it.CreatedAt),
+			Total:     it.QTotal,
+			Paid:      it.QPaid,
+			Unpaid:    it.QUnpaid,
+		}
+
+		if it.Language != nil {
+			userProto.Language = &wrapperspb.StringValue{Value: *it.Language}
+		}
+		if it.RefBossID != nil {
+			userProto.RefBossId = &wrapperspb.Int64Value{Value: *it.RefBossID}
+		}
+		if it.Promocode != nil {
+			userProto.Promocode = &wrapperspb.StringValue{Value: *it.Promocode}
+		}
+		if it.Age != nil {
+			userProto.Age = &wrapperspb.Int64Value{Value: *it.Age}
+		}
+		if it.Gender != nil {
+			userProto.Gender = &wrapperspb.StringValue{Value: *it.Gender}
+		}
+		if it.MapBinding != nil {
+			userProto.MapBinding = &wrapperspb.BoolValue{Value: *it.MapBinding}
+		}
+
+		rows = append(rows, userProto)
 	}
 
 	return &protos.UsersListResponse{

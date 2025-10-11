@@ -1,15 +1,15 @@
 package usecase
 
 import (
+	"admin_history/internal/entities"
 	"admin_history/internal/misc"
+	protos "admin_history/pkg/proto/gen/go"
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
-
-	"admin_history/internal/entities"
-	protos "admin_history/pkg/proto/gen/go"
 )
 
 func (u *Usecase) GetQuestionnairesList(ctx context.Context, req *protos.QuestionnairesListRequest) (*protos.QuestionnairesListResponse, error) {
@@ -88,4 +88,66 @@ func (u *Usecase) UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQue
 	}
 
 	return &protos.Status{Ok: true, Message: "updated"}, nil
+}
+
+func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest) (*protos.Status, error) {
+	if req == nil {
+		return nil, fmt.Errorf("invalid request")
+	}
+	if req.QuestionnaireId <= 0 {
+		return nil, fmt.Errorf("invalid questionnaire_id")
+	}
+	if req.UserId <= 0 {
+		return nil, fmt.Errorf("invalid user_id")
+	}
+
+	qID := req.QuestionnaireId
+
+	for _, p := range req.FinalPhotos {
+		if p == nil {
+			continue
+		}
+		path := strings.TrimSpace(p.GetPath())
+		if path == "" {
+			continue
+		}
+
+		scene := strings.TrimSpace(p.GetScene())
+		if scene == "" {
+			scene = "result"
+		}
+		typePhoto := strings.TrimSpace(p.GetTypePhoto())
+		if typePhoto == "" {
+			typePhoto = "result"
+		}
+		ent := entities.Photo{
+			QuestionnaireID: qID,
+			Path:            path,
+			Scene:           scene,
+			TypePhoto:       typePhoto,
+		}
+		if err := u.Postgres.UploadPhoto(ctx, &ent); err != nil {
+			return nil, err
+		}
+	}
+
+	if video := req.GetGeneratedVideo(); video != nil {
+		path := strings.TrimSpace(video.GetPath())
+		if path != "" {
+			typeVideo := strings.TrimSpace(video.GetTypeVideo())
+			if typeVideo == "" {
+				typeVideo = "generated"
+			}
+			ent := entities.Video{
+				QuestionnaireID: qID,
+				Path:            path,
+				TypeVideo:       typeVideo,
+			}
+			if err := u.Postgres.UploadVideo(ctx, &ent); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &protos.Status{Ok: true, Message: "saved"}, nil
 }
