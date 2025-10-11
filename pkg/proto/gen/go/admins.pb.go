@@ -539,6 +539,7 @@ type QuestionnairesListRequest struct {
 	Status        *wrapperspb.BoolValue  `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	DateFrom      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=date_from,json=dateFrom,proto3" json:"date_from,omitempty"`
 	DateTo        *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=date_to,json=dateTo,proto3" json:"date_to,omitempty"`
+	UserId        *wrapperspb.Int64Value `protobuf:"bytes,7,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -611,6 +612,13 @@ func (x *QuestionnairesListRequest) GetDateFrom() *timestamppb.Timestamp {
 func (x *QuestionnairesListRequest) GetDateTo() *timestamppb.Timestamp {
 	if x != nil {
 		return x.DateTo
+	}
+	return nil
+}
+
+func (x *QuestionnairesListRequest) GetUserId() *wrapperspb.Int64Value {
+	if x != nil {
+		return x.UserId
 	}
 	return nil
 }
@@ -2539,14 +2547,15 @@ const file_pkg_proto_admins_proto_rawDesc = "" +
 	"\vUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"7\n" +
 	"\fUserResponse\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"\x9d\x02\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.todo_proto.v1.UserR\x04user\"\xd3\x02\n" +
 	"\x19QuestionnairesListRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x124\n" +
 	"\apayment\x18\x03 \x01(\v2\x1a.google.protobuf.BoolValueR\apayment\x122\n" +
 	"\x06status\x18\x04 \x01(\v2\x1a.google.protobuf.BoolValueR\x06status\x127\n" +
 	"\tdate_from\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bdateFrom\x123\n" +
-	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\"\x90\x02\n" +
+	"\adate_to\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06dateTo\x124\n" +
+	"\auser_id\x18\a \x01(\v2\x1b.google.protobuf.Int64ValueR\x06userId\"\x90\x02\n" +
 	"\rQuestionnaire\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x18\n" +
@@ -2784,81 +2793,82 @@ var file_pkg_proto_admins_proto_depIdxs = []int32{
 	46, // 20: todo_proto.v1.QuestionnairesListRequest.status:type_name -> google.protobuf.BoolValue
 	45, // 21: todo_proto.v1.QuestionnairesListRequest.date_from:type_name -> google.protobuf.Timestamp
 	45, // 22: todo_proto.v1.QuestionnairesListRequest.date_to:type_name -> google.protobuf.Timestamp
-	9,  // 23: todo_proto.v1.Questionnaire.answers:type_name -> todo_proto.v1.Answer
-	45, // 24: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 25: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
-	8,  // 26: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	8,  // 27: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
-	11, // 28: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
-	1,  // 29: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
-	16, // 30: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
-	19, // 31: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
-	45, // 32: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
-	45, // 33: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
-	11, // 34: todo_proto.v1.CreatePhotoRequest.photo:type_name -> todo_proto.v1.Photo
-	11, // 35: todo_proto.v1.PhotoResponse.photo:type_name -> todo_proto.v1.Photo
-	11, // 36: todo_proto.v1.SubmitQuestionnaireMediaRequest.final_photos:type_name -> todo_proto.v1.Photo
-	12, // 37: todo_proto.v1.SubmitQuestionnaireMediaRequest.generated_video:type_name -> todo_proto.v1.Video
-	12, // 38: todo_proto.v1.CreateVideoRequest.video:type_name -> todo_proto.v1.Video
-	12, // 39: todo_proto.v1.VideoResponse.video:type_name -> todo_proto.v1.Video
-	47, // 40: todo_proto.v1.PromoCode.number_uses:type_name -> google.protobuf.Int32Value
-	46, // 41: todo_proto.v1.PromoCode.status:type_name -> google.protobuf.BoolValue
-	31, // 42: todo_proto.v1.PromoCodeResponse.promo_code:type_name -> todo_proto.v1.PromoCode
-	46, // 43: todo_proto.v1.PromoCodesListRequest.status:type_name -> google.protobuf.BoolValue
-	31, // 44: todo_proto.v1.PromoCodesListResponse.promo_codes:type_name -> todo_proto.v1.PromoCode
-	31, // 45: todo_proto.v1.CreatePromoCodeRequest.promo_code:type_name -> todo_proto.v1.PromoCode
-	31, // 46: todo_proto.v1.UpdatePromoCodeRequest.promo_code:type_name -> todo_proto.v1.PromoCode
-	45, // 47: todo_proto.v1.Review.created_at:type_name -> google.protobuf.Timestamp
-	38, // 48: todo_proto.v1.ReviewResponse.review:type_name -> todo_proto.v1.Review
-	44, // 49: todo_proto.v1.ReviewsListRequest.user_id:type_name -> google.protobuf.Int64Value
-	45, // 50: todo_proto.v1.ReviewsListRequest.date_from:type_name -> google.protobuf.Timestamp
-	45, // 51: todo_proto.v1.ReviewsListRequest.date_to:type_name -> google.protobuf.Timestamp
-	38, // 52: todo_proto.v1.ReviewsListResponse.reviews:type_name -> todo_proto.v1.Review
-	5,  // 53: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
-	3,  // 54: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
-	2,  // 55: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
-	13, // 56: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
-	7,  // 57: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
-	15, // 58: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
-	27, // 59: todo_proto.v1.AdminHistoryService.SubmitQuestionnaireMedia:input_type -> todo_proto.v1.SubmitQuestionnaireMediaRequest
-	24, // 60: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:input_type -> todo_proto.v1.PhotoRequest
-	25, // 61: todo_proto.v1.AdminHistoryService.CreatePhoto:input_type -> todo_proto.v1.CreatePhotoRequest
-	28, // 62: todo_proto.v1.AdminHistoryService.GetVideosQuestionnaire:input_type -> todo_proto.v1.VideoRequest
-	29, // 63: todo_proto.v1.AdminHistoryService.CreateVideo:input_type -> todo_proto.v1.CreateVideoRequest
-	17, // 64: todo_proto.v1.AdminHistoryService.GetChat:input_type -> todo_proto.v1.ChatRequest
-	20, // 65: todo_proto.v1.AdminHistoryService.ChatsList:input_type -> todo_proto.v1.ChatsListRequest
-	22, // 66: todo_proto.v1.AdminHistoryService.GetStatistics:input_type -> todo_proto.v1.StatisticsRequest
-	32, // 67: todo_proto.v1.AdminHistoryService.GetPromoCode:input_type -> todo_proto.v1.PromoCodeRequest
-	34, // 68: todo_proto.v1.AdminHistoryService.PromoCodesList:input_type -> todo_proto.v1.PromoCodesListRequest
-	36, // 69: todo_proto.v1.AdminHistoryService.CreatePromoCode:input_type -> todo_proto.v1.CreatePromoCodeRequest
-	37, // 70: todo_proto.v1.AdminHistoryService.UpdatePromoCode:input_type -> todo_proto.v1.UpdatePromoCodeRequest
-	39, // 71: todo_proto.v1.AdminHistoryService.GetReview:input_type -> todo_proto.v1.ReviewRequest
-	41, // 72: todo_proto.v1.AdminHistoryService.ReviewsList:input_type -> todo_proto.v1.ReviewsListRequest
-	6,  // 73: todo_proto.v1.AdminHistoryService.GetUser:output_type -> todo_proto.v1.UserResponse
-	4,  // 74: todo_proto.v1.AdminHistoryService.UsersList:output_type -> todo_proto.v1.UsersListResponse
-	0,  // 75: todo_proto.v1.AdminHistoryService.UpdateUser:output_type -> todo_proto.v1.Status
-	14, // 76: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
-	10, // 77: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
-	0,  // 78: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:output_type -> todo_proto.v1.Status
-	0,  // 79: todo_proto.v1.AdminHistoryService.SubmitQuestionnaireMedia:output_type -> todo_proto.v1.Status
-	26, // 80: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:output_type -> todo_proto.v1.PhotoResponse
-	0,  // 81: todo_proto.v1.AdminHistoryService.CreatePhoto:output_type -> todo_proto.v1.Status
-	30, // 82: todo_proto.v1.AdminHistoryService.GetVideosQuestionnaire:output_type -> todo_proto.v1.VideoResponse
-	0,  // 83: todo_proto.v1.AdminHistoryService.CreateVideo:output_type -> todo_proto.v1.Status
-	18, // 84: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
-	21, // 85: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
-	23, // 86: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
-	33, // 87: todo_proto.v1.AdminHistoryService.GetPromoCode:output_type -> todo_proto.v1.PromoCodeResponse
-	35, // 88: todo_proto.v1.AdminHistoryService.PromoCodesList:output_type -> todo_proto.v1.PromoCodesListResponse
-	0,  // 89: todo_proto.v1.AdminHistoryService.CreatePromoCode:output_type -> todo_proto.v1.Status
-	0,  // 90: todo_proto.v1.AdminHistoryService.UpdatePromoCode:output_type -> todo_proto.v1.Status
-	40, // 91: todo_proto.v1.AdminHistoryService.GetReview:output_type -> todo_proto.v1.ReviewResponse
-	42, // 92: todo_proto.v1.AdminHistoryService.ReviewsList:output_type -> todo_proto.v1.ReviewsListResponse
-	73, // [73:93] is the sub-list for method output_type
-	53, // [53:73] is the sub-list for method input_type
-	53, // [53:53] is the sub-list for extension type_name
-	53, // [53:53] is the sub-list for extension extendee
-	0,  // [0:53] is the sub-list for field type_name
+	44, // 23: todo_proto.v1.QuestionnairesListRequest.user_id:type_name -> google.protobuf.Int64Value
+	9,  // 24: todo_proto.v1.Questionnaire.answers:type_name -> todo_proto.v1.Answer
+	45, // 25: todo_proto.v1.Questionnaire.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 26: todo_proto.v1.QuestionnairesListResponse.questionnaires:type_name -> todo_proto.v1.Questionnaire
+	8,  // 27: todo_proto.v1.QuestionnaireResponse.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	8,  // 28: todo_proto.v1.UpdateQuestionnaireRequest.questionnaire:type_name -> todo_proto.v1.Questionnaire
+	11, // 29: todo_proto.v1.MessageChat.photo:type_name -> todo_proto.v1.Photo
+	1,  // 30: todo_proto.v1.ChatResponse.user:type_name -> todo_proto.v1.User
+	16, // 31: todo_proto.v1.ChatResponse.messages:type_name -> todo_proto.v1.MessageChat
+	19, // 32: todo_proto.v1.ChatsListResponse.chats:type_name -> todo_proto.v1.ChatsInfo
+	45, // 33: todo_proto.v1.StatisticsRequest.date_start:type_name -> google.protobuf.Timestamp
+	45, // 34: todo_proto.v1.StatisticsRequest.date_end:type_name -> google.protobuf.Timestamp
+	11, // 35: todo_proto.v1.CreatePhotoRequest.photo:type_name -> todo_proto.v1.Photo
+	11, // 36: todo_proto.v1.PhotoResponse.photo:type_name -> todo_proto.v1.Photo
+	11, // 37: todo_proto.v1.SubmitQuestionnaireMediaRequest.final_photos:type_name -> todo_proto.v1.Photo
+	12, // 38: todo_proto.v1.SubmitQuestionnaireMediaRequest.generated_video:type_name -> todo_proto.v1.Video
+	12, // 39: todo_proto.v1.CreateVideoRequest.video:type_name -> todo_proto.v1.Video
+	12, // 40: todo_proto.v1.VideoResponse.video:type_name -> todo_proto.v1.Video
+	47, // 41: todo_proto.v1.PromoCode.number_uses:type_name -> google.protobuf.Int32Value
+	46, // 42: todo_proto.v1.PromoCode.status:type_name -> google.protobuf.BoolValue
+	31, // 43: todo_proto.v1.PromoCodeResponse.promo_code:type_name -> todo_proto.v1.PromoCode
+	46, // 44: todo_proto.v1.PromoCodesListRequest.status:type_name -> google.protobuf.BoolValue
+	31, // 45: todo_proto.v1.PromoCodesListResponse.promo_codes:type_name -> todo_proto.v1.PromoCode
+	31, // 46: todo_proto.v1.CreatePromoCodeRequest.promo_code:type_name -> todo_proto.v1.PromoCode
+	31, // 47: todo_proto.v1.UpdatePromoCodeRequest.promo_code:type_name -> todo_proto.v1.PromoCode
+	45, // 48: todo_proto.v1.Review.created_at:type_name -> google.protobuf.Timestamp
+	38, // 49: todo_proto.v1.ReviewResponse.review:type_name -> todo_proto.v1.Review
+	44, // 50: todo_proto.v1.ReviewsListRequest.user_id:type_name -> google.protobuf.Int64Value
+	45, // 51: todo_proto.v1.ReviewsListRequest.date_from:type_name -> google.protobuf.Timestamp
+	45, // 52: todo_proto.v1.ReviewsListRequest.date_to:type_name -> google.protobuf.Timestamp
+	38, // 53: todo_proto.v1.ReviewsListResponse.reviews:type_name -> todo_proto.v1.Review
+	5,  // 54: todo_proto.v1.AdminHistoryService.GetUser:input_type -> todo_proto.v1.UserRequest
+	3,  // 55: todo_proto.v1.AdminHistoryService.UsersList:input_type -> todo_proto.v1.UsersListRequest
+	2,  // 56: todo_proto.v1.AdminHistoryService.UpdateUser:input_type -> todo_proto.v1.UpdateUserRequest
+	13, // 57: todo_proto.v1.AdminHistoryService.GetQuestionnaire:input_type -> todo_proto.v1.QuestionnaireRequest
+	7,  // 58: todo_proto.v1.AdminHistoryService.QuestionnairesList:input_type -> todo_proto.v1.QuestionnairesListRequest
+	15, // 59: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:input_type -> todo_proto.v1.UpdateQuestionnaireRequest
+	27, // 60: todo_proto.v1.AdminHistoryService.SubmitQuestionnaireMedia:input_type -> todo_proto.v1.SubmitQuestionnaireMediaRequest
+	24, // 61: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:input_type -> todo_proto.v1.PhotoRequest
+	25, // 62: todo_proto.v1.AdminHistoryService.CreatePhoto:input_type -> todo_proto.v1.CreatePhotoRequest
+	28, // 63: todo_proto.v1.AdminHistoryService.GetVideosQuestionnaire:input_type -> todo_proto.v1.VideoRequest
+	29, // 64: todo_proto.v1.AdminHistoryService.CreateVideo:input_type -> todo_proto.v1.CreateVideoRequest
+	17, // 65: todo_proto.v1.AdminHistoryService.GetChat:input_type -> todo_proto.v1.ChatRequest
+	20, // 66: todo_proto.v1.AdminHistoryService.ChatsList:input_type -> todo_proto.v1.ChatsListRequest
+	22, // 67: todo_proto.v1.AdminHistoryService.GetStatistics:input_type -> todo_proto.v1.StatisticsRequest
+	32, // 68: todo_proto.v1.AdminHistoryService.GetPromoCode:input_type -> todo_proto.v1.PromoCodeRequest
+	34, // 69: todo_proto.v1.AdminHistoryService.PromoCodesList:input_type -> todo_proto.v1.PromoCodesListRequest
+	36, // 70: todo_proto.v1.AdminHistoryService.CreatePromoCode:input_type -> todo_proto.v1.CreatePromoCodeRequest
+	37, // 71: todo_proto.v1.AdminHistoryService.UpdatePromoCode:input_type -> todo_proto.v1.UpdatePromoCodeRequest
+	39, // 72: todo_proto.v1.AdminHistoryService.GetReview:input_type -> todo_proto.v1.ReviewRequest
+	41, // 73: todo_proto.v1.AdminHistoryService.ReviewsList:input_type -> todo_proto.v1.ReviewsListRequest
+	6,  // 74: todo_proto.v1.AdminHistoryService.GetUser:output_type -> todo_proto.v1.UserResponse
+	4,  // 75: todo_proto.v1.AdminHistoryService.UsersList:output_type -> todo_proto.v1.UsersListResponse
+	0,  // 76: todo_proto.v1.AdminHistoryService.UpdateUser:output_type -> todo_proto.v1.Status
+	14, // 77: todo_proto.v1.AdminHistoryService.GetQuestionnaire:output_type -> todo_proto.v1.QuestionnaireResponse
+	10, // 78: todo_proto.v1.AdminHistoryService.QuestionnairesList:output_type -> todo_proto.v1.QuestionnairesListResponse
+	0,  // 79: todo_proto.v1.AdminHistoryService.UpdateQuestionnaire:output_type -> todo_proto.v1.Status
+	0,  // 80: todo_proto.v1.AdminHistoryService.SubmitQuestionnaireMedia:output_type -> todo_proto.v1.Status
+	26, // 81: todo_proto.v1.AdminHistoryService.GetPhotosQuestionnaire:output_type -> todo_proto.v1.PhotoResponse
+	0,  // 82: todo_proto.v1.AdminHistoryService.CreatePhoto:output_type -> todo_proto.v1.Status
+	30, // 83: todo_proto.v1.AdminHistoryService.GetVideosQuestionnaire:output_type -> todo_proto.v1.VideoResponse
+	0,  // 84: todo_proto.v1.AdminHistoryService.CreateVideo:output_type -> todo_proto.v1.Status
+	18, // 85: todo_proto.v1.AdminHistoryService.GetChat:output_type -> todo_proto.v1.ChatResponse
+	21, // 86: todo_proto.v1.AdminHistoryService.ChatsList:output_type -> todo_proto.v1.ChatsListResponse
+	23, // 87: todo_proto.v1.AdminHistoryService.GetStatistics:output_type -> todo_proto.v1.StatisticsResponse
+	33, // 88: todo_proto.v1.AdminHistoryService.GetPromoCode:output_type -> todo_proto.v1.PromoCodeResponse
+	35, // 89: todo_proto.v1.AdminHistoryService.PromoCodesList:output_type -> todo_proto.v1.PromoCodesListResponse
+	0,  // 90: todo_proto.v1.AdminHistoryService.CreatePromoCode:output_type -> todo_proto.v1.Status
+	0,  // 91: todo_proto.v1.AdminHistoryService.UpdatePromoCode:output_type -> todo_proto.v1.Status
+	40, // 92: todo_proto.v1.AdminHistoryService.GetReview:output_type -> todo_proto.v1.ReviewResponse
+	42, // 93: todo_proto.v1.AdminHistoryService.ReviewsList:output_type -> todo_proto.v1.ReviewsListResponse
+	74, // [74:94] is the sub-list for method output_type
+	54, // [54:74] is the sub-list for method input_type
+	54, // [54:54] is the sub-list for extension type_name
+	54, // [54:54] is the sub-list for extension extendee
+	0,  // [0:54] is the sub-list for field type_name
 }
 
 func init() { file_pkg_proto_admins_proto_init() }

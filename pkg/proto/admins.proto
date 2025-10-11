@@ -68,6 +68,7 @@ message QuestionnairesListRequest{
   google.protobuf.BoolValue  status = 4;
   google.protobuf.Timestamp  date_from = 5;
   google.protobuf.Timestamp  date_to = 6;
+  google.protobuf.Int64Value user_id = 7;
 }
 
 message Questionnaire{

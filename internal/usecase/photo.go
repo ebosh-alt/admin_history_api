@@ -56,7 +56,7 @@ func (u *Usecase) UploadPhoto(ctx context.Context, r io.Reader, filename string,
 		Path:            photo.Path,
 		QuestionnaireID: photo.QuestionnaireId,
 		Scene:           photo.Scene,
-		TypePhoto:       photo.TypePhoto,
+		TypePhoto:       normalizePhotoType(photo.TypePhoto),
 	}
 
 	if err := u.Postgres.UploadPhoto(ctx, &ent); err != nil {
@@ -78,6 +78,14 @@ func normalizeExt(name string) string {
 	default:
 		return ".bin"
 	}
+}
+
+func normalizePhotoType(t string) string {
+	t = strings.ToLower(strings.TrimSpace(t))
+	if isAllowedPhotoType(t) {
+		return t
+	}
+	return "original"
 }
 
 var _ InterfacePhotoUsecase = (*Usecase)(nil)

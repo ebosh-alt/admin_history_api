@@ -18,3 +18,8 @@ Server:
   port: "3000"
 
 Pepper: "PASSWORD_PEPPER"
+
+Telegram:
+  token: ""
+  api_base_url: "https://api.telegram.org"
+  timeout: "30s"

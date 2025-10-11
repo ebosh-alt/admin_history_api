@@ -4,6 +4,7 @@ import (
 	"admin_history/config"
 	"admin_history/internal/repository/postgres"
 	"admin_history/internal/storage"
+	"admin_history/internal/telegram"
 	protos "admin_history/pkg/proto/gen/go"
 	"context"
 
@@ -16,6 +17,7 @@ type Usecase struct {
 	Postgres postgres.InterfaceRepo
 	ctx      context.Context
 	st       *storage.FS
+	tg       *telegram.Client
 }
 
 func (u *Usecase) GetChat(ctx context.Context, req *protos.ChatRequest) (*protos.ChatResponse, error) {
@@ -39,6 +41,7 @@ func NewUsecase(
 	cfg *config.Config,
 	ctx context.Context,
 	st *storage.FS,
+	tg *telegram.Client,
 ) (*Usecase, error) {
 	return &Usecase{
 		cfg:      cfg,
@@ -46,6 +49,7 @@ func NewUsecase(
 		Postgres: Postgres,
 		ctx:      ctx,
 		st:       st,
+		tg:       tg,
 	}, nil
 }
 

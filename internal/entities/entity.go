@@ -333,6 +333,7 @@ func (d *QuestionnaireDTO) ToEntity() *Questionnaire {
 }
 
 type QuestionnaireFilter struct {
+	UserID   *int64
 	Payment  *bool
 	Status   *bool
 	DateFrom *time.Time

@@ -56,6 +56,11 @@ func (r *Repository) CountQuestionnaires(ctx context.Context, f entities.Questio
 		i     = 1
 	)
 
+	if f.UserID != nil {
+		where = append(where, fmt.Sprintf("user_id = $%d", i))
+		args = append(args, *f.UserID)
+		i++
+	}
 	if f.Payment != nil {
 		where = append(where, fmt.Sprintf("payment = $%d", i))
 		args = append(args, *f.Payment)
@@ -112,9 +117,14 @@ SELECT id, user_id, answers, history, storyboard, status, payment, created_at
 FROM questionnaires
 WHERE 1=1`)
 
-	args := make([]any, 0, 6)
+	args := make([]any, 0, 7)
 	i := 0
 
+	if f.UserID != nil {
+		i++
+		sb.WriteString(fmt.Sprintf(" AND user_id = $%d", i))
+		args = append(args, *f.UserID)
+	}
 	if f.Payment != nil {
 		i++
 		sb.WriteString(fmt.Sprintf(" AND payment = $%d", i))

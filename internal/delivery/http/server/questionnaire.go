@@ -1,10 +1,12 @@
 package server
 
 import (
+	usecase "admin_history/internal/usecase"
 	protos "admin_history/pkg/proto/gen/go"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -56,6 +58,7 @@ func (s *Server) GetQuestionnaire(c *gin.Context) {
 // @Param        status     query     bool    false  "Фильтр по статусу"
 // @Param        date_from  query     string  false  "Дата с (unix или YYYY-MM-DD)"
 // @Param        date_to    query     string  false  "Дата по (unix или YYYY-MM-DD)"
+// @Param        user_id    query     int     false  "Фильтр по пользователю"
 // @Success      200        {object}  QuestionnairesListResponse
 // @Failure      400        {object}  ErrorResponse
 // @Failure      404        {object}  ErrorResponse
@@ -63,7 +66,6 @@ func (s *Server) GetQuestionnaire(c *gin.Context) {
 func (s *Server) QuestionnairesList(c *gin.Context) {
 	req := &protos.QuestionnairesListRequest{}
 
-	// page/limit
 	if v := c.Query("page"); v != "" {
 		if i, err := strconv.Atoi(v); err == nil && i > 0 {
 			req.Page = int32(i)
@@ -75,7 +77,6 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 		}
 	}
 
-	// bools
 	if v := c.Query("payment"); v != "" {
 		if b, err := strconv.ParseBool(v); err == nil {
 			req.Payment = wrapperspb.Bool(b)
@@ -87,21 +88,21 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 		}
 	}
 
-	// UTC+3 timezone for date parsing
+	if v := c.Query("user_id"); v != "" {
+		if id, err := strconv.ParseInt(v, 10, 64); err == nil && id > 0 {
+			req.UserId = wrapperspb.Int64(id)
+		}
+	}
+
 	moscowTZ, _ := time.LoadLocation("Europe/Moscow")
 
-	// Parse date_from - support both Unix timestamp and ISO date format
 	if v := c.Query("date_from"); v != "" {
 		var t time.Time
 		var err error
-
-		// Try to parse as Unix timestamp first
 		if sec, parseErr := strconv.ParseInt(v, 10, 64); parseErr == nil && sec > 0 {
 			t = time.Unix(sec, 0)
 		} else {
-			// Try to parse as ISO date format (YYYY-MM-DD)
 			if t, err = time.ParseInLocation("2006-01-02", v, moscowTZ); err != nil {
-				// Try to parse as ISO datetime format (YYYY-MM-DDTHH:MM:SS)
 				if t, err = time.ParseInLocation("2006-01-02T15:04:05", v, moscowTZ); err != nil {
 					s.log.Error("failed to parse date_from", zap.String("value", v), zap.Error(err))
 					c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный формат даты date_from"})
@@ -109,23 +110,16 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 				}
 			}
 		}
-
-		// Convert to UTC for database storage
 		req.DateFrom = timestamppb.New(t.UTC())
 	}
 
-	// Parse date_to - support both Unix timestamp and ISO date format
 	if v := c.Query("date_to"); v != "" {
 		var t time.Time
 		var err error
-
-		// Try to parse as Unix timestamp first
 		if sec, parseErr := strconv.ParseInt(v, 10, 64); parseErr == nil && sec > 0 {
 			t = time.Unix(sec, 0)
 		} else {
-			// Try to parse as ISO date format (YYYY-MM-DD)
 			if t, err = time.ParseInLocation("2006-01-02", v, moscowTZ); err != nil {
-				// Try to parse as ISO datetime format (YYYY-MM-DDTHH:MM:SS)
 				if t, err = time.ParseInLocation("2006-01-02T15:04:05", v, moscowTZ); err != nil {
 					s.log.Error("failed to parse date_to", zap.String("value", v), zap.Error(err))
 					c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный формат даты date_to"})
@@ -134,14 +128,12 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 			}
 		}
 
-		// For date_to, if it's just a date (no time), add 23:59:59 to include the whole day
 		if t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0 {
 			t = t.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 		}
-
-		// Convert to UTC for database storage
 		req.DateTo = timestamppb.New(t.UTC())
 	}
+
 	resp, err := s.Usecase.GetQuestionnairesList(c, req)
 	if err != nil {
 		s.log.Error("list questionnaires failed", zap.Error(err), zap.Any("req", req))
@@ -179,17 +171,36 @@ func (s *Server) UpdateQuestionnaire(c *gin.Context) {
 }
 
 // SubmitQuestionnaireMedia godoc
-// @Summary      Сохранить итоговые медиа анкеты
-// @Description  Сохраняет финальные фотографии и сгенерированное видео анкеты, а также принимает демо-материалы без сохранения
+// @Summary      Сохранить медиа анкеты
+// @Description  Сохраняет медиа анкеты, поддерживает multipart/form-data и JSON
 // @Tags         questionnaires
+// @Accept       multipart/form-data
 // @Accept       json
 // @Produce      json
-// @Param        request  body      SubmitQuestionnaireMediaRequest  true  "Медиа анкеты"
+// @Param        questionnaire_id       formData  int     true   "ID анкеты"
+// @Param        user_id                formData  int     true   "ID пользователя (chat_id в Telegram)"
+// @Param        demo_photos            formData  file    false  "Демо-фотографии (можно несколько файлов)"
+// @Param        final_photos           formData  file    false  "Финальные фото (можно несколько файлов)"
+// @Param        demo_video             formData  file    false  "Демо-видео"
+// @Param        generated_video        formData  file    false  "Сгенерированное видео"
+// @Param        delivery_photo         formData  file    false  "Фото для отправки пользователю"
+// @Param        demo_photo_path        formData  string  false  "Путь к уже сохранённому демо-фото"
+// @Param        final_photo_path       formData  string  false  "Путь к уже сохранённому финальному фото"
+// @Param        delivery_photo_path    formData  string  false  "Путь к фото для отправки пользователю"
+// @Param        demo_video_path        formData  string  false  "Путь к уже сохранённому демо-видео"
+// @Param        generated_video_path   formData  string  false  "Путь к уже сохранённому сгенерированному видео"
+// @Param        final_photo_scene      formData  string  false  "Подписи сцен для финальных фото (по порядку файлов)"
+// @Param        payload                formData  string  false  "Дополнительный JSON (SubmitQuestionnaireMediaRequest)"
 // @Success      200      {object}  Status
 // @Failure      400      {object}  ErrorResponse
 // @Failure      500      {object}  ErrorResponse
 // @Router       /questionnaires/media [post]
 func (s *Server) SubmitQuestionnaireMedia(c *gin.Context) {
+	if strings.HasPrefix(c.GetHeader("Content-Type"), "multipart/form-data") {
+		s.submitQuestionnaireMediaMultipart(c)
+		return
+	}
+
 	body, _ := io.ReadAll(c.Request.Body)
 	var req protos.SubmitQuestionnaireMediaRequest
 	if err := unmarshalJSON.Unmarshal(body, &req); err != nil {
@@ -197,7 +208,7 @@ func (s *Server) SubmitQuestionnaireMedia(c *gin.Context) {
 		return
 	}
 
-	resp, err := s.Usecase.SubmitQuestionnaireMedia(c, &req)
+	resp, err := s.Usecase.SubmitQuestionnaireMedia(c, &req, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -205,6 +216,157 @@ func (s *Server) SubmitQuestionnaireMedia(c *gin.Context) {
 
 	b, _ := marshalJSON.Marshal(resp)
 	c.Data(http.StatusOK, "application/json", b)
+}
+
+func (s *Server) submitQuestionnaireMediaMultipart(c *gin.Context) {
+	if err := c.Request.ParseMultipartForm(500 << 20); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid multipart"})
+		return
+	}
+
+	var req protos.SubmitQuestionnaireMediaRequest
+	if payload := c.PostForm("payload"); payload != "" {
+		if err := unmarshalJSON.Unmarshal([]byte(payload), &req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid payload json"})
+			return
+		}
+	}
+
+	qid, err := strconv.ParseInt(c.PostForm("questionnaire_id"), 10, 64)
+	if err != nil || qid <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid questionnaire_id"})
+		return
+	}
+	req.QuestionnaireId = qid
+
+	uid, err := strconv.ParseInt(c.PostForm("user_id"), 10, 64)
+	if err != nil || uid <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid user_id"})
+		return
+	}
+	req.UserId = uid
+
+	finalSceneQueue := make([]string, 0)
+	if len(req.FinalPhotos) > 0 {
+		prefilled := make([]*protos.Photo, 0, len(req.FinalPhotos))
+		for _, meta := range req.FinalPhotos {
+			if meta == nil {
+				continue
+			}
+			scene := strings.TrimSpace(meta.Scene)
+			if scene == "" {
+				scene = "result"
+			}
+			typePhoto := strings.TrimSpace(meta.TypePhoto)
+			if typePhoto == "" {
+				typePhoto = "result"
+			}
+			path := strings.TrimSpace(meta.Path)
+			if path != "" {
+				prefilled = append(prefilled, &protos.Photo{
+					Path:            path,
+					QuestionnaireId: qid,
+					Scene:           scene,
+					TypePhoto:       typePhoto,
+				})
+			} else {
+				finalSceneQueue = append(finalSceneQueue, scene)
+			}
+		}
+		req.FinalPhotos = prefilled
+	} else {
+		req.FinalPhotos = nil
+	}
+
+	for _, scene := range c.PostFormArray("final_photo_scene") {
+		if sc := strings.TrimSpace(scene); sc != "" {
+			finalSceneQueue = append(finalSceneQueue, sc)
+		}
+	}
+
+	for _, path := range c.PostFormArray("demo_photo_path") {
+		if p := strings.TrimSpace(path); p != "" {
+			req.DemoPhotos = append(req.DemoPhotos, p)
+		}
+	}
+
+	for _, path := range c.PostFormArray("final_photo_path") {
+		if p := strings.TrimSpace(path); p != "" {
+			req.FinalPhotos = append(req.FinalPhotos, &protos.Photo{
+				Path:            p,
+				QuestionnaireId: qid,
+				Scene:           popScene(&finalSceneQueue),
+				TypePhoto:       "send",
+			})
+		}
+	}
+
+	if v := strings.TrimSpace(c.PostForm("delivery_photo_path")); v != "" {
+		req.FinalPhotos = append(req.FinalPhotos, &protos.Photo{
+			Path:            v,
+			QuestionnaireId: qid,
+			Scene:           "delivery",
+			TypePhoto:       "send",
+		})
+	}
+
+	if v := strings.TrimSpace(c.PostForm("demo_video_path")); v != "" {
+		req.DemoVideo = v
+	}
+	if v := strings.TrimSpace(c.PostForm("generated_video_path")); v != "" {
+		req.GeneratedVideo = &protos.Video{
+			Path:            v,
+			QuestionnaireId: qid,
+			TypeVideo:       "generated",
+		}
+	}
+
+	media := &usecase.MediaUpload{
+		FinalPhotoScenes: finalSceneQueue,
+	}
+
+	if form := c.Request.MultipartForm; form != nil {
+		if files := form.File["demo_photos"]; len(files) > 0 {
+			media.DemoPhotos = files
+		}
+		if files := form.File["final_photos"]; len(files) > 0 {
+			media.FinalPhotos = files
+		}
+		if files := form.File["demo_video"]; len(files) > 0 {
+			media.DemoVideo = files[0]
+		}
+		if files := form.File["generated_video"]; len(files) > 0 {
+			media.GeneratedVideo = files[0]
+		}
+		if files := form.File["delivery_photo"]; len(files) > 0 {
+			media.DeliveryPhoto = files[0]
+		}
+	}
+
+	if media.DemoPhotos == nil && media.FinalPhotos == nil && media.DemoVideo == nil && media.GeneratedVideo == nil && media.DeliveryPhoto == nil && len(media.FinalPhotoScenes) == 0 {
+		media = nil
+	}
+
+	resp, err := s.Usecase.SubmitQuestionnaireMedia(c, &req, media)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	b, _ := marshalJSON.Marshal(resp)
+	c.Data(http.StatusOK, "application/json", b)
+}
+
+func popScene(queue *[]string) string {
+	if queue == nil || len(*queue) == 0 {
+		return "send"
+	}
+	scene := strings.TrimSpace((*queue)[0])
+	*queue = (*queue)[1:]
+	if scene == "" {
+		return "send"
+	}
+	return scene
 }
 
 var _ InterfaceQuestionnaireServer = (*Server)(nil)

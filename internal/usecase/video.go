@@ -53,7 +53,7 @@ func (u *Usecase) UploadVideo(ctx context.Context, r io.Reader, filename string,
 	entity := entities.Video{
 		Path:            video.Path,
 		QuestionnaireID: video.QuestionnaireId,
-		TypeVideo:       video.TypeVideo,
+		TypeVideo:       normalizeVideoType(video.TypeVideo),
 	}
 
 	if err := u.Postgres.UploadVideo(ctx, &entity); err != nil {
@@ -74,6 +74,14 @@ func normalizeVideoExt(name string) string {
 	default:
 		return ".bin"
 	}
+}
+
+func normalizeVideoType(t string) string {
+	t = strings.ToLower(strings.TrimSpace(t))
+	if isAllowedVideoType(t) {
+		return t
+	}
+	return "send"
 }
 
 var _ InterfaceVideoUsecase = (*Usecase)(nil)

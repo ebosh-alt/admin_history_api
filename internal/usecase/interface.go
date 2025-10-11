@@ -4,6 +4,7 @@ import (
 	protos "admin_history/pkg/proto/gen/go"
 	"context"
 	"io"
+	"mime/multipart"
 )
 
 type InterfaceUsecase interface {
@@ -27,7 +28,7 @@ type InterfaceQuestionnaireUsecase interface {
 	GetQuestionnairesList(ctx context.Context, req *protos.QuestionnairesListRequest) (*protos.QuestionnairesListResponse, error)
 	GetQuestionnaire(ctx context.Context, req *protos.QuestionnaireRequest) (*protos.QuestionnaireResponse, error)
 	UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQuestionnaireRequest) (*protos.Status, error)
-	SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest) (*protos.Status, error)
+	SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest, media *MediaUpload) (*protos.Status, error)
 }
 
 type InterfacePhotoUsecase interface {
@@ -38,6 +39,15 @@ type InterfacePhotoUsecase interface {
 type InterfaceVideoUsecase interface {
 	GetVideosQuestionnaire(ctx context.Context, req *protos.VideoRequest) (*protos.VideoResponse, error)
 	UploadVideo(ctx context.Context, r io.Reader, filename string, video *protos.Video) (*protos.Status, error)
+}
+
+type MediaUpload struct {
+	DemoPhotos       []*multipart.FileHeader
+	FinalPhotos      []*multipart.FileHeader
+	DemoVideo        *multipart.FileHeader
+	GeneratedVideo   *multipart.FileHeader
+	DeliveryPhoto    *multipart.FileHeader
+	FinalPhotoScenes []string
 }
 
 type InterfaceChatUsecase interface {

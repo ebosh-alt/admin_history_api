@@ -4,6 +4,7 @@ import (
 	"admin_history/internal/delivery/http/middleware"
 	"admin_history/internal/delivery/http/server"
 	"admin_history/internal/storage"
+	"admin_history/internal/telegram"
 	"context"
 
 	"go.uber.org/fx"
@@ -37,6 +38,7 @@ func New() *fx.App {
 
 			},
 			storage.NewFS,
+			telegram.NewClient,
 			// HTTP-мiddleware и сервер
 			middleware.NewMiddleware,
 			server.NewServer,

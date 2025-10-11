@@ -7,6 +7,7 @@ type Config struct {
 	Postgres PostgresConfig `yaml:"Postgres"`
 	JWT      JWTConfig      `yaml:"JWT"`
 	Pepper   string         `yaml:"Pepper"`
+	Telegram TelegramConfig `yaml:"Telegram"`
 }
 
 type JWTConfig struct {
@@ -33,4 +34,10 @@ type ServerConfig struct {
 	AppVersion string `yaml:"appVersion"`
 	Host       string `yaml:"host" validate:"required"`
 	Port       string `yaml:"port" validate:"required"`
+}
+
+type TelegramConfig struct {
+	Token      string        `yaml:"token"`
+	APIBaseURL string        `yaml:"api_base_url"`
+	Timeout    time.Duration `yaml:"timeout"`
 }
