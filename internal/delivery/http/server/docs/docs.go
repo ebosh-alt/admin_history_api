@@ -346,6 +346,12 @@ const docTemplate = `{
                         "description": "Дата по (unix или YYYY-MM-DD)",
                         "name": "date_to",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Фильтр по пользователю",
+                        "name": "user_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -363,6 +369,129 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/questionnaires/media": {
+            "post": {
+                "description": "Сохраняет медиа анкеты. Поддерживает multipart/form-data (для загрузки файлов) и JSON (тело SubmitQuestionnaireMediaRequest)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questionnaires"
+                ],
+                "summary": "Сохранить медиа анкеты",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID анкеты",
+                        "name": "questionnaire_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя (chat_id в Telegram)",
+                        "name": "user_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Демо-фотографии (можно несколько файлов)",
+                        "name": "demo_photos",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Финальные фото (можно несколько файлов)",
+                        "name": "final_photos",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Демо-видео",
+                        "name": "demo_video",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Сгенерированное видео",
+                        "name": "generated_video",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Фото для отправки пользователю",
+                        "name": "delivery_photo",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому демо-фото",
+                        "name": "demo_photo_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому финальному фото",
+                        "name": "final_photo_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к фото для отправки пользователю",
+                        "name": "delivery_photo_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому демо-видео",
+                        "name": "demo_video_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому сгенерированному видео",
+                        "name": "generated_video_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Подписи сцен для финальных фото (по порядку файлов)",
+                        "name": "final_photo_scene",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Дополнительный JSON (SubmitQuestionnaireMediaRequest)",
+                        "name": "payload",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.Status"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/server.ErrorResponse"
                         }
@@ -728,10 +857,102 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/videos": {
+            "get": {
+                "description": "Возвращает список видеозаписей анкеты",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "videos"
+                ],
+                "summary": "Получить видео анкеты",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID анкеты",
+                        "name": "questionnaire_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Тип видео",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.VideoResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/videos/upload": {
+            "post": {
+                "description": "Загружает видеозапись для анкеты",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "videos"
+                ],
+                "summary": "Загрузить видео",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID анкеты",
+                        "name": "questionnaire_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Тип видео",
+                        "name": "type",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Видео файл",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.Status"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "admin_history_pkg_proto_gen_go.Answer": {
+        "admin_history.Answer": {
             "type": "object",
             "properties": {
                 "answer": {
@@ -742,7 +963,7 @@ const docTemplate = `{
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.Photo": {
+        "admin_history.Photo": {
             "type": "object",
             "properties": {
                 "path": {
@@ -759,7 +980,7 @@ const docTemplate = `{
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.PromoCode": {
+        "admin_history.PromoCode": {
             "type": "object",
             "properties": {
                 "description": {
@@ -782,13 +1003,13 @@ const docTemplate = `{
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.Questionnaire": {
+        "admin_history.Questionnaire": {
             "type": "object",
             "properties": {
                 "answers": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Answer"
+                        "$ref": "#/definitions/admin_history.Answer"
                     }
                 },
                 "created_at": {
@@ -806,12 +1027,15 @@ const docTemplate = `{
                 "status": {
                     "type": "boolean"
                 },
+                "storyboard": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "integer"
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.Review": {
+        "admin_history.Review": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -828,7 +1052,7 @@ const docTemplate = `{
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.User": {
+        "admin_history.User": {
             "type": "object",
             "properties": {
                 "accepted_offer": {
@@ -875,11 +1099,25 @@ const docTemplate = `{
                 }
             }
         },
+        "admin_history.Video": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "questionnaire_id": {
+                    "type": "integer"
+                },
+                "type_video": {
+                    "type": "string"
+                }
+            }
+        },
         "server.CreatePromoCodeRequest": {
             "type": "object",
             "properties": {
                 "promo_code": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                    "$ref": "#/definitions/admin_history.PromoCode"
                 }
             }
         },
@@ -897,7 +1135,7 @@ const docTemplate = `{
                 "photo": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Photo"
+                        "$ref": "#/definitions/admin_history.Photo"
                     }
                 }
             }
@@ -906,7 +1144,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "promo_code": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                    "$ref": "#/definitions/admin_history.PromoCode"
                 }
             }
         },
@@ -916,7 +1154,7 @@ const docTemplate = `{
                 "promo_codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                        "$ref": "#/definitions/admin_history.PromoCode"
                     }
                 },
                 "total": {
@@ -928,7 +1166,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "questionnaire": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Questionnaire"
+                    "$ref": "#/definitions/admin_history.Questionnaire"
                 }
             }
         },
@@ -938,7 +1176,7 @@ const docTemplate = `{
                 "questionnaires": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Questionnaire"
+                        "$ref": "#/definitions/admin_history.Questionnaire"
                     }
                 },
                 "total": {
@@ -950,7 +1188,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "review": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Review"
+                    "$ref": "#/definitions/admin_history.Review"
                 }
             }
         },
@@ -960,7 +1198,7 @@ const docTemplate = `{
                 "reviews": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Review"
+                        "$ref": "#/definitions/admin_history.Review"
                     }
                 },
                 "total": {
@@ -983,7 +1221,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "promo_code": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                    "$ref": "#/definitions/admin_history.PromoCode"
                 }
             }
         },
@@ -991,7 +1229,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "questionnaire": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Questionnaire"
+                    "$ref": "#/definitions/admin_history.Questionnaire"
                 }
             }
         },
@@ -999,7 +1237,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.User"
+                    "$ref": "#/definitions/admin_history.User"
                 }
             }
         },
@@ -1007,7 +1245,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.User"
+                    "$ref": "#/definitions/admin_history.User"
                 }
             }
         },
@@ -1020,7 +1258,18 @@ const docTemplate = `{
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.User"
+                        "$ref": "#/definitions/admin_history.User"
+                    }
+                }
+            }
+        },
+        "server.VideoResponse": {
+            "type": "object",
+            "properties": {
+                "video": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin_history.Video"
                     }
                 }
             }
@@ -1079,12 +1328,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Version:          "1.0",
+	Host:             "localhost:3000",
+	BasePath:         "/api",
+	Schemes:          []string{"http"},
+	Title:            "Admin History API",
+	Description:      "REST API для управления пользователями, анкетами, фотографиями и промокодами.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

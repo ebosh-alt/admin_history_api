@@ -1,13 +1,16 @@
-package postgres
+package promocode
 
 import (
 	"admin_history/internal/entities"
+	"admin_history/internal/repository"
+	"admin_history/internal/repository/postgres/base"
 	"context"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -27,9 +30,17 @@ WHERE id = $1
 RETURNING id, value, number_uses, status, percent, description;`
 )
 
-func (r *Repository) GetPromoCode(ctx context.Context, promoCode *entities.PromoCode) (*entities.PromoCode, error) {
+type Repo struct {
+	db *pgxpool.Pool
+}
+
+func New(db *pgxpool.Pool) repository.PromoCodeRepository {
+	return &Repo{db: db}
+}
+
+func (r *Repo) GetPromoCode(ctx context.Context, promoCode *entities.PromoCode) (*entities.PromoCode, error) {
 	promoCodeDTO := promoCode.ToDTO()
-	err := r.DB.QueryRow(ctx, promoCodeByIDQuery, promoCodeDTO.ID).Scan(
+	err := r.db.QueryRow(ctx, promoCodeByIDQuery, promoCodeDTO.ID).Scan(
 		&promoCode.ID, &promoCode.Value, &promoCode.NumberUses, &promoCode.Status, &promoCode.Percent, &promoCode.Description,
 	)
 	if err != nil {
@@ -41,7 +52,7 @@ func (r *Repository) GetPromoCode(ctx context.Context, promoCode *entities.Promo
 	return promoCode, nil
 }
 
-func (r *Repository) CountPromoCodes(ctx context.Context, f entities.PromoCodeFilter) (int64, error) {
+func (r *Repo) CountPromoCodes(ctx context.Context, f entities.PromoCodeFilter) (int64, error) {
 	sb := strings.Builder{}
 	sb.WriteString(`SELECT COUNT(*) FROM promo_codes WHERE 1=1`)
 	args := make([]any, 0, 1)
@@ -54,13 +65,13 @@ func (r *Repository) CountPromoCodes(ctx context.Context, f entities.PromoCodeFi
 	}
 
 	var total int64
-	if err := r.DB.QueryRow(ctx, sb.String(), args...).Scan(&total); err != nil {
+	if err := r.db.QueryRow(ctx, sb.String(), args...).Scan(&total); err != nil {
 		return 0, fmt.Errorf("count promo codes: %w", err)
 	}
 	return total, nil
 }
 
-func (r *Repository) PromoCodesList(
+func (r *Repo) PromoCodesList(
 	ctx context.Context,
 	page, limit int32,
 	f entities.PromoCodeFilter,
@@ -99,7 +110,7 @@ WHERE 1=1`)
 	sb.WriteString(fmt.Sprintf(` OFFSET $%d`, i))
 	args = append(args, offset)
 
-	rows, err := r.DB.Query(ctx, sb.String(), args...)
+	rows, err := r.db.Query(ctx, sb.String(), args...)
 	if err != nil {
 		return nil, fmt.Errorf("list promo codes: %w", err)
 	}
@@ -121,16 +132,16 @@ WHERE 1=1`)
 	return out, nil
 }
 
-func (r *Repository) CreatePromoCode(ctx context.Context, promoCode *entities.PromoCode) error {
+func (r *Repo) CreatePromoCode(ctx context.Context, promoCode *entities.PromoCode) error {
 	promoCodeDTO := promoCode.ToDTO()
 
 	var id int64
-	err := r.DB.QueryRow(ctx, createPromoCodeQuery,
-		valOrNil(promoCodeDTO.Value),
-		valOrNil(promoCodeDTO.NumberUses),
-		valOrNil(promoCodeDTO.Status),
-		valOrNil(promoCodeDTO.Percent),
-		valOrNil(promoCodeDTO.Description),
+	err := r.db.QueryRow(ctx, createPromoCodeQuery,
+		base.ValOrNil(promoCodeDTO.Value),
+		base.ValOrNil(promoCodeDTO.NumberUses),
+		base.ValOrNil(promoCodeDTO.Status),
+		base.ValOrNil(promoCodeDTO.Percent),
+		base.ValOrNil(promoCodeDTO.Description),
 	).Scan(&id)
 	if err != nil {
 		return fmt.Errorf("create promo code: %w", err)
@@ -140,20 +151,20 @@ func (r *Repository) CreatePromoCode(ctx context.Context, promoCode *entities.Pr
 	return nil
 }
 
-func (r *Repository) UpdatePromoCode(ctx context.Context, promoCode *entities.PromoCode) error {
+func (r *Repo) UpdatePromoCode(ctx context.Context, promoCode *entities.PromoCode) error {
 	if promoCode == nil || promoCode.ID == 0 {
 		return fmt.Errorf("invalid promo code")
 	}
 
 	dto := promoCode.ToDTO()
 
-	err := r.DB.QueryRow(ctx, updatePromoCodeQuery,
+	err := r.db.QueryRow(ctx, updatePromoCodeQuery,
 		promoCode.ID,
-		valOrNil(dto.Value),
-		valOrNil(dto.NumberUses),
-		valOrNil(dto.Status),
-		valOrNil(dto.Percent),
-		valOrNil(dto.Description),
+		base.ValOrNil(dto.Value),
+		base.ValOrNil(dto.NumberUses),
+		base.ValOrNil(dto.Status),
+		base.ValOrNil(dto.Percent),
+		base.ValOrNil(dto.Description),
 	).Scan(
 		&promoCode.ID,
 		&promoCode.Value,
@@ -171,3 +182,5 @@ func (r *Repository) UpdatePromoCode(ctx context.Context, promoCode *entities.Pr
 
 	return nil
 }
+
+var _ repository.PromoCodeRepository = (*Repo)(nil)

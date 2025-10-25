@@ -167,3 +167,10 @@ func (f *FS) PublicDir() string {
 	}
 	return filepath.Join(f.baseDir, filepath.FromSlash(prefix))
 }
+
+func (f *FS) BaseDir() string {
+	if f == nil {
+		return ""
+	}
+	return f.baseDir
+}

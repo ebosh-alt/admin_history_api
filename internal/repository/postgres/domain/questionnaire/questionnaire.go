@@ -1,55 +1,57 @@
-package postgres
+package questionnaire
 
 import (
+	"admin_history/internal/entities"
+	"admin_history/internal/repository"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"strings"
 
-	"admin_history/internal/entities"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-type QuestionnaireRepo struct {
-	DB *pgxpool.Pool
-}
 
 const (
 	questionnaireByIDQuery = `SELECT id, user_id, history, storyboard, status, payment, created_at, answers
 FROM questionnaires WHERE id = $1 order by created_at desc`
-	//	photosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, scene
-	//FROM photos WHERE questionnaire_id = $1 ORDER BY id`
-	//	generatePhotosByQuestionnaireIDQuery = `SELECT id, questionnaire_id, path, NULL::text as scene
-	//FROM generate_photos WHERE questionnaire_id = $1 ORDER BY id`
 	listQuestionnairesQuery = `SELECT id, user_id, answers, history, storyboard, status, payment, created_at
 FROM questionnaires
 ORDER BY id
 LIMIT $1 OFFSET $2;`
-	//	insertPhotoQuery = `INSERT INTO photos (questionnaire_id, path, scene, created_at)
-	//VALUES ($1, $2, $3, NOW())
-	//ON CONFLICT (questionnaire_id, path) DO UPDATE
-	//SET scene = COALESCE(EXCLUDED.scene, photos.scene);`
-	//	insertGeneratePhotoQuery = `INSERT INTO generate_photos (questionnaire_id, path, created_at)
-	//VALUES ($1, $2, NOW())
-	//ON CONFLICT (questionnaire_id, path) DO NOTHING;`
+	updateQuestionnaireStatusQuery = `UPDATE questionnaires SET status = $2 WHERE id = $1`
 )
 
-func (r *Repository) GetQuestionnaire(ctx context.Context, q *entities.Questionnaire) (*entities.Questionnaire, error) {
+type Repo struct {
+	db *pgxpool.Pool
+}
+
+func New(db *pgxpool.Pool) repository.QuestionnaireRepository {
+	return &Repo{db: db}
+}
+
+func (r *Repo) GetQuestionnaire(ctx context.Context, q *entities.Questionnaire) (*entities.Questionnaire, error) {
 	qDTO := q.ToDTO()
-	if err := r.DB.QueryRow(ctx, questionnaireByIDQuery, qDTO.ID).Scan(
-		&q.ID, &q.UserID, &q.History, &q.Storyboard, &q.Status, &q.Payment, &q.CreatedAt, &q.Answers,
+	var storyboard sql.NullString
+	if err := r.db.QueryRow(ctx, questionnaireByIDQuery, qDTO.ID).Scan(
+		&q.ID, &q.UserID, &q.History, &storyboard, &q.Status, &q.Payment, &q.CreatedAt, &q.Answers,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, pgx.ErrNoRows
 		}
 		return nil, fmt.Errorf("get questionnaire: %w", err)
 	}
+	if storyboard.Valid {
+		q.Storyboard = storyboard.String
+	} else {
+		q.Storyboard = ""
+	}
 
 	return q, nil
 }
 
-func (r *Repository) CountQuestionnaires(ctx context.Context, f entities.QuestionnaireFilter) (int64, error) {
+func (r *Repo) CountQuestionnaires(ctx context.Context, f entities.QuestionnaireFilter) (int64, error) {
 	var (
 		args  []any
 		where []string
@@ -89,13 +91,13 @@ func (r *Repository) CountQuestionnaires(ctx context.Context, f entities.Questio
 
 	var total int64
 	q := "SELECT COUNT(*) FROM questionnaires " + whereSQL
-	if err := r.DB.QueryRow(ctx, q, args...).Scan(&total); err != nil {
+	if err := r.db.QueryRow(ctx, q, args...).Scan(&total); err != nil {
 		return 0, err
 	}
 	return total, nil
 }
 
-func (r *Repository) GetQuestionnairesList(
+func (r *Repo) GetQuestionnairesList(
 	ctx context.Context,
 	page, limit int32,
 	f entities.QuestionnaireFilter,
@@ -138,7 +140,7 @@ WHERE 1=1`)
 	if f.DateFrom != nil {
 		i++
 		sb.WriteString(fmt.Sprintf(" AND created_at >= $%d", i))
-		args = append(args, *f.DateFrom) // time.Time → драйвер передаст timestamptz
+		args = append(args, *f.DateFrom)
 	}
 	if f.DateTo != nil {
 		i++
@@ -152,7 +154,7 @@ WHERE 1=1`)
 	i++
 	sb.WriteString(fmt.Sprintf(" OFFSET $%d", i))
 	args = append(args, offset)
-	rows, err := r.DB.Query(ctx, sb.String(), args...)
+	rows, err := r.db.Query(ctx, sb.String(), args...)
 	if err != nil {
 		return nil, fmt.Errorf("list questionnaires: %w", err)
 	}
@@ -160,17 +162,21 @@ WHERE 1=1`)
 	out := make([]entities.Questionnaire, 0, limit)
 	for rows.Next() {
 		var item entities.Questionnaire
+		var storyboard sql.NullString
 		if err := rows.Scan(
 			&item.ID,
 			&item.UserID,
 			&item.Answers,
 			&item.History,
-			&item.Storyboard,
+			&storyboard,
 			&item.Status,
 			&item.Payment,
 			&item.CreatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan questionnaire: %w", err)
+		}
+		if storyboard.Valid {
+			item.Storyboard = storyboard.String
 		}
 		out = append(out, item)
 	}
@@ -180,7 +186,7 @@ WHERE 1=1`)
 	return out, nil
 }
 
-func (r *Repository) UpdateQuestionnaire(ctx context.Context, q *entities.Questionnaire) error {
+func (r *Repo) UpdateQuestionnaire(ctx context.Context, q *entities.Questionnaire) error {
 	if q == nil || q.ID == 0 {
 		return fmt.Errorf("invalid questionnaire")
 	}
@@ -210,7 +216,7 @@ func (r *Repository) UpdateQuestionnaire(ctx context.Context, q *entities.Questi
 
 	sql := fmt.Sprintf(`UPDATE questionnaires SET %s WHERE id = $1`, strings.Join(set, ", "))
 
-	tag, err := r.DB.Exec(ctx, sql, args...)
+	tag, err := r.db.Exec(ctx, sql, args...)
 	if err != nil {
 		return fmt.Errorf("update questionnaires: %w", err)
 	}
@@ -219,3 +225,20 @@ func (r *Repository) UpdateQuestionnaire(ctx context.Context, q *entities.Questi
 	}
 	return nil
 }
+
+func (r *Repo) SetQuestionnaireStatus(ctx context.Context, questionnaireID int64, status bool) error {
+	if questionnaireID <= 0 {
+		return fmt.Errorf("invalid questionnaire id")
+	}
+
+	tag, err := r.db.Exec(ctx, updateQuestionnaireStatusQuery, questionnaireID, status)
+	if err != nil {
+		return fmt.Errorf("set questionnaire status: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
+var _ repository.QuestionnaireRepository = (*Repo)(nil)

@@ -1,12 +1,14 @@
-package postgres
+package review
 
 import (
 	"admin_history/internal/entities"
+	"admin_history/internal/repository"
 	"context"
 	"fmt"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -14,9 +16,17 @@ const (
 FROM reviews WHERE id = $1;`
 )
 
-func (r *Repository) GetReview(ctx context.Context, review *entities.Review) (*entities.Review, error) {
+type Repo struct {
+	db *pgxpool.Pool
+}
+
+func New(db *pgxpool.Pool) repository.ReviewRepository {
+	return &Repo{db: db}
+}
+
+func (r *Repo) GetReview(ctx context.Context, review *entities.Review) (*entities.Review, error) {
 	reviewDTO := review.ToDTO()
-	err := r.DB.QueryRow(ctx, reviewByIDQuery, reviewDTO.ID).Scan(
+	err := r.db.QueryRow(ctx, reviewByIDQuery, reviewDTO.ID).Scan(
 		&review.ID, &review.UserID, &review.Description, &review.CreatedAt,
 	)
 	if err != nil {
@@ -28,7 +38,7 @@ func (r *Repository) GetReview(ctx context.Context, review *entities.Review) (*e
 	return review, nil
 }
 
-func (r *Repository) CountReviews(ctx context.Context, f entities.ReviewFilter) (int64, error) {
+func (r *Repo) CountReviews(ctx context.Context, f entities.ReviewFilter) (int64, error) {
 	sb := strings.Builder{}
 	sb.WriteString(`SELECT COUNT(*) FROM reviews WHERE 1=1`)
 	args := make([]any, 0, 3)
@@ -51,13 +61,13 @@ func (r *Repository) CountReviews(ctx context.Context, f entities.ReviewFilter) 
 	}
 
 	var total int64
-	if err := r.DB.QueryRow(ctx, sb.String(), args...).Scan(&total); err != nil {
+	if err := r.db.QueryRow(ctx, sb.String(), args...).Scan(&total); err != nil {
 		return 0, fmt.Errorf("count reviews: %w", err)
 	}
 	return total, nil
 }
 
-func (r *Repository) ReviewsList(
+func (r *Repo) ReviewsList(
 	ctx context.Context,
 	page, limit int32,
 	f entities.ReviewFilter,
@@ -106,7 +116,7 @@ WHERE 1=1`)
 	sb.WriteString(fmt.Sprintf(` OFFSET $%d`, i))
 	args = append(args, offset)
 
-	rows, err := r.DB.Query(ctx, sb.String(), args...)
+	rows, err := r.db.Query(ctx, sb.String(), args...)
 	if err != nil {
 		return nil, fmt.Errorf("list reviews: %w", err)
 	}
@@ -127,3 +137,5 @@ WHERE 1=1`)
 	}
 	return out, nil
 }
+
+var _ repository.ReviewRepository = (*Repo)(nil)

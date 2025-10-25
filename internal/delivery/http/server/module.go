@@ -5,6 +5,8 @@ import (
 	"admin_history/internal/delivery/http/middleware"
 	"admin_history/internal/storage"
 	"admin_history/internal/usecase"
+	"path/filepath"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -23,6 +25,9 @@ func NewServer(
 			if dir := st.PublicDir(); dir != "" {
 				engine.Static(route, dir)
 			}
+		}
+		if base := st.BaseDir(); base != "" {
+			engine.Static("/videos", filepath.Join(base, "videos"))
 		}
 	}
 

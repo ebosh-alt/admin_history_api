@@ -18,7 +18,7 @@ func (u *Usecase) GetUser(ctx context.Context, req *protos.UserRequest) (*protos
 		return nil, errors.New("user id is required")
 	}
 	user := &entities.User{ID: userId}
-	user, err := u.Postgres.GetUser(ctx, user)
+	user, err := u.users.GetUser(ctx, user)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
@@ -98,11 +98,11 @@ func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (
 		f.MapBinding = &v
 	}
 
-	items, err := u.Postgres.UsersList(ctx, page, limit, f)
+	items, err := u.users.UsersList(ctx, page, limit, f)
 	if err != nil {
 		return nil, fmt.Errorf("users list: %w", err)
 	}
-	countUsers, err := u.Postgres.CountUsers(ctx, f)
+	countUsers, err := u.users.CountUsers(ctx, f)
 
 	rows := make([]*protos.User, 0, len(items))
 	for i := range items {
@@ -154,7 +154,7 @@ func (u *Usecase) UpdateUser(ctx context.Context, req *protos.UpdateUserRequest)
 		Status:        req.User.Status,
 		AcceptedOffer: req.User.AcceptedOffer,
 	}
-	err := u.Postgres.UpdateUser(ctx, user)
+	err := u.users.UpdateUser(ctx, user)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return &protos.Status{
 			Ok:      true,

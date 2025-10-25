@@ -172,10 +172,9 @@ func (s *Server) UpdateQuestionnaire(c *gin.Context) {
 
 // SubmitQuestionnaireMedia godoc
 // @Summary      Сохранить медиа анкеты
-// @Description  Сохраняет медиа анкеты, поддерживает multipart/form-data и JSON
+// @Description  Сохраняет медиа анкеты. Поддерживает multipart/form-data (для загрузки файлов) и JSON (тело SubmitQuestionnaireMediaRequest)
 // @Tags         questionnaires
 // @Accept       multipart/form-data
-// @Accept       json
 // @Produce      json
 // @Param        questionnaire_id       formData  int     true   "ID анкеты"
 // @Param        user_id                formData  int     true   "ID пользователя (chat_id в Telegram)"

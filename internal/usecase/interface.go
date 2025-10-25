@@ -38,7 +38,7 @@ type InterfacePhotoUsecase interface {
 
 type InterfaceVideoUsecase interface {
 	GetVideosQuestionnaire(ctx context.Context, req *protos.VideoRequest) (*protos.VideoResponse, error)
-	UploadVideo(ctx context.Context, r io.Reader, filename string, video *protos.Video) (*protos.Status, error)
+	UploadVideo(ctx context.Context, r io.Reader, filename string, contentType string, video *protos.Video) (*protos.Status, error)
 }
 
 type MediaUpload struct {

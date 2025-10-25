@@ -1,12 +1,14 @@
-package postgres
+package user
 
 import (
 	"admin_history/internal/entities"
+	"admin_history/internal/repository"
 	"context"
 	"fmt"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -25,6 +27,10 @@ WHERE id = $1
 RETURNING id, username, language, ref_boss_id, status, accepted_offer, created_at, promocode, age, gender, map_binding;
 `
 )
+
+type Repo struct {
+	db *pgxpool.Pool
+}
 
 func appendPromocodeCondition(sb *strings.Builder, column string, idx *int, args *[]any, promoPtr *string) {
 	if promoPtr == nil {
@@ -53,9 +59,13 @@ func appendPromocodeCondition(sb *strings.Builder, column string, idx *int, args
 	sb.WriteString(")")
 }
 
-func (r *Repository) GetUser(ctx context.Context, user *entities.User) (*entities.User, error) {
+func New(db *pgxpool.Pool) repository.UserRepository {
+	return &Repo{db: db}
+}
+
+func (r *Repo) GetUser(ctx context.Context, user *entities.User) (*entities.User, error) {
 	userDTO := &entities.UserDTO{}
-	err := r.DB.QueryRow(ctx, userByIDQuery, user.ID).Scan(
+	err := r.db.QueryRow(ctx, userByIDQuery, user.ID).Scan(
 		&userDTO.ID, &userDTO.Username, &userDTO.Language, &userDTO.RefBossID, &userDTO.Status, &userDTO.AcceptedOffer, &userDTO.CreatedAt, &userDTO.Promocode, &userDTO.Age, &userDTO.Gender, &userDTO.MapBinding,
 	)
 	if err != nil {
@@ -64,7 +74,7 @@ func (r *Repository) GetUser(ctx context.Context, user *entities.User) (*entitie
 	return userDTO.ToEntity(), nil
 }
 
-func (r *Repository) CountUsers(ctx context.Context, f entities.UsersFilter) (int64, error) {
+func (r *Repo) CountUsers(ctx context.Context, f entities.UsersFilter) (int64, error) {
 	sb := strings.Builder{}
 	sb.WriteString(`SELECT COUNT(*) FROM users WHERE 1=1`)
 	args := make([]any, 0, 8)
@@ -113,13 +123,13 @@ func (r *Repository) CountUsers(ctx context.Context, f entities.UsersFilter) (in
 	}
 
 	var total int64
-	if err := r.DB.QueryRow(ctx, sb.String(), args...).Scan(&total); err != nil {
+	if err := r.db.QueryRow(ctx, sb.String(), args...).Scan(&total); err != nil {
 		return 0, fmt.Errorf("count users: %w", err)
 	}
 	return total, nil
 }
 
-func (r *Repository) UsersList(
+func (r *Repo) UsersList(
 	ctx context.Context,
 	page, limit int32,
 	f entities.UsersFilter,
@@ -199,7 +209,7 @@ WHERE 1=1`)
 	sb.WriteString(fmt.Sprintf(` OFFSET $%d`, i))
 	args = append(args, offset)
 
-	rows, err := r.DB.Query(ctx, sb.String(), args...)
+	rows, err := r.db.Query(ctx, sb.String(), args...)
 	if err != nil {
 		return nil, fmt.Errorf("users list with stats: %w", err)
 	}
@@ -222,9 +232,9 @@ WHERE 1=1`)
 	return out, nil
 }
 
-func (r *Repository) UpdateUser(ctx context.Context, user *entities.User) error {
+func (r *Repo) UpdateUser(ctx context.Context, user *entities.User) error {
 	userDTO := user.ToDTO()
-	tag, err := r.DB.Exec(ctx, updateUserQuery,
+	tag, err := r.db.Exec(ctx, updateUserQuery,
 		userDTO.ID,
 		userDTO.Username,
 		userDTO.Language,
@@ -245,4 +255,4 @@ func (r *Repository) UpdateUser(ctx context.Context, user *entities.User) error 
 	return nil
 }
 
-var _ InterfaceRepo = (*Repository)(nil)
+var _ repository.UserRepository = (*Repo)(nil)

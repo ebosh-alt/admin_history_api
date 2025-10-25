@@ -2,10 +2,11 @@ package server
 
 import (
 	protos "admin_history/pkg/proto/gen/go"
-	"github.com/gin-gonic/gin"
 	"mime/multipart"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 // GetPhotosQuestionnaire godoc

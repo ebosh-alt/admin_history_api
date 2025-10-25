@@ -1,35 +1,30 @@
 package app
 
 import (
+	"admin_history/config"
 	"admin_history/internal/delivery/http/middleware"
 	"admin_history/internal/delivery/http/server"
+	"admin_history/internal/repository"
+	"admin_history/internal/repository/postgres"
 	"admin_history/internal/storage"
-	"admin_history/internal/telegram"
+	"admin_history/internal/usecase"
+	"admin_history/pkg/telegram"
 	"context"
 
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
-
-	"admin_history/config"
-	"admin_history/internal/repository/postgres"
-	"admin_history/internal/usecase"
 )
 
 func New() *fx.App {
 	return fx.New(
+		repository.Module(postgres.Module()),
 		// --- Provide all dependencies ---
 		fx.Provide(
 			// базовые
 			context.Background,
 			config.NewConfig,
 			zap.NewDevelopment,
-
-			// Postgres-репозиторий и его интерфейс
-			postgres.NewRepository,
-			func(r *postgres.Repository) postgres.InterfaceRepo {
-				return r
-			},
 
 			// Usecase и его интерфейс
 			usecase.NewUsecase,
@@ -43,13 +38,6 @@ func New() *fx.App {
 			middleware.NewMiddleware,
 			server.NewServer,
 		),
-		// Lifecycle: сначала поднимаем репозиторий
-		fx.Invoke(func(lc fx.Lifecycle, repo *postgres.Repository) {
-			lc.Append(fx.Hook{
-				OnStart: repo.OnStart,
-				OnStop:  repo.OnStop,
-			})
-		}),
 		// --- Hook server lifecycle ---
 		fx.Invoke(func(lc fx.Lifecycle, srv *server.Server) {
 			lc.Append(fx.Hook{

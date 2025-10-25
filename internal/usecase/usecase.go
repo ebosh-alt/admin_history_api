@@ -2,22 +2,29 @@ package usecase
 
 import (
 	"admin_history/config"
-	"admin_history/internal/repository/postgres"
+	"admin_history/internal/repository"
 	"admin_history/internal/storage"
-	"admin_history/internal/telegram"
 	protos "admin_history/pkg/proto/gen/go"
+	"admin_history/pkg/telegram"
 	"context"
 
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
 type Usecase struct {
-	cfg      *config.Config
-	log      *zap.Logger
-	Postgres postgres.InterfaceRepo
-	ctx      context.Context
-	st       *storage.FS
-	tg       *telegram.Client
+	cfg *config.Config
+	log *zap.Logger
+	ctx context.Context
+	st  *storage.FS
+	tg  *telegram.Client
+
+	users          repository.UserRepository
+	questionnaires repository.QuestionnaireRepository
+	photos         repository.PhotoRepository
+	videos         repository.VideoRepository
+	promoCodes     repository.PromoCodeRepository
+	reviews        repository.ReviewRepository
 }
 
 func (u *Usecase) GetChat(ctx context.Context, req *protos.ChatRequest) (*protos.ChatResponse, error) {
@@ -35,21 +42,37 @@ func (u *Usecase) GetStatistics(ctx context.Context, req *protos.StatisticsReque
 	panic("implement me")
 }
 
+type RepositoryDeps struct {
+	fx.In
+
+	Users          repository.UserRepository
+	Questionnaires repository.QuestionnaireRepository
+	Photos         repository.PhotoRepository
+	Videos         repository.VideoRepository
+	PromoCodes     repository.PromoCodeRepository
+	Reviews        repository.ReviewRepository
+}
+
 func NewUsecase(
 	logger *zap.Logger,
-	Postgres postgres.InterfaceRepo,
 	cfg *config.Config,
 	ctx context.Context,
 	st *storage.FS,
 	tg *telegram.Client,
+	repos RepositoryDeps,
 ) (*Usecase, error) {
 	return &Usecase{
-		cfg:      cfg,
-		log:      logger,
-		Postgres: Postgres,
-		ctx:      ctx,
-		st:       st,
-		tg:       tg,
+		cfg:            cfg,
+		log:            logger,
+		ctx:            ctx,
+		st:             st,
+		tg:             tg,
+		users:          repos.Users,
+		questionnaires: repos.Questionnaires,
+		photos:         repos.Photos,
+		videos:         repos.Videos,
+		promoCodes:     repos.PromoCodes,
+		reviews:        repos.Reviews,
 	}, nil
 }
 

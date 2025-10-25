@@ -15,9 +15,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// /2025-10-22T20:12:00.340+0300    ERROR   usecase/video.go:118    send final media failed {"error": "call telegram sendPhoto: Post \"https://api.telegram.org/bot7858517388:AAEoU0Or3bii3yfv4pmQR7d2Oxl8_AJZBkA/sendPhoto\": net/http: TLS handshake timeout", "user_id": 686171972, "questionnaire_id": 1}
 const demoCaption = `Вот демо-версия вашей истории 🎬✨
 
-Если нравится — оплатите и получите полную версию без водяных (ВОДНЫХ) знаков + бонус: все фото в стиле Disney!
+Если нравится — оплатите и получите полную версию без водяных знаков + бонус: все фото в стиле Disney!
 
 📲 Больше примеров и идей:
 VK: https://vk.com/istoriym
@@ -56,11 +57,11 @@ func (u *Usecase) GetQuestionnairesList(ctx context.Context, req *protos.Questio
 		f.UserID = &v
 	}
 
-	items, err := u.Postgres.GetQuestionnairesList(ctx, req.Page, req.Limit, f)
+	items, err := u.questionnaires.GetQuestionnairesList(ctx, req.Page, req.Limit, f)
 	if err != nil {
 		return nil, err
 	}
-	count, err := u.Postgres.CountQuestionnaires(ctx, f)
+	count, err := u.questionnaires.CountQuestionnaires(ctx, f)
 	resp := &protos.QuestionnairesListResponse{
 		Questionnaires: make([]*protos.Questionnaire, 0, len(items)),
 		Total:          count,
@@ -75,7 +76,7 @@ func (u *Usecase) GetQuestionnaire(ctx context.Context, req *protos.Questionnair
 	if req == nil || req.Id <= 0 {
 		return nil, fmt.Errorf("bad id")
 	}
-	q, err := u.Postgres.GetQuestionnaire(ctx, &entities.Questionnaire{ID: req.Id})
+	q, err := u.questionnaires.GetQuestionnaire(ctx, &entities.Questionnaire{ID: req.Id})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("user not found")
@@ -95,7 +96,7 @@ func (u *Usecase) UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQue
 		return nil, err
 	}
 
-	if err := u.Postgres.UpdateQuestionnaire(ctx, ent); err != nil {
+	if err := u.questionnaires.UpdateQuestionnaire(ctx, ent); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &protos.Status{Ok: false, Message: "questionnaire not found"}, nil
 		}
@@ -117,6 +118,7 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 	}
 
 	qID := req.QuestionnaireId
+	mediaAdded := false
 
 	if media != nil {
 		demoPhotoPaths, err := u.savePhotoFiles(ctx, media.DemoPhotos)
@@ -183,14 +185,36 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 		}
 	}
 
+	demoPhotoSet := make(map[string]struct{}, len(req.DemoPhotos))
 	demoPhotos := make([]string, 0, len(req.DemoPhotos))
 	for _, rel := range req.DemoPhotos {
 		if abs := resolveStoragePath(rel); abs != "" {
+			if _, exists := demoPhotoSet[abs]; exists {
+				continue
+			}
+			demoPhotoSet[abs] = struct{}{}
 			demoPhotos = append(demoPhotos, abs)
 		}
 	}
 
 	demoVideoPath := resolveStoragePath(req.GetDemoVideo())
+
+	if u.photos != nil {
+		photos, err := u.photos.GetPhotosQuestionnaire(ctx, qID, "demo")
+		if err != nil {
+			u.log.Warn("load demo photos failed", zap.Error(err), zap.Int64("questionnaire_id", qID))
+		} else {
+			for _, photo := range photos {
+				if abs := resolveStoragePath(photo.Path); abs != "" {
+					if _, exists := demoPhotoSet[abs]; exists {
+						continue
+					}
+					demoPhotoSet[abs] = struct{}{}
+					demoPhotos = append(demoPhotos, abs)
+				}
+			}
+		}
+	}
 
 	if u.tg != nil && (len(demoPhotos) > 0 || demoVideoPath != "") {
 		if err := u.tg.SendDemoMedia(ctx, req.UserId, qID, demoPhotos, demoVideoPath, demoCaption); err != nil {
@@ -210,9 +234,10 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 			Scene:           "demo",
 			TypePhoto:       "demo",
 		}
-		if err := u.Postgres.UploadPhoto(ctx, &ent); err != nil {
+		if err := u.photos.UploadPhoto(ctx, &ent); err != nil {
 			return nil, err
 		}
+		mediaAdded = true
 	}
 
 	for _, p := range req.FinalPhotos {
@@ -238,9 +263,10 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 			Scene:           scene,
 			TypePhoto:       typePhoto,
 		}
-		if err := u.Postgres.UploadPhoto(ctx, &ent); err != nil {
+		if err := u.photos.UploadPhoto(ctx, &ent); err != nil {
 			return nil, err
 		}
+		mediaAdded = true
 	}
 
 	if video := req.GetGeneratedVideo(); video != nil {
@@ -255,9 +281,10 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 				Path:            path,
 				TypeVideo:       typeVideo,
 			}
-			if err := u.Postgres.UploadVideo(ctx, &ent); err != nil {
+			if err := u.videos.UploadVideo(ctx, &ent); err != nil {
 				return nil, err
 			}
+			mediaAdded = true
 		}
 	}
 
@@ -267,7 +294,14 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 			Path:            demo,
 			TypeVideo:       "demo",
 		}
-		if err := u.Postgres.UploadVideo(ctx, &ent); err != nil {
+		if err := u.videos.UploadVideo(ctx, &ent); err != nil {
+			return nil, err
+		}
+		mediaAdded = true
+	}
+
+	if mediaAdded {
+		if err := u.questionnaires.SetQuestionnaireStatus(ctx, qID, true); err != nil {
 			return nil, err
 		}
 	}
@@ -341,6 +375,13 @@ func (u *Usecase) saveVideoFile(ctx context.Context, hdr *multipart.FileHeader) 
 	defer src.Close()
 
 	ext := normalizeVideoExt(hdr.Filename)
+	if ext == ".bin" {
+		if ct := hdr.Header.Get("Content-Type"); ct != "" {
+			if alt := normalizeVideoExt(ct); alt != ".bin" {
+				ext = alt
+			}
+		}
+	}
 	rel, err := u.st.SaveTo(ctx, "videos", src, ext)
 	if err != nil {
 		return "", fmt.Errorf("save video: %w", err)

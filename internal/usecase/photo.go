@@ -5,10 +5,11 @@ import (
 	protos "admin_history/pkg/proto/gen/go"
 	"context"
 	"fmt"
-	"go.uber.org/zap"
 	"io"
 	"path/filepath"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 func (u *Usecase) GetPhotosQuestionnaire(ctx context.Context, req *protos.PhotoRequest) (*protos.PhotoResponse, error) {
@@ -17,7 +18,7 @@ func (u *Usecase) GetPhotosQuestionnaire(ctx context.Context, req *protos.PhotoR
 	if qType == "" {
 		qType = "original"
 	}
-	photo, err := u.Postgres.GetPhotosQuestionnaire(ctx, qID, qType)
+	photo, err := u.photos.GetPhotosQuestionnaire(ctx, qID, qType)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,13 @@ func (u *Usecase) UploadPhoto(ctx context.Context, r io.Reader, filename string,
 		TypePhoto:       normalizePhotoType(photo.TypePhoto),
 	}
 
-	if err := u.Postgres.UploadPhoto(ctx, &ent); err != nil {
+	if err := u.photos.UploadPhoto(ctx, &ent); err != nil {
+		if dd := u.st.Remove(ctx, relPath); dd != nil {
+			u.log.Warn("cleanup remove file failed", zap.String("path", relPath), zap.Error(dd))
+		}
+		return nil, err
+	}
+	if err := u.questionnaires.SetQuestionnaireStatus(ctx, photo.QuestionnaireId, true); err != nil {
 		if dd := u.st.Remove(ctx, relPath); dd != nil {
 			u.log.Warn("cleanup remove file failed", zap.String("path", relPath), zap.Error(dd))
 		}
@@ -82,6 +89,9 @@ func normalizeExt(name string) string {
 
 func normalizePhotoType(t string) string {
 	t = strings.ToLower(strings.TrimSpace(t))
+	if t == "" {
+		return "original" // или другой тип по умолчанию
+	}
 	if isAllowedPhotoType(t) {
 		return t
 	}

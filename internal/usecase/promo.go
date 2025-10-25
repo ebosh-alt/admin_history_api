@@ -19,7 +19,7 @@ func (u *Usecase) GetPromoCode(ctx context.Context, req *protos.PromoCodeRequest
 	}
 
 	promoCode := &entities.PromoCode{ID: req.Id}
-	promoCode, err := u.Postgres.GetPromoCode(ctx, promoCode)
+	promoCode, err := u.promoCodes.GetPromoCode(ctx, promoCode)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrPromoCodeNotFound
@@ -58,12 +58,12 @@ func (u *Usecase) PromoCodesList(ctx context.Context, req *protos.PromoCodesList
 		f.Status = &v
 	}
 
-	items, err := u.Postgres.PromoCodesList(ctx, page, limit, f)
+	items, err := u.promoCodes.PromoCodesList(ctx, page, limit, f)
 	if err != nil {
 		return nil, fmt.Errorf("promo codes list: %w", err)
 	}
 
-	count, err := u.Postgres.CountPromoCodes(ctx, f)
+	count, err := u.promoCodes.CountPromoCodes(ctx, f)
 	if err != nil {
 		return nil, fmt.Errorf("count promo codes: %w", err)
 	}
@@ -115,7 +115,7 @@ func (u *Usecase) CreatePromoCode(ctx context.Context, req *protos.CreatePromoCo
 		promoCode.Status = &status
 	}
 
-	err := u.Postgres.CreatePromoCode(ctx, promoCode)
+	err := u.promoCodes.CreatePromoCode(ctx, promoCode)
 	if err != nil {
 		return nil, fmt.Errorf("create promo code: %w", err)
 	}
@@ -160,7 +160,7 @@ func (u *Usecase) UpdatePromoCode(ctx context.Context, req *protos.UpdatePromoCo
 		promoCode.Status = &status
 	}
 
-	err := u.Postgres.UpdatePromoCode(ctx, promoCode)
+	err := u.promoCodes.UpdatePromoCode(ctx, promoCode)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrPromoCodeNotFound

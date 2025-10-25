@@ -1,11 +1,13 @@
-package postgres
+package video
 
 import (
 	"admin_history/internal/entities"
+	"admin_history/internal/repository"
 	"context"
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -30,7 +32,15 @@ const (
 	`
 )
 
-func (r *Repository) GetVideosQuestionnaire(ctx context.Context, questionnaireID int64, typeVideo string) ([]entities.Video, error) {
+type Repo struct {
+	db *pgxpool.Pool
+}
+
+func New(db *pgxpool.Pool) repository.VideoRepository {
+	return &Repo{db: db}
+}
+
+func (r *Repo) GetVideosQuestionnaire(ctx context.Context, questionnaireID int64, typeVideo string) ([]entities.Video, error) {
 	var (
 		rows pgx.Rows
 		err  error
@@ -38,9 +48,9 @@ func (r *Repository) GetVideosQuestionnaire(ctx context.Context, questionnaireID
 
 	switch {
 	case typeVideo == "", typeVideo == "all":
-		rows, err = r.DB.Query(ctx, listVideosByQIDQuery, questionnaireID)
+		rows, err = r.db.Query(ctx, listVideosByQIDQuery, questionnaireID)
 	default:
-		rows, err = r.DB.Query(ctx, listVideosByQIDTypeQuery, questionnaireID, typeVideo)
+		rows, err = r.db.Query(ctx, listVideosByQIDTypeQuery, questionnaireID, typeVideo)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("get videos: %w", err)
@@ -61,17 +71,17 @@ func (r *Repository) GetVideosQuestionnaire(ctx context.Context, questionnaireID
 	return items, nil
 }
 
-func (r *Repository) UploadVideo(ctx context.Context, video *entities.Video) error {
+func (r *Repo) UploadVideo(ctx context.Context, video *entities.Video) error {
 	if video == nil {
 		return fmt.Errorf("video payload is nil")
 	}
 
 	vDTO := video.ToDTO()
-	return r.DB.QueryRow(ctx, insertVideoQuery,
+	return r.db.QueryRow(ctx, insertVideoQuery,
 		vDTO.QuestionnaireID,
 		vDTO.Path,
 		vDTO.TypeVideo,
 	).Scan(&vDTO.ID, &vDTO.CreatedAt)
 }
 
-var _ InterfaceVideoRepo = (*Repository)(nil)
+var _ repository.VideoRepository = (*Repo)(nil)

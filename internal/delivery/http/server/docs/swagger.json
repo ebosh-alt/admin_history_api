@@ -1,8 +1,16 @@
 {
+    "schemes": [
+        "http"
+    ],
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "REST API для управления пользователями, анкетами, фотографиями и промокодами.",
+        "title": "Admin History API",
+        "contact": {},
+        "version": "1.0"
     },
+    "host": "localhost:3000",
+    "basePath": "/api",
     "paths": {
         "/photos": {
             "get": {
@@ -335,6 +343,12 @@
                         "description": "Дата по (unix или YYYY-MM-DD)",
                         "name": "date_to",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Фильтр по пользователю",
+                        "name": "user_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -352,6 +366,129 @@
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/questionnaires/media": {
+            "post": {
+                "description": "Сохраняет медиа анкеты. Поддерживает multipart/form-data (для загрузки файлов) и JSON (тело SubmitQuestionnaireMediaRequest)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "questionnaires"
+                ],
+                "summary": "Сохранить медиа анкеты",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID анкеты",
+                        "name": "questionnaire_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя (chat_id в Telegram)",
+                        "name": "user_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Демо-фотографии (можно несколько файлов)",
+                        "name": "demo_photos",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Финальные фото (можно несколько файлов)",
+                        "name": "final_photos",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Демо-видео",
+                        "name": "demo_video",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Сгенерированное видео",
+                        "name": "generated_video",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Фото для отправки пользователю",
+                        "name": "delivery_photo",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому демо-фото",
+                        "name": "demo_photo_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому финальному фото",
+                        "name": "final_photo_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к фото для отправки пользователю",
+                        "name": "delivery_photo_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому демо-видео",
+                        "name": "demo_video_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Путь к уже сохранённому сгенерированному видео",
+                        "name": "generated_video_path",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Подписи сцен для финальных фото (по порядку файлов)",
+                        "name": "final_photo_scene",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Дополнительный JSON (SubmitQuestionnaireMediaRequest)",
+                        "name": "payload",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.Status"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/server.ErrorResponse"
                         }
@@ -717,10 +854,102 @@
                     }
                 }
             }
+        },
+        "/videos": {
+            "get": {
+                "description": "Возвращает список видеозаписей анкеты",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "videos"
+                ],
+                "summary": "Получить видео анкеты",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID анкеты",
+                        "name": "questionnaire_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Тип видео",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.VideoResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/videos/upload": {
+            "post": {
+                "description": "Загружает видеозапись для анкеты",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "videos"
+                ],
+                "summary": "Загрузить видео",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID анкеты",
+                        "name": "questionnaire_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Тип видео",
+                        "name": "type",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Видео файл",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.Status"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "admin_history_pkg_proto_gen_go.Answer": {
+        "admin_history.Answer": {
             "type": "object",
             "properties": {
                 "answer": {
@@ -731,7 +960,7 @@
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.Photo": {
+        "admin_history.Photo": {
             "type": "object",
             "properties": {
                 "path": {
@@ -748,7 +977,7 @@
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.PromoCode": {
+        "admin_history.PromoCode": {
             "type": "object",
             "properties": {
                 "description": {
@@ -771,13 +1000,13 @@
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.Questionnaire": {
+        "admin_history.Questionnaire": {
             "type": "object",
             "properties": {
                 "answers": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Answer"
+                        "$ref": "#/definitions/admin_history.Answer"
                     }
                 },
                 "created_at": {
@@ -795,12 +1024,15 @@
                 "status": {
                     "type": "boolean"
                 },
+                "storyboard": {
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "integer"
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.Review": {
+        "admin_history.Review": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -817,7 +1049,7 @@
                 }
             }
         },
-        "admin_history_pkg_proto_gen_go.User": {
+        "admin_history.User": {
             "type": "object",
             "properties": {
                 "accepted_offer": {
@@ -864,11 +1096,25 @@
                 }
             }
         },
+        "admin_history.Video": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "questionnaire_id": {
+                    "type": "integer"
+                },
+                "type_video": {
+                    "type": "string"
+                }
+            }
+        },
         "server.CreatePromoCodeRequest": {
             "type": "object",
             "properties": {
                 "promo_code": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                    "$ref": "#/definitions/admin_history.PromoCode"
                 }
             }
         },
@@ -886,7 +1132,7 @@
                 "photo": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Photo"
+                        "$ref": "#/definitions/admin_history.Photo"
                     }
                 }
             }
@@ -895,7 +1141,7 @@
             "type": "object",
             "properties": {
                 "promo_code": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                    "$ref": "#/definitions/admin_history.PromoCode"
                 }
             }
         },
@@ -905,7 +1151,7 @@
                 "promo_codes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                        "$ref": "#/definitions/admin_history.PromoCode"
                     }
                 },
                 "total": {
@@ -917,7 +1163,7 @@
             "type": "object",
             "properties": {
                 "questionnaire": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Questionnaire"
+                    "$ref": "#/definitions/admin_history.Questionnaire"
                 }
             }
         },
@@ -927,7 +1173,7 @@
                 "questionnaires": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Questionnaire"
+                        "$ref": "#/definitions/admin_history.Questionnaire"
                     }
                 },
                 "total": {
@@ -939,7 +1185,7 @@
             "type": "object",
             "properties": {
                 "review": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Review"
+                    "$ref": "#/definitions/admin_history.Review"
                 }
             }
         },
@@ -949,7 +1195,7 @@
                 "reviews": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Review"
+                        "$ref": "#/definitions/admin_history.Review"
                     }
                 },
                 "total": {
@@ -972,7 +1218,7 @@
             "type": "object",
             "properties": {
                 "promo_code": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.PromoCode"
+                    "$ref": "#/definitions/admin_history.PromoCode"
                 }
             }
         },
@@ -980,7 +1226,7 @@
             "type": "object",
             "properties": {
                 "questionnaire": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.Questionnaire"
+                    "$ref": "#/definitions/admin_history.Questionnaire"
                 }
             }
         },
@@ -988,7 +1234,7 @@
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.User"
+                    "$ref": "#/definitions/admin_history.User"
                 }
             }
         },
@@ -996,7 +1242,7 @@
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/admin_history_pkg_proto_gen_go.User"
+                    "$ref": "#/definitions/admin_history.User"
                 }
             }
         },
@@ -1009,7 +1255,18 @@
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/admin_history_pkg_proto_gen_go.User"
+                        "$ref": "#/definitions/admin_history.User"
+                    }
+                }
+            }
+        },
+        "server.VideoResponse": {
+            "type": "object",
+            "properties": {
+                "video": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/admin_history.Video"
                     }
                 }
             }

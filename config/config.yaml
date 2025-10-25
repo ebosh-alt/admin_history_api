@@ -20,6 +20,6 @@ Server:
 Pepper: "PASSWORD_PEPPER"
 
 Telegram:
-  token: ""
+  token: "7858517388:AAEoU0Or3bii3yfv4pmQR7d2Oxl8_AJZBkA"
   api_base_url: "https://api.telegram.org"
   timeout: "30s"

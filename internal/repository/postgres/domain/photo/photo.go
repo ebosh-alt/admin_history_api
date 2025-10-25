@@ -1,10 +1,13 @@
-package postgres
+package photo
 
 import (
 	"admin_history/internal/entities"
+	"admin_history/internal/repository"
 	"context"
 	"fmt"
+
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -25,7 +28,15 @@ const (
 	insertPhotoQuery = `INSERT INTO photos (questionnaire_id, path, scene, type, created_at) VALUES ($1, $2, $3, $4, NOW()) returning id`
 )
 
-func (r *Repository) GetPhotosQuestionnaire(ctx context.Context, questionnaireID int64, typePhoto string) ([]entities.Photo, error) {
+type Repo struct {
+	db *pgxpool.Pool
+}
+
+func New(db *pgxpool.Pool) repository.PhotoRepository {
+	return &Repo{db: db}
+}
+
+func (r *Repo) GetPhotosQuestionnaire(ctx context.Context, questionnaireID int64, typePhoto string) ([]entities.Photo, error) {
 
 	var (
 		rows pgx.Rows
@@ -34,10 +45,10 @@ func (r *Repository) GetPhotosQuestionnaire(ctx context.Context, questionnaireID
 
 	if typePhoto == "" || typePhoto == "all" {
 		const q = listPhotosByQIDQuery
-		rows, err = r.DB.Query(ctx, q, questionnaireID)
+		rows, err = r.db.Query(ctx, q, questionnaireID)
 	} else {
 		const q = listPhotosByQIDTypeQuery
-		rows, err = r.DB.Query(ctx, q, questionnaireID, typePhoto)
+		rows, err = r.db.Query(ctx, q, questionnaireID, typePhoto)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("get photos: %w", err)
@@ -58,9 +69,9 @@ func (r *Repository) GetPhotosQuestionnaire(ctx context.Context, questionnaireID
 	return out, nil
 }
 
-func (r *Repository) UploadPhoto(ctx context.Context, photo *entities.Photo) error {
+func (r *Repo) UploadPhoto(ctx context.Context, photo *entities.Photo) error {
 	pDTO := photo.ToDTO()
-	err := r.DB.QueryRow(ctx, insertPhotoQuery,
+	err := r.db.QueryRow(ctx, insertPhotoQuery,
 		pDTO.QuestionnaireID,
 		pDTO.Path,
 		pDTO.Scene,
@@ -72,4 +83,4 @@ func (r *Repository) UploadPhoto(ctx context.Context, photo *entities.Photo) err
 	return nil
 }
 
-var _ InterfacePhotoRepo = (*Repository)(nil)
+var _ repository.PhotoRepository = (*Repo)(nil)

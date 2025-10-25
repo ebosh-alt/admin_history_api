@@ -80,7 +80,8 @@ func (s *Server) UploadVideo(c *gin.Context) {
 		TypeVideo:       typeVideo,
 	}
 
-	resp, err := s.Usecase.UploadVideo(c, src, hdr.Filename, videoProto)
+	contentType := hdr.Header.Get("Content-Type")
+	resp, err := s.Usecase.UploadVideo(c, src, hdr.Filename, contentType, videoProto)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

@@ -1,12 +1,13 @@
+basePath: /api
 definitions:
-  admin_history_pkg_proto_gen_go.Answer:
+  admin_history.Answer:
     properties:
       answer:
         type: string
       question:
         type: string
     type: object
-  admin_history_pkg_proto_gen_go.Photo:
+  admin_history.Photo:
     properties:
       path:
         type: string
@@ -17,7 +18,7 @@ definitions:
       type_photo:
         type: string
     type: object
-  admin_history_pkg_proto_gen_go.PromoCode:
+  admin_history.PromoCode:
     properties:
       description:
         type: string
@@ -32,11 +33,11 @@ definitions:
       value:
         type: string
     type: object
-  admin_history_pkg_proto_gen_go.Questionnaire:
+  admin_history.Questionnaire:
     properties:
       answers:
         items:
-          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Answer'
+          $ref: '#/definitions/admin_history.Answer'
         type: array
       created_at:
         $ref: '#/definitions/timestamppb.Timestamp'
@@ -48,10 +49,12 @@ definitions:
         type: boolean
       status:
         type: boolean
+      storyboard:
+        type: string
       user_id:
         type: integer
     type: object
-  admin_history_pkg_proto_gen_go.Review:
+  admin_history.Review:
     properties:
       created_at:
         $ref: '#/definitions/timestamppb.Timestamp'
@@ -62,7 +65,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  admin_history_pkg_proto_gen_go.User:
+  admin_history.User:
     properties:
       accepted_offer:
         type: boolean
@@ -93,10 +96,19 @@ definitions:
       username:
         type: string
     type: object
+  admin_history.Video:
+    properties:
+      path:
+        type: string
+      questionnaire_id:
+        type: integer
+      type_video:
+        type: string
+    type: object
   server.CreatePromoCodeRequest:
     properties:
       promo_code:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+        $ref: '#/definitions/admin_history.PromoCode'
     type: object
   server.ErrorResponse:
     properties:
@@ -107,19 +119,19 @@ definitions:
     properties:
       photo:
         items:
-          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Photo'
+          $ref: '#/definitions/admin_history.Photo'
         type: array
     type: object
   server.PromoCodeResponse:
     properties:
       promo_code:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+        $ref: '#/definitions/admin_history.PromoCode'
     type: object
   server.PromoCodesListResponse:
     properties:
       promo_codes:
         items:
-          $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+          $ref: '#/definitions/admin_history.PromoCode'
         type: array
       total:
         type: integer
@@ -127,13 +139,13 @@ definitions:
   server.QuestionnaireResponse:
     properties:
       questionnaire:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.Questionnaire'
+        $ref: '#/definitions/admin_history.Questionnaire'
     type: object
   server.QuestionnairesListResponse:
     properties:
       questionnaires:
         items:
-          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Questionnaire'
+          $ref: '#/definitions/admin_history.Questionnaire'
         type: array
       total:
         type: integer
@@ -141,13 +153,13 @@ definitions:
   server.ReviewResponse:
     properties:
       review:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.Review'
+        $ref: '#/definitions/admin_history.Review'
     type: object
   server.ReviewsListResponse:
     properties:
       reviews:
         items:
-          $ref: '#/definitions/admin_history_pkg_proto_gen_go.Review'
+          $ref: '#/definitions/admin_history.Review'
         type: array
       total:
         type: integer
@@ -162,22 +174,22 @@ definitions:
   server.UpdatePromoCodeRequest:
     properties:
       promo_code:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.PromoCode'
+        $ref: '#/definitions/admin_history.PromoCode'
     type: object
   server.UpdateQuestionnaireRequest:
     properties:
       questionnaire:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.Questionnaire'
+        $ref: '#/definitions/admin_history.Questionnaire'
     type: object
   server.UpdateUserRequest:
     properties:
       user:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.User'
+        $ref: '#/definitions/admin_history.User'
     type: object
   server.UserResponse:
     properties:
       user:
-        $ref: '#/definitions/admin_history_pkg_proto_gen_go.User'
+        $ref: '#/definitions/admin_history.User'
     type: object
   server.UsersListResponse:
     properties:
@@ -185,7 +197,14 @@ definitions:
         type: integer
       users:
         items:
-          $ref: '#/definitions/admin_history_pkg_proto_gen_go.User'
+          $ref: '#/definitions/admin_history.User'
+        type: array
+    type: object
+  server.VideoResponse:
+    properties:
+      video:
+        items:
+          $ref: '#/definitions/admin_history.Video'
         type: array
     type: object
   timestamppb.Timestamp:
@@ -228,8 +247,12 @@ definitions:
         description: The string value.
         type: string
     type: object
+host: localhost:3000
 info:
   contact: {}
+  description: REST API для управления пользователями, анкетами, фотографиями и промокодами.
+  title: Admin History API
+  version: "1.0"
 paths:
   /photos:
     get:
@@ -448,6 +471,10 @@ paths:
         in: query
         name: date_to
         type: string
+      - description: Фильтр по пользователю
+        in: query
+        name: user_id
+        type: integer
       produces:
       - application/json
       responses:
@@ -487,6 +514,89 @@ paths:
           schema:
             $ref: '#/definitions/server.ErrorResponse'
       summary: Получить анкету
+      tags:
+      - questionnaires
+  /questionnaires/media:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Сохраняет медиа анкеты. Поддерживает multipart/form-data (для загрузки
+        файлов) и JSON (тело SubmitQuestionnaireMediaRequest)
+      parameters:
+      - description: ID анкеты
+        in: formData
+        name: questionnaire_id
+        required: true
+        type: integer
+      - description: ID пользователя (chat_id в Telegram)
+        in: formData
+        name: user_id
+        required: true
+        type: integer
+      - description: Демо-фотографии (можно несколько файлов)
+        in: formData
+        name: demo_photos
+        type: file
+      - description: Финальные фото (можно несколько файлов)
+        in: formData
+        name: final_photos
+        type: file
+      - description: Демо-видео
+        in: formData
+        name: demo_video
+        type: file
+      - description: Сгенерированное видео
+        in: formData
+        name: generated_video
+        type: file
+      - description: Фото для отправки пользователю
+        in: formData
+        name: delivery_photo
+        type: file
+      - description: Путь к уже сохранённому демо-фото
+        in: formData
+        name: demo_photo_path
+        type: string
+      - description: Путь к уже сохранённому финальному фото
+        in: formData
+        name: final_photo_path
+        type: string
+      - description: Путь к фото для отправки пользователю
+        in: formData
+        name: delivery_photo_path
+        type: string
+      - description: Путь к уже сохранённому демо-видео
+        in: formData
+        name: demo_video_path
+        type: string
+      - description: Путь к уже сохранённому сгенерированному видео
+        in: formData
+        name: generated_video_path
+        type: string
+      - description: Подписи сцен для финальных фото (по порядку файлов)
+        in: formData
+        name: final_photo_scene
+        type: string
+      - description: Дополнительный JSON (SubmitQuestionnaireMediaRequest)
+        in: formData
+        name: payload
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Сохранить медиа анкеты
       tags:
       - questionnaires
   /questionnaires/update:
@@ -703,4 +813,67 @@ paths:
       summary: Обновить пользователя
       tags:
       - users
+  /videos:
+    get:
+      description: Возвращает список видеозаписей анкеты
+      parameters:
+      - description: ID анкеты
+        in: query
+        name: questionnaire_id
+        required: true
+        type: integer
+      - description: Тип видео
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.VideoResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Получить видео анкеты
+      tags:
+      - videos
+  /videos/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает видеозапись для анкеты
+      parameters:
+      - description: ID анкеты
+        in: formData
+        name: questionnaire_id
+        required: true
+        type: integer
+      - description: Тип видео
+        in: formData
+        name: type
+        type: string
+      - description: Видео файл
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.Status'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.ErrorResponse'
+      summary: Загрузить видео
+      tags:
+      - videos
+schemes:
+- http
 swagger: "2.0"

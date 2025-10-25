@@ -17,7 +17,7 @@ func (u *Usecase) GetReview(ctx context.Context, req *protos.ReviewRequest) (*pr
 	}
 
 	review := &entities.Review{ID: req.Id}
-	review, err := u.Postgres.GetReview(ctx, review)
+	review, err := u.reviews.GetReview(ctx, review)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("review not found")
@@ -61,12 +61,12 @@ func (u *Usecase) ReviewsList(ctx context.Context, req *protos.ReviewsListReques
 		f.DateTo = &t
 	}
 
-	items, err := u.Postgres.ReviewsList(ctx, page, limit, f)
+	items, err := u.reviews.ReviewsList(ctx, page, limit, f)
 	if err != nil {
 		return nil, fmt.Errorf("reviews list: %w", err)
 	}
 
-	count, err := u.Postgres.CountReviews(ctx, f)
+	count, err := u.reviews.CountReviews(ctx, f)
 	if err != nil {
 		return nil, fmt.Errorf("count reviews: %w", err)
 	}
