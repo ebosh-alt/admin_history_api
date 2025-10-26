@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/spf13/viper"
 	"log/slog"
+
+	"github.com/spf13/viper"
 )
 
 func NewConfig() (*Config, error) {

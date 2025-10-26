@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"context"
+
 	"admin_history/internal/entities"
 	protos "admin_history/pkg/proto/gen/go"
-	"context"
 )
 
 type UserRepository interface {

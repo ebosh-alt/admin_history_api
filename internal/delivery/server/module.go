@@ -1,11 +1,12 @@
 package server
 
 import (
+	"path/filepath"
+
 	"admin_history/config"
 	"admin_history/internal/delivery/http/middleware"
 	"admin_history/internal/storage"
-	"admin_history/internal/usecase"
-	"path/filepath"
+	usecase "admin_history/internal/usecase"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -35,7 +36,7 @@ func NewServer(
 		log:        logger,
 		cfg:        cfg,
 		serv:       engine,
-		Usecase:    uc,
+		usecase:    uc,
 		middleware: middleware,
 	}, nil
 }

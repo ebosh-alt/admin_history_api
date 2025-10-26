@@ -1,19 +1,50 @@
-package usecase
+package questionnaire
 
 import (
-	"admin_history/internal/entities"
-	"admin_history/internal/misc"
-	protos "admin_history/pkg/proto/gen/go"
+	"admin_history/internal/repository"
+	"admin_history/internal/storage"
+	"admin_history/internal/usecase/domain/base"
+	"admin_history/pkg/telegram"
 	"context"
 	"errors"
 	"fmt"
 	"mime/multipart"
-	"path/filepath"
 	"strings"
+
+	"admin_history/internal/entities"
+	"admin_history/internal/misc"
+	protos "admin_history/pkg/proto/gen/go"
 
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 )
+
+type Usecase struct {
+	log               *zap.Logger
+	questionnaireRepo repository.QuestionnaireRepository
+	photoRepo         repository.PhotoRepository
+	videoRepo         repository.VideoRepository
+	st                *storage.FS
+	tg                *telegram.Client
+}
+
+func New(
+	log *zap.Logger,
+	questionnaireRepo repository.QuestionnaireRepository,
+	photoRepo repository.PhotoRepository,
+	videoRepo repository.VideoRepository,
+	st *storage.FS,
+	tg *telegram.Client,
+) *Usecase {
+	return &Usecase{
+		log:               log,
+		questionnaireRepo: questionnaireRepo,
+		photoRepo:         photoRepo,
+		videoRepo:         videoRepo,
+		st:                st,
+		tg:                tg,
+	}
+}
 
 // /2025-10-22T20:12:00.340+0300    ERROR   usecase/video.go:118    send final media failed {"error": "call telegram sendPhoto: Post \"https://api.telegram.org/bot7858517388:AAEoU0Or3bii3yfv4pmQR7d2Oxl8_AJZBkA/sendPhoto\": net/http: TLS handshake timeout", "user_id": 686171972, "questionnaire_id": 1}
 const demoCaption = `Вот демо-версия вашей истории 🎬✨
@@ -57,11 +88,11 @@ func (u *Usecase) GetQuestionnairesList(ctx context.Context, req *protos.Questio
 		f.UserID = &v
 	}
 
-	items, err := u.questionnaires.GetQuestionnairesList(ctx, req.Page, req.Limit, f)
+	items, err := u.questionnaireRepo.GetQuestionnairesList(ctx, req.Page, req.Limit, f)
 	if err != nil {
 		return nil, err
 	}
-	count, err := u.questionnaires.CountQuestionnaires(ctx, f)
+	count, err := u.questionnaireRepo.CountQuestionnaires(ctx, f)
 	resp := &protos.QuestionnairesListResponse{
 		Questionnaires: make([]*protos.Questionnaire, 0, len(items)),
 		Total:          count,
@@ -76,7 +107,7 @@ func (u *Usecase) GetQuestionnaire(ctx context.Context, req *protos.Questionnair
 	if req == nil || req.Id <= 0 {
 		return nil, fmt.Errorf("bad id")
 	}
-	q, err := u.questionnaires.GetQuestionnaire(ctx, &entities.Questionnaire{ID: req.Id})
+	q, err := u.questionnaireRepo.GetQuestionnaire(ctx, &entities.Questionnaire{ID: req.Id})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("user not found")
@@ -96,7 +127,7 @@ func (u *Usecase) UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQue
 		return nil, err
 	}
 
-	if err := u.questionnaires.UpdateQuestionnaire(ctx, ent); err != nil {
+	if err := u.questionnaireRepo.UpdateQuestionnaire(ctx, ent); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &protos.Status{Ok: false, Message: "questionnaire not found"}, nil
 		}
@@ -106,7 +137,7 @@ func (u *Usecase) UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQue
 	return &protos.Status{Ok: true, Message: "updated"}, nil
 }
 
-func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest, media *MediaUpload) (*protos.Status, error) {
+func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest, media *entities.MediaUpload) (*protos.Status, error) {
 	if req == nil {
 		return nil, fmt.Errorf("invalid request")
 	}
@@ -188,7 +219,7 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 	demoPhotoSet := make(map[string]struct{}, len(req.DemoPhotos))
 	demoPhotos := make([]string, 0, len(req.DemoPhotos))
 	for _, rel := range req.DemoPhotos {
-		if abs := resolveStoragePath(rel); abs != "" {
+		if abs := base.ResolveStoragePath(rel); abs != "" {
 			if _, exists := demoPhotoSet[abs]; exists {
 				continue
 			}
@@ -197,30 +228,28 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 		}
 	}
 
-	demoVideoPath := resolveStoragePath(req.GetDemoVideo())
+	demoVideoPath := base.ResolveStoragePath(req.GetDemoVideo())
 
-	if u.photos != nil {
-		photos, err := u.photos.GetPhotosQuestionnaire(ctx, qID, "demo")
-		if err != nil {
-			u.log.Warn("load demo photos failed", zap.Error(err), zap.Int64("questionnaire_id", qID))
-		} else {
-			for _, photo := range photos {
-				if abs := resolveStoragePath(photo.Path); abs != "" {
-					if _, exists := demoPhotoSet[abs]; exists {
-						continue
-					}
-					demoPhotoSet[abs] = struct{}{}
-					demoPhotos = append(demoPhotos, abs)
+	photos, err := u.photoRepo.GetPhotosQuestionnaire(ctx, qID, "demo")
+	if err != nil {
+		u.log.Warn("load demo photos failed", zap.Error(err), zap.Int64("questionnaire_id", qID))
+	} else {
+		for _, photo := range photos {
+			if abs := base.ResolveStoragePath(photo.Path); abs != "" {
+				if _, exists := demoPhotoSet[abs]; exists {
+					continue
 				}
+				demoPhotoSet[abs] = struct{}{}
+				demoPhotos = append(demoPhotos, abs)
 			}
 		}
 	}
 
-	if u.tg != nil && (len(demoPhotos) > 0 || demoVideoPath != "") {
-		if err := u.tg.SendDemoMedia(ctx, req.UserId, qID, demoPhotos, demoVideoPath, demoCaption); err != nil {
-			u.log.Error("send demo media failed", zap.Error(err), zap.Int64("user_id", req.UserId), zap.Int64("questionnaire_id", qID))
-			return nil, err
-		}
+	if len(demoPhotos) > 0 || demoVideoPath != "" {
+		//if err := u.tg.SendDemoMedia(ctx, req.UserId, qID, demoPhotos, demoVideoPath, demoCaption); err != nil {
+		//	u.log.Error("send demo media failed", zap.Error(err), zap.Int64("user_id", req.UserId), zap.Int64("questionnaire_id", qID))
+		//	return nil, err
+		//}
 	}
 
 	for _, path := range req.DemoPhotos {
@@ -234,7 +263,7 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 			Scene:           "demo",
 			TypePhoto:       "demo",
 		}
-		if err := u.photos.UploadPhoto(ctx, &ent); err != nil {
+		if err := u.photoRepo.UploadPhoto(ctx, &ent); err != nil {
 			return nil, err
 		}
 		mediaAdded = true
@@ -254,7 +283,7 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 			scene = "result"
 		}
 		typePhoto := strings.TrimSpace(p.GetTypePhoto())
-		if typePhoto == "" || !isAllowedPhotoType(typePhoto) {
+		if typePhoto == "" || !base.IsAllowedPhotoType(typePhoto) {
 			typePhoto = "send"
 		}
 		ent := entities.Photo{
@@ -263,7 +292,7 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 			Scene:           scene,
 			TypePhoto:       typePhoto,
 		}
-		if err := u.photos.UploadPhoto(ctx, &ent); err != nil {
+		if err := u.photoRepo.UploadPhoto(ctx, &ent); err != nil {
 			return nil, err
 		}
 		mediaAdded = true
@@ -273,7 +302,7 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 		path := strings.TrimSpace(video.GetPath())
 		if path != "" {
 			typeVideo := strings.TrimSpace(video.GetTypeVideo())
-			if typeVideo == "" || !isAllowedVideoType(typeVideo) {
+			if typeVideo == "" || !base.IsAllowedVideoType(typeVideo) {
 				typeVideo = "send"
 			}
 			ent := entities.Video{
@@ -281,7 +310,7 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 				Path:            path,
 				TypeVideo:       typeVideo,
 			}
-			if err := u.videos.UploadVideo(ctx, &ent); err != nil {
+			if err := u.videoRepo.UploadVideo(ctx, &ent); err != nil {
 				return nil, err
 			}
 			mediaAdded = true
@@ -294,14 +323,14 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 			Path:            demo,
 			TypeVideo:       "demo",
 		}
-		if err := u.videos.UploadVideo(ctx, &ent); err != nil {
+		if err := u.videoRepo.UploadVideo(ctx, &ent); err != nil {
 			return nil, err
 		}
 		mediaAdded = true
 	}
 
 	if mediaAdded {
-		if err := u.questionnaires.SetQuestionnaireStatus(ctx, qID, true); err != nil {
+		if err := u.questionnaireRepo.SetQuestionnaireStatus(ctx, qID, true); err != nil {
 			return nil, err
 		}
 	}
@@ -309,31 +338,9 @@ func (u *Usecase) SubmitQuestionnaireMedia(ctx context.Context, req *protos.Subm
 	return &protos.Status{Ok: true, Message: "saved"}, nil
 }
 
-func resolveStoragePath(path string) string {
-	path = strings.TrimSpace(path)
-	if path == "" {
-		return ""
-	}
-	if filepath.IsAbs(path) {
-		return path
-	}
-	trimmed := strings.TrimLeft(path, "/")
-	if trimmed == "" {
-		return ""
-	}
-	cleaned := filepath.Clean(filepath.FromSlash(trimmed))
-	if strings.HasPrefix(cleaned, "..") {
-		return ""
-	}
-	return filepath.Join("data", cleaned)
-}
-
 func (u *Usecase) savePhotoFiles(ctx context.Context, files []*multipart.FileHeader) ([]string, error) {
 	if len(files) == 0 {
 		return nil, nil
-	}
-	if u.st == nil {
-		return nil, fmt.Errorf("storage not configured")
 	}
 	saved := make([]string, 0, len(files))
 	for _, hdr := range files {
@@ -345,8 +352,13 @@ func (u *Usecase) savePhotoFiles(ctx context.Context, files []*multipart.FileHea
 			return nil, fmt.Errorf("open photo: %w", err)
 		}
 		func() {
-			defer src.Close()
-			ext := normalizeExt(hdr.Filename)
+			defer func(src multipart.File) {
+				err := src.Close()
+				if err != nil {
+
+				}
+			}(src)
+			ext := storage.NormalizeExt(hdr.Filename)
 			rel, saveErr := u.st.Save(ctx, src, ext)
 			if saveErr != nil {
 				err = fmt.Errorf("save photo: %w", saveErr)
@@ -365,19 +377,21 @@ func (u *Usecase) saveVideoFile(ctx context.Context, hdr *multipart.FileHeader) 
 	if hdr == nil {
 		return "", nil
 	}
-	if u.st == nil {
-		return "", fmt.Errorf("storage not configured")
-	}
 	src, err := hdr.Open()
 	if err != nil {
 		return "", fmt.Errorf("open video: %w", err)
 	}
-	defer src.Close()
+	defer func(src multipart.File) {
+		err := src.Close()
+		if err != nil {
 
-	ext := normalizeVideoExt(hdr.Filename)
+		}
+	}(src)
+
+	ext := base.NormalizeVideoExt(hdr.Filename)
 	if ext == ".bin" {
 		if ct := hdr.Header.Get("Content-Type"); ct != "" {
-			if alt := normalizeVideoExt(ct); alt != ".bin" {
+			if alt := base.NormalizeVideoExt(ct); alt != ".bin" {
 				ext = alt
 			}
 		}
@@ -389,7 +403,7 @@ func (u *Usecase) saveVideoFile(ctx context.Context, hdr *multipart.FileHeader) 
 	return rel, nil
 }
 
-func (u *Usecase) nextFinalScene(media *MediaUpload) string {
+func (u *Usecase) nextFinalScene(media *entities.MediaUpload) string {
 	if media == nil || len(media.FinalPhotoScenes) == 0 {
 		return "send"
 	}
@@ -399,26 +413,6 @@ func (u *Usecase) nextFinalScene(media *MediaUpload) string {
 		return "send"
 	}
 	return scene
-}
-
-func isAllowedPhotoType(t string) bool {
-	t = strings.ToLower(strings.TrimSpace(t))
-	switch t {
-	case "original", "generated", "send", "demo":
-		return true
-	default:
-		return false
-	}
-}
-
-func isAllowedVideoType(t string) bool {
-	t = strings.ToLower(strings.TrimSpace(t))
-	switch t {
-	case "send", "demo":
-		return true
-	default:
-		return false
-	}
 }
 
 func (u *Usecase) savePhotoFile(ctx context.Context, hdr *multipart.FileHeader) (string, error) {

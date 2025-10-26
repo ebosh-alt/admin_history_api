@@ -35,7 +35,6 @@ tmp/
 
 # Env/config
 .env
-.env.*
 secrets/
 TODO.md
 go.mod

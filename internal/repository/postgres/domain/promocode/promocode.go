@@ -1,13 +1,14 @@
 package promocode
 
 import (
-	"admin_history/internal/entities"
-	"admin_history/internal/repository"
-	"admin_history/internal/repository/postgres/base"
 	"context"
 	"errors"
 	"fmt"
 	"strings"
+
+	"admin_history/internal/entities"
+	"admin_history/internal/repository"
+	"admin_history/internal/repository/postgres/base"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

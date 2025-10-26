@@ -1,12 +1,42 @@
-package server
+package video
 
 import (
-	protos "admin_history/pkg/proto/gen/go"
-	"github.com/gin-gonic/gin"
+	"context"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"strconv"
+
+	protos "admin_history/pkg/proto/gen/go"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
+
+type Usecase interface {
+	GetVideosQuestionnaire(ctx context.Context, req *protos.VideoRequest) (*protos.VideoResponse, error)
+	UploadVideo(ctx context.Context, r io.Reader, filename string, contentType string, video *protos.Video) (*protos.Status, error)
+}
+
+type Handler struct {
+	log *zap.Logger
+	uc  Usecase
+}
+
+func New(log *zap.Logger, uc Usecase) *Handler {
+	return &Handler{
+		log: log,
+		uc:  uc,
+	}
+}
+
+func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
+	r.GET("", h.GetVideosQuestionnaire)
+	r.POST("/upload", h.UploadVideo)
+}
+
+var marshalJSON = protojson.MarshalOptions{EmitUnpopulated: true}
 
 // GetVideosQuestionnaire godoc
 // @Summary      Получить видео анкеты
@@ -18,7 +48,7 @@ import (
 // @Success      200               {object}  VideoResponse
 // @Failure      404               {object}  ErrorResponse
 // @Router       /videos [get]
-func (s *Server) GetVideosQuestionnaire(c *gin.Context) {
+func (h *Handler) GetVideosQuestionnaire(c *gin.Context) {
 	req := &protos.VideoRequest{}
 	if v := c.Query("questionnaire_id"); v != "" {
 		if n, err := strconv.ParseInt(v, 10, 32); err == nil {
@@ -29,12 +59,13 @@ func (s *Server) GetVideosQuestionnaire(c *gin.Context) {
 		req.Type = v
 	}
 
-	proto, err := s.Usecase.GetVideosQuestionnaire(c, req)
+	resp, err := h.uc.GetVideosQuestionnaire(c, req)
 	if err != nil {
+		h.log.Error("failed to get videos questionnaire", zap.Error(err), zap.Any("request", req))
 		c.JSON(http.StatusNotFound, gin.H{"message": "Не корректные данные"})
 		return
 	}
-	c.JSON(http.StatusOK, proto)
+	c.JSON(http.StatusOK, resp)
 }
 
 // UploadVideo godoc
@@ -49,8 +80,9 @@ func (s *Server) GetVideosQuestionnaire(c *gin.Context) {
 // @Success      200               {object}  Status
 // @Failure      400               {object}  ErrorResponse
 // @Router       /videos/upload [post]
-func (s *Server) UploadVideo(c *gin.Context) {
+func (h *Handler) UploadVideo(c *gin.Context) {
 	if err := c.Request.ParseMultipartForm(200 << 20); err != nil {
+		h.log.Error("invalid multipart form", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid multipart"})
 		return
 	}
@@ -68,7 +100,7 @@ func (s *Server) UploadVideo(c *gin.Context) {
 	}
 	defer func(src multipart.File) {
 		if err := src.Close(); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "error closing file"})
+			h.log.Warn("error closing file", zap.Error(err))
 		}
 	}(src)
 
@@ -81,7 +113,7 @@ func (s *Server) UploadVideo(c *gin.Context) {
 	}
 
 	contentType := hdr.Header.Get("Content-Type")
-	resp, err := s.Usecase.UploadVideo(c, src, hdr.Filename, contentType, videoProto)
+	resp, err := h.uc.UploadVideo(c, src, hdr.Filename, contentType, videoProto)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -90,5 +122,3 @@ func (s *Server) UploadVideo(c *gin.Context) {
 	b, _ := marshalJSON.Marshal(resp)
 	c.Data(http.StatusOK, "application/json", b)
 }
-
-var _ InterfaceVideoServer = (*Server)(nil)

@@ -1,18 +1,32 @@
-version: "2"
+run:
+  timeout: 3m
+  tests: true
 
 linters:
   enable:
     - govet
     - staticcheck
-    - gofmt
-    - goimports
-    - golint
+    - revive
+    - gosimple
     - ineffassign
+    - errcheck
     - gocyclo
-    - gosec
-  disable:
-    - megacheck
-run:
-  timeout: 5m
+    - goconst
+    - gofumpt
+    - misspell
 
+linters-settings:
+  revive:
+    rules:
+      - name: exported
+        arguments: ["checkPrivateReceivers", "sayRepetitiveInsteadOfStutters"]
+      - name: indent-error-flow
+      - name: error-naming
+  gocyclo:
+    min-complexity: 15
 
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: _test\.go
+      linters: [gocyclo]

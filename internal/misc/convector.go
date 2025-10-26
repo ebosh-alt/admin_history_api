@@ -1,10 +1,11 @@
 package misc
 
 import (
-	"admin_history/internal/entities"
-	protos "admin_history/pkg/proto/gen/go"
 	"encoding/json"
 	"fmt"
+
+	"admin_history/internal/entities"
+	protos "admin_history/pkg/proto/gen/go"
 )
 
 func BuildEntityForUpdate(p *protos.Questionnaire) (*entities.Questionnaire, error) {

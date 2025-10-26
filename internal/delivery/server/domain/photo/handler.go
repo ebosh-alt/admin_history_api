@@ -1,13 +1,45 @@
-package server
+package photo
 
 import (
-	protos "admin_history/pkg/proto/gen/go"
+	"context"
+	"google.golang.org/protobuf/encoding/protojson"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"strconv"
 
+	protos "admin_history/pkg/proto/gen/go"
+
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
+
+var (
+	unmarshalJSON = protojson.UnmarshalOptions{DiscardUnknown: true}
+	marshalJSON   = protojson.MarshalOptions{EmitUnpopulated: true}
+)
+
+type Usecase interface {
+	GetPhotosQuestionnaire(ctx context.Context, req *protos.PhotoRequest) (*protos.PhotoResponse, error)
+	UploadPhoto(ctx context.Context, r io.Reader, filename string, photo *protos.Photo) (*protos.Status, error)
+}
+
+type Handler struct {
+	log *zap.Logger
+	uc  Usecase
+}
+
+func New(log *zap.Logger, uc Usecase) *Handler {
+	return &Handler{
+		log: log,
+		uc:  uc,
+	}
+}
+
+func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
+	r.GET("", h.GetPhotosQuestionnaire)
+	r.POST("/upload", h.UploadPhoto)
+}
 
 // GetPhotosQuestionnaire godoc
 // @Summary      Получить фото анкеты
@@ -19,7 +51,7 @@ import (
 // @Success      200               {object}  PhotoResponse
 // @Failure      404               {object}  ErrorResponse
 // @Router       /photos [get]
-func (s *Server) GetPhotosQuestionnaire(c *gin.Context) {
+func (h *Handler) GetPhotosQuestionnaire(c *gin.Context) {
 	req := &protos.PhotoRequest{}
 	if v := c.Query("questionnaire_id"); v != "" {
 		if n, err := strconv.ParseInt(v, 10, 32); err == nil {
@@ -29,18 +61,14 @@ func (s *Server) GetPhotosQuestionnaire(c *gin.Context) {
 	if v := c.Query("type"); v != "" {
 		req.Type = v
 	}
-	//if err := c.ShouldBindJSON(&req); err != nil {
-	//	s.log.Error("failed to get questionnaire: ", zap.Error(err))
-	//	c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный запрос"})
-	//	return
-	//}
 
-	proto, err := s.Usecase.GetPhotosQuestionnaire(c, req)
+	resp, err := h.uc.GetPhotosQuestionnaire(c, req)
 	if err != nil {
+		h.log.Error("failed to get photos questionnaire", zap.Error(err), zap.Any("request", req))
 		c.JSON(http.StatusNotFound, gin.H{"message": "Не корректные данные"})
 		return
 	}
-	c.JSON(http.StatusOK, proto)
+	c.JSON(http.StatusOK, resp)
 }
 
 // UploadPhoto godoc
@@ -56,8 +84,9 @@ func (s *Server) GetPhotosQuestionnaire(c *gin.Context) {
 // @Success      200               {object}  Status
 // @Failure      400               {object}  ErrorResponse
 // @Router       /photos/upload [post]
-func (s *Server) UploadPhoto(c *gin.Context) {
+func (h *Handler) UploadPhoto(c *gin.Context) {
 	if err := c.Request.ParseMultipartForm(20 << 20); err != nil {
+		h.log.Error("invalid multipart form", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid multipart"})
 		return
 	}
@@ -68,15 +97,14 @@ func (s *Server) UploadPhoto(c *gin.Context) {
 		return
 	}
 
-	src, err := hdr.Open() // получаем io.ReadCloser из FileHeader
+	src, err := hdr.Open()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot open file"})
 		return
 	}
 	defer func(src multipart.File) {
-		err := src.Close()
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "error closing file"})
+		if err := src.Close(); err != nil {
+			h.log.Warn("error closing file", zap.Error(err))
 		}
 	}(src)
 
@@ -88,7 +116,8 @@ func (s *Server) UploadPhoto(c *gin.Context) {
 		Scene:           scene,
 		TypePhoto:       typePhoto,
 	}
-	resp, err := s.Usecase.UploadPhoto(c, src, hdr.Filename, photoProto)
+
+	resp, err := h.uc.UploadPhoto(c, src, hdr.Filename, photoProto)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
@@ -97,5 +126,3 @@ func (s *Server) UploadPhoto(c *gin.Context) {
 	b, _ := marshalJSON.Marshal(resp)
 	c.Data(http.StatusOK, "application/json", b)
 }
-
-var _ InterfacePhotoServer = (*Server)(nil)

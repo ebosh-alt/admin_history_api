@@ -1,16 +1,43 @@
-package server
+package review
 
 import (
-	protos "admin_history/pkg/proto/gen/go"
+	"context"
 	"net/http"
 	"strconv"
 	"time"
 
+	protos "admin_history/pkg/proto/gen/go"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
+
+type Usecase interface {
+	GetReview(ctx context.Context, req *protos.ReviewRequest) (*protos.ReviewResponse, error)
+	ReviewsList(ctx context.Context, req *protos.ReviewsListRequest) (*protos.ReviewsListResponse, error)
+}
+
+type Handler struct {
+	log *zap.Logger
+	uc  Usecase
+}
+
+func New(log *zap.Logger, uc Usecase) *Handler {
+	return &Handler{
+		log: log,
+		uc:  uc,
+	}
+}
+
+func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
+	r.GET("/:id", h.GetReview)
+	r.GET("", h.ReviewsList)
+}
+
+var marshalJSON = protojson.MarshalOptions{EmitUnpopulated: true}
 
 // GetReview godoc
 // @Summary      Получить отзыв
@@ -22,7 +49,7 @@ import (
 // @Failure      400  {object}  ErrorResponse
 // @Failure      404  {object}  ErrorResponse
 // @Router       /reviews/{id} [get]
-func (s *Server) GetReview(c *gin.Context) {
+func (h *Handler) GetReview(c *gin.Context) {
 	req := &protos.ReviewRequest{}
 
 	if v := c.Param("id"); v != "" {
@@ -32,14 +59,14 @@ func (s *Server) GetReview(c *gin.Context) {
 	}
 
 	if req.Id <= 0 {
-		s.log.Error("invalid review id", zap.Int64("id", req.Id))
+		h.log.Error("invalid review id", zap.Int64("id", req.Id))
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный ID отзыва"})
 		return
 	}
 
-	reviewProto, err := s.Usecase.GetReview(c, req)
+	reviewProto, err := h.uc.GetReview(c, req)
 	if err != nil {
-		s.log.Error("failed to get review", zap.Error(err), zap.Any("request", req))
+		h.log.Error("failed to get review", zap.Error(err), zap.Any("request", req))
 		c.JSON(http.StatusNotFound, gin.H{"message": "Отзыв не найден"})
 		return
 	}
@@ -60,10 +87,9 @@ func (s *Server) GetReview(c *gin.Context) {
 // @Success      200        {object}  ReviewsListResponse
 // @Failure      400        {object}  ErrorResponse
 // @Router       /reviews [get]
-func (s *Server) ReviewsList(c *gin.Context) {
+func (h *Handler) ReviewsList(c *gin.Context) {
 	req := &protos.ReviewsListRequest{}
 
-	// page/limit
 	if v := c.Query("page"); v != "" {
 		if i, err := strconv.Atoi(v); err == nil && i > 0 {
 			req.Page = int32(i)
@@ -75,70 +101,56 @@ func (s *Server) ReviewsList(c *gin.Context) {
 		}
 	}
 
-	// user_id filter
 	if v := c.Query("user_id"); v != "" {
 		if n, err := strconv.ParseInt(v, 10, 64); err == nil && n > 0 {
 			req.UserId = wrapperspb.Int64(n)
 		}
 	}
 
-	// UTC+3 timezone for date parsing
 	moscowTZ, _ := time.LoadLocation("Europe/Moscow")
 
-	// Parse date_from - support both Unix timestamp and ISO date format
 	if v := c.Query("date_from"); v != "" {
 		var t time.Time
 		var err error
 
-		// Try to parse as Unix timestamp first
 		if sec, parseErr := strconv.ParseInt(v, 10, 64); parseErr == nil && sec > 0 {
 			t = time.Unix(sec, 0)
 		} else {
-			// Try to parse as ISO date format (YYYY-MM-DD)
 			if t, err = time.ParseInLocation("2006-01-02", v, moscowTZ); err != nil {
-				// Try to parse as ISO datetime format (YYYY-MM-DDTHH:MM:SS)
 				if t, err = time.ParseInLocation("2006-01-02T15:04:05", v, moscowTZ); err != nil {
-					s.log.Error("failed to parse date_from", zap.String("value", v), zap.Error(err))
+					h.log.Error("failed to parse date_from", zap.String("value", v), zap.Error(err))
 					c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный формат даты date_from"})
 					return
 				}
 			}
 		}
 
-		// Convert to UTC for database storage
 		req.DateFrom = timestamppb.New(t.UTC())
 	}
 
-	// Parse date_to - support both Unix timestamp and ISO date format
 	if v := c.Query("date_to"); v != "" {
 		var t time.Time
 		var err error
 
-		// Try to parse as Unix timestamp first
 		if sec, parseErr := strconv.ParseInt(v, 10, 64); parseErr == nil && sec > 0 {
 			t = time.Unix(sec, 0)
 		} else {
-			// Try to parse as ISO date format (YYYY-MM-DD)
 			if t, err = time.ParseInLocation("2006-01-02", v, moscowTZ); err != nil {
-				// Try to parse as ISO datetime format (YYYY-MM-DDTHH:MM:SS)
 				if t, err = time.ParseInLocation("2006-01-02T15:04:05", v, moscowTZ); err != nil {
-					s.log.Error("failed to parse date_to", zap.String("value", v), zap.Error(err))
+					h.log.Error("failed to parse date_to", zap.String("value", v), zap.Error(err))
 					c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный формат даты date_to"})
 					return
 				}
 			}
 		}
 
-		// For date_to, if it's just a date (no time), add 23:59:59 to include the whole day
 		if t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0 {
 			t = t.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 		}
 
-		// Convert to UTC for database storage
 		req.DateTo = timestamppb.New(t.UTC())
 	}
 
-	// set defaults
 	if req.Page < 1 {
 		req.Page = 1
 	}
@@ -146,9 +158,9 @@ func (s *Server) ReviewsList(c *gin.Context) {
 		req.Limit = 50
 	}
 
-	resp, err := s.Usecase.ReviewsList(c, req)
+	resp, err := h.uc.ReviewsList(c, req)
 	if err != nil {
-		s.log.Error("failed to get reviews list", zap.Error(err), zap.Any("request", req))
+		h.log.Error("failed to get reviews list", zap.Error(err), zap.Any("request", req))
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректные данные"})
 		return
 	}
@@ -156,5 +168,3 @@ func (s *Server) ReviewsList(c *gin.Context) {
 	b, _ := marshalJSON.Marshal(resp)
 	c.Data(http.StatusOK, "application/json", b)
 }
-
-var _ InterfaceReviewServer = (*Server)(nil)

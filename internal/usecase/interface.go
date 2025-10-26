@@ -1,10 +1,10 @@
-package usecase
+package errors
 
 import (
+	"admin_history/internal/entities"
 	protos "admin_history/pkg/proto/gen/go"
 	"context"
 	"io"
-	"mime/multipart"
 )
 
 type InterfaceUsecase interface {
@@ -12,8 +12,6 @@ type InterfaceUsecase interface {
 	InterfaceQuestionnaireUsecase
 	InterfacePhotoUsecase
 	InterfaceVideoUsecase
-	InterfaceChatUsecase
-	InterfaceStatisticUsecase
 	InterfacePromoCodeUsecase
 	InterfaceReviewUsecase
 }
@@ -28,7 +26,7 @@ type InterfaceQuestionnaireUsecase interface {
 	GetQuestionnairesList(ctx context.Context, req *protos.QuestionnairesListRequest) (*protos.QuestionnairesListResponse, error)
 	GetQuestionnaire(ctx context.Context, req *protos.QuestionnaireRequest) (*protos.QuestionnaireResponse, error)
 	UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQuestionnaireRequest) (*protos.Status, error)
-	SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest, media *MediaUpload) (*protos.Status, error)
+	SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest, media *entities.MediaUpload) (*protos.Status, error)
 }
 
 type InterfacePhotoUsecase interface {
@@ -39,24 +37,6 @@ type InterfacePhotoUsecase interface {
 type InterfaceVideoUsecase interface {
 	GetVideosQuestionnaire(ctx context.Context, req *protos.VideoRequest) (*protos.VideoResponse, error)
 	UploadVideo(ctx context.Context, r io.Reader, filename string, contentType string, video *protos.Video) (*protos.Status, error)
-}
-
-type MediaUpload struct {
-	DemoPhotos       []*multipart.FileHeader
-	FinalPhotos      []*multipart.FileHeader
-	DemoVideo        *multipart.FileHeader
-	GeneratedVideo   *multipart.FileHeader
-	DeliveryPhoto    *multipart.FileHeader
-	FinalPhotoScenes []string
-}
-
-type InterfaceChatUsecase interface {
-	GetChat(ctx context.Context, req *protos.ChatRequest) (*protos.ChatResponse, error)
-	ChatsList(ctx context.Context, req *protos.ChatsListRequest) (*protos.ChatsListResponse, error)
-}
-
-type InterfaceStatisticUsecase interface {
-	GetStatistics(ctx context.Context, req *protos.StatisticsRequest) (*protos.StatisticsResponse, error)
 }
 
 type InterfacePromoCodeUsecase interface {

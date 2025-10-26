@@ -1,13 +1,15 @@
-package server
+package questionnaire
 
 import (
-	usecase "admin_history/internal/usecase"
-	protos "admin_history/pkg/proto/gen/go"
+	"admin_history/internal/entities"
+	"context"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	protos "admin_history/pkg/proto/gen/go"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -15,6 +17,32 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
+
+type Usecase interface {
+	GetQuestionnairesList(ctx context.Context, req *protos.QuestionnairesListRequest) (*protos.QuestionnairesListResponse, error)
+	GetQuestionnaire(ctx context.Context, req *protos.QuestionnaireRequest) (*protos.QuestionnaireResponse, error)
+	UpdateQuestionnaire(ctx context.Context, req *protos.UpdateQuestionnaireRequest) (*protos.Status, error)
+	SubmitQuestionnaireMedia(ctx context.Context, req *protos.SubmitQuestionnaireMediaRequest, media *entities.MediaUpload) (*protos.Status, error)
+}
+
+type Handler struct {
+	log *zap.Logger
+	uc  Usecase
+}
+
+func New(log *zap.Logger, uc Usecase) *Handler {
+	return &Handler{
+		log: log,
+		uc:  uc,
+	}
+}
+
+func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
+	r.GET("/:id", h.GetQuestionnaire)
+	r.GET("", h.QuestionnairesList)
+	r.POST("/update", h.UpdateQuestionnaire)
+	r.POST("/media", h.SubmitQuestionnaireMedia)
+}
 
 var (
 	unmarshalJSON = protojson.UnmarshalOptions{DiscardUnknown: true}
@@ -30,7 +58,7 @@ var (
 // @Success      200  {object}  QuestionnaireResponse
 // @Failure      404  {object}  ErrorResponse
 // @Router       /questionnaires/{id} [get]
-func (s *Server) GetQuestionnaire(c *gin.Context) {
+func (h *Handler) GetQuestionnaire(c *gin.Context) {
 	req := &protos.QuestionnaireRequest{}
 
 	if v := c.Param("id"); v != "" {
@@ -39,7 +67,7 @@ func (s *Server) GetQuestionnaire(c *gin.Context) {
 		}
 	}
 
-	qProto, err := s.Usecase.GetQuestionnaire(c, req)
+	qProto, err := h.uc.GetQuestionnaire(c, req)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Не корректные данные"})
 		return
@@ -63,7 +91,7 @@ func (s *Server) GetQuestionnaire(c *gin.Context) {
 // @Failure      400        {object}  ErrorResponse
 // @Failure      404        {object}  ErrorResponse
 // @Router       /questionnaires [get]
-func (s *Server) QuestionnairesList(c *gin.Context) {
+func (h *Handler) QuestionnairesList(c *gin.Context) {
 	req := &protos.QuestionnairesListRequest{}
 
 	if v := c.Query("page"); v != "" {
@@ -104,7 +132,7 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 		} else {
 			if t, err = time.ParseInLocation("2006-01-02", v, moscowTZ); err != nil {
 				if t, err = time.ParseInLocation("2006-01-02T15:04:05", v, moscowTZ); err != nil {
-					s.log.Error("failed to parse date_from", zap.String("value", v), zap.Error(err))
+					h.log.Error("failed to parse date_from", zap.String("value", v), zap.Error(err))
 					c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный формат даты date_from"})
 					return
 				}
@@ -121,7 +149,7 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 		} else {
 			if t, err = time.ParseInLocation("2006-01-02", v, moscowTZ); err != nil {
 				if t, err = time.ParseInLocation("2006-01-02T15:04:05", v, moscowTZ); err != nil {
-					s.log.Error("failed to parse date_to", zap.String("value", v), zap.Error(err))
+					h.log.Error("failed to parse date_to", zap.String("value", v), zap.Error(err))
 					c.JSON(http.StatusBadRequest, gin.H{"message": "Не корректный формат даты date_to"})
 					return
 				}
@@ -134,9 +162,9 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 		req.DateTo = timestamppb.New(t.UTC())
 	}
 
-	resp, err := s.Usecase.GetQuestionnairesList(c, req)
+	resp, err := h.uc.GetQuestionnairesList(c, req)
 	if err != nil {
-		s.log.Error("list questionnaires failed", zap.Error(err), zap.Any("req", req))
+		h.log.Error("list questionnaires failed", zap.Error(err), zap.Any("req", req))
 		c.JSON(http.StatusNotFound, gin.H{"message": "Не корректные данные"})
 		return
 	}
@@ -154,18 +182,20 @@ func (s *Server) QuestionnairesList(c *gin.Context) {
 // @Failure      400      {object}  ErrorResponse
 // @Failure      500      {object}  ErrorResponse
 // @Router       /questionnaires/update [post]
-func (s *Server) UpdateQuestionnaire(c *gin.Context) {
+func (h *Handler) UpdateQuestionnaire(c *gin.Context) {
 	body, _ := io.ReadAll(c.Request.Body)
 	var req protos.UpdateQuestionnaireRequest
 	if err := unmarshalJSON.Unmarshal(body, &req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid JSON"})
 		return
 	}
-	resp, err := s.Usecase.UpdateQuestionnaire(c, &req)
+
+	resp, err := h.uc.UpdateQuestionnaire(c, &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
+
 	b, _ := marshalJSON.Marshal(resp)
 	c.Data(http.StatusOK, "application/json", b)
 }
@@ -194,9 +224,9 @@ func (s *Server) UpdateQuestionnaire(c *gin.Context) {
 // @Failure      400      {object}  ErrorResponse
 // @Failure      500      {object}  ErrorResponse
 // @Router       /questionnaires/media [post]
-func (s *Server) SubmitQuestionnaireMedia(c *gin.Context) {
+func (h *Handler) SubmitQuestionnaireMedia(c *gin.Context) {
 	if strings.HasPrefix(c.GetHeader("Content-Type"), "multipart/form-data") {
-		s.submitQuestionnaireMediaMultipart(c)
+		h.submitQuestionnaireMediaMultipart(c)
 		return
 	}
 
@@ -207,7 +237,7 @@ func (s *Server) SubmitQuestionnaireMedia(c *gin.Context) {
 		return
 	}
 
-	resp, err := s.Usecase.SubmitQuestionnaireMedia(c, &req, nil)
+	resp, err := h.uc.SubmitQuestionnaireMedia(c, &req, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -217,7 +247,7 @@ func (s *Server) SubmitQuestionnaireMedia(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json", b)
 }
 
-func (s *Server) submitQuestionnaireMediaMultipart(c *gin.Context) {
+func (h *Handler) submitQuestionnaireMediaMultipart(c *gin.Context) {
 	if err := c.Request.ParseMultipartForm(500 << 20); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid multipart"})
 		return
@@ -320,7 +350,7 @@ func (s *Server) submitQuestionnaireMediaMultipart(c *gin.Context) {
 		}
 	}
 
-	media := &usecase.MediaUpload{
+	media := &entities.MediaUpload{
 		FinalPhotoScenes: finalSceneQueue,
 	}
 
@@ -346,7 +376,7 @@ func (s *Server) submitQuestionnaireMediaMultipart(c *gin.Context) {
 		media = nil
 	}
 
-	resp, err := s.Usecase.SubmitQuestionnaireMedia(c, &req, media)
+	resp, err := h.uc.SubmitQuestionnaireMedia(c, &req, media)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -367,5 +397,3 @@ func popScene(queue *[]string) string {
 	}
 	return scene
 }
-
-var _ InterfaceQuestionnaireServer = (*Server)(nil)

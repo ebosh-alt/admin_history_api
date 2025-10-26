@@ -1,16 +1,41 @@
-package usecase
+package photo
 
 import (
-	"admin_history/internal/entities"
-	protos "admin_history/pkg/proto/gen/go"
+	"admin_history/internal/repository"
+	"admin_history/internal/storage"
+	"admin_history/internal/usecase/domain/base"
 	"context"
 	"fmt"
 	"io"
 	"path/filepath"
 	"strings"
 
+	"admin_history/internal/entities"
+	protos "admin_history/pkg/proto/gen/go"
+
 	"go.uber.org/zap"
 )
+
+type Usecase struct {
+	log               *zap.Logger
+	photoRepo         repository.PhotoRepository
+	questionnaireRepo repository.QuestionnaireRepository
+	st                *storage.FS
+}
+
+func New(
+	log *zap.Logger,
+	photoRepo repository.PhotoRepository,
+	questionnaireRepo repository.QuestionnaireRepository,
+	st *storage.FS,
+) *Usecase {
+	return &Usecase{
+		log:               log,
+		photoRepo:         photoRepo,
+		questionnaireRepo: questionnaireRepo,
+		st:                st,
+	}
+}
 
 func (u *Usecase) GetPhotosQuestionnaire(ctx context.Context, req *protos.PhotoRequest) (*protos.PhotoResponse, error) {
 	qID := req.QuestionnaireId
@@ -18,7 +43,7 @@ func (u *Usecase) GetPhotosQuestionnaire(ctx context.Context, req *protos.PhotoR
 	if qType == "" {
 		qType = "original"
 	}
-	photo, err := u.photos.GetPhotosQuestionnaire(ctx, qID, qType)
+	photo, err := u.photoRepo.GetPhotosQuestionnaire(ctx, qID, qType)
 	if err != nil {
 		return nil, err
 	}
@@ -60,13 +85,13 @@ func (u *Usecase) UploadPhoto(ctx context.Context, r io.Reader, filename string,
 		TypePhoto:       normalizePhotoType(photo.TypePhoto),
 	}
 
-	if err := u.photos.UploadPhoto(ctx, &ent); err != nil {
+	if err := u.photoRepo.UploadPhoto(ctx, &ent); err != nil {
 		if dd := u.st.Remove(ctx, relPath); dd != nil {
 			u.log.Warn("cleanup remove file failed", zap.String("path", relPath), zap.Error(dd))
 		}
 		return nil, err
 	}
-	if err := u.questionnaires.SetQuestionnaireStatus(ctx, photo.QuestionnaireId, true); err != nil {
+	if err := u.questionnaireRepo.SetQuestionnaireStatus(ctx, photo.QuestionnaireId, true); err != nil {
 		if dd := u.st.Remove(ctx, relPath); dd != nil {
 			u.log.Warn("cleanup remove file failed", zap.String("path", relPath), zap.Error(dd))
 		}
@@ -92,10 +117,8 @@ func normalizePhotoType(t string) string {
 	if t == "" {
 		return "original" // или другой тип по умолчанию
 	}
-	if isAllowedPhotoType(t) {
+	if base.IsAllowedPhotoType(t) {
 		return t
 	}
 	return "original"
 }
-
-var _ InterfacePhotoUsecase = (*Usecase)(nil)

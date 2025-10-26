@@ -15,6 +15,6 @@ func NewMiddleware(cfg *config.Config, log *zap.Logger) (*Middleware, error) {
 	return &Middleware{
 		cfg: cfg,
 		log: log,
-		//repo: repository,
+		// repo: repository,
 	}, nil
 }

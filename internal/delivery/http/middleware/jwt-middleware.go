@@ -1,16 +1,18 @@
 package middleware
 
 import (
-	"admin_history/internal/authctx"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"net/http"
 	"strings"
 	"time"
+
+	"admin_history/internal/authctx"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

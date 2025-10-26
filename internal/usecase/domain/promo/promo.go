@@ -1,28 +1,43 @@
-package usecase
+package promo
 
 import (
-	"admin_history/internal/entities"
-	protos "admin_history/pkg/proto/gen/go"
+	"admin_history/internal/repository"
+	"admin_history/internal/storage"
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+
+	"admin_history/internal/entities"
+	protos "admin_history/pkg/proto/gen/go"
 
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-var ErrPromoCodeNotFound = errors.New("promo code not found")
+type Usecase struct {
+	log  *zap.Logger
+	repo repository.PromoCodeRepository
+	st   *storage.FS
+}
 
+func New(log *zap.Logger, repo repository.PromoCodeRepository, st *storage.FS) *Usecase {
+	return &Usecase{
+		log:  log,
+		repo: repo,
+		st:   st,
+	}
+}
 func (u *Usecase) GetPromoCode(ctx context.Context, req *protos.PromoCodeRequest) (*protos.PromoCodeResponse, error) {
 	if req == nil || req.Id <= 0 {
 		return nil, fmt.Errorf("invalid promo code id")
 	}
 
 	promoCode := &entities.PromoCode{ID: req.Id}
-	promoCode, err := u.promoCodes.GetPromoCode(ctx, promoCode)
+	promoCode, err := u.repo.GetPromoCode(ctx, promoCode)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrPromoCodeNotFound
+			return nil, repository.ErrPromoCodeNotFound
 		}
 		return nil, err
 	}
@@ -58,12 +73,12 @@ func (u *Usecase) PromoCodesList(ctx context.Context, req *protos.PromoCodesList
 		f.Status = &v
 	}
 
-	items, err := u.promoCodes.PromoCodesList(ctx, page, limit, f)
+	items, err := u.repo.PromoCodesList(ctx, page, limit, f)
 	if err != nil {
 		return nil, fmt.Errorf("promo codes list: %w", err)
 	}
 
-	count, err := u.promoCodes.CountPromoCodes(ctx, f)
+	count, err := u.repo.CountPromoCodes(ctx, f)
 	if err != nil {
 		return nil, fmt.Errorf("count promo codes: %w", err)
 	}
@@ -115,7 +130,7 @@ func (u *Usecase) CreatePromoCode(ctx context.Context, req *protos.CreatePromoCo
 		promoCode.Status = &status
 	}
 
-	err := u.promoCodes.CreatePromoCode(ctx, promoCode)
+	err := u.repo.CreatePromoCode(ctx, promoCode)
 	if err != nil {
 		return nil, fmt.Errorf("create promo code: %w", err)
 	}
@@ -160,10 +175,10 @@ func (u *Usecase) UpdatePromoCode(ctx context.Context, req *protos.UpdatePromoCo
 		promoCode.Status = &status
 	}
 
-	err := u.promoCodes.UpdatePromoCode(ctx, promoCode)
+	err := u.repo.UpdatePromoCode(ctx, promoCode)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, ErrPromoCodeNotFound
+			return nil, repository.ErrPromoCodeNotFound
 		}
 		return nil, fmt.Errorf("update promo code: %w", err)
 	}

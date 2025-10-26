@@ -1,15 +1,30 @@
-package usecase
+package review
 
 import (
-	"admin_history/internal/entities"
-	protos "admin_history/pkg/proto/gen/go"
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+
+	"admin_history/internal/entities"
+	"admin_history/internal/repository"
+	protos "admin_history/pkg/proto/gen/go"
 
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+type Usecase struct {
+	log  *zap.Logger
+	repo repository.ReviewRepository
+}
+
+func New(log *zap.Logger, repo repository.ReviewRepository) *Usecase {
+	return &Usecase{
+		log:  log,
+		repo: repo,
+	}
+}
 
 func (u *Usecase) GetReview(ctx context.Context, req *protos.ReviewRequest) (*protos.ReviewResponse, error) {
 	if req == nil || req.Id <= 0 {
@@ -17,7 +32,7 @@ func (u *Usecase) GetReview(ctx context.Context, req *protos.ReviewRequest) (*pr
 	}
 
 	review := &entities.Review{ID: req.Id}
-	review, err := u.reviews.GetReview(ctx, review)
+	review, err := u.repo.GetReview(ctx, review)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("review not found")
@@ -61,12 +76,12 @@ func (u *Usecase) ReviewsList(ctx context.Context, req *protos.ReviewsListReques
 		f.DateTo = &t
 	}
 
-	items, err := u.reviews.ReviewsList(ctx, page, limit, f)
+	items, err := u.repo.ReviewsList(ctx, page, limit, f)
 	if err != nil {
 		return nil, fmt.Errorf("reviews list: %w", err)
 	}
 
-	count, err := u.reviews.CountReviews(ctx, f)
+	count, err := u.repo.CountReviews(ctx, f)
 	if err != nil {
 		return nil, fmt.Errorf("count reviews: %w", err)
 	}

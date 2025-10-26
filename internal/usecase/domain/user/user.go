@@ -1,16 +1,31 @@
-package usecase
+package user
 
 import (
-	"admin_history/internal/entities"
-	protos "admin_history/pkg/proto/gen/go"
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+
+	"admin_history/internal/entities"
+	"admin_history/internal/repository"
+	protos "admin_history/pkg/proto/gen/go"
 
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
+
+type Usecase struct {
+	log  *zap.Logger
+	repo repository.UserRepository
+}
+
+func New(log *zap.Logger, repo repository.UserRepository) *Usecase {
+	return &Usecase{
+		log:  log,
+		repo: repo,
+	}
+}
 
 func (u *Usecase) GetUser(ctx context.Context, req *protos.UserRequest) (*protos.UserResponse, error) {
 	userId := req.Id
@@ -18,7 +33,7 @@ func (u *Usecase) GetUser(ctx context.Context, req *protos.UserRequest) (*protos
 		return nil, errors.New("user id is required")
 	}
 	user := &entities.User{ID: userId}
-	user, err := u.users.GetUser(ctx, user)
+	user, err := u.repo.GetUser(ctx, user)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
@@ -52,7 +67,6 @@ func (u *Usecase) GetUser(ctx context.Context, req *protos.UserRequest) (*protos
 	return &protos.UserResponse{
 		User: userProto,
 	}, err
-
 }
 
 func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (*protos.UsersListResponse, error) {
@@ -98,11 +112,11 @@ func (u *Usecase) UsersList(ctx context.Context, req *protos.UsersListRequest) (
 		f.MapBinding = &v
 	}
 
-	items, err := u.users.UsersList(ctx, page, limit, f)
+	items, err := u.repo.UsersList(ctx, page, limit, f)
 	if err != nil {
 		return nil, fmt.Errorf("users list: %w", err)
 	}
-	countUsers, err := u.users.CountUsers(ctx, f)
+	countUsers, err := u.repo.CountUsers(ctx, f)
 
 	rows := make([]*protos.User, 0, len(items))
 	for i := range items {
@@ -154,7 +168,7 @@ func (u *Usecase) UpdateUser(ctx context.Context, req *protos.UpdateUserRequest)
 		Status:        req.User.Status,
 		AcceptedOffer: req.User.AcceptedOffer,
 	}
-	err := u.users.UpdateUser(ctx, user)
+	err := u.repo.UpdateUser(ctx, user)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return &protos.Status{
 			Ok:      true,

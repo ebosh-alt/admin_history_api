@@ -3,11 +3,12 @@ package storage
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type FS struct {
@@ -18,6 +19,7 @@ type FS struct {
 func NewFS() *FS {
 	return &FS{baseDir: strings.TrimRight("data", string(os.PathSeparator)), prefix: strings.Trim("photos", "/")}
 }
+
 func (f *FS) OnStart(_ context.Context) error {
 	return nil
 }
@@ -41,7 +43,7 @@ func (f *FS) save(ctx context.Context, prefix string, r io.Reader, ext string) (
 	if f == nil || f.baseDir == "" {
 		return "", errors.New("storage FS is not configured")
 	}
-	ext = normalizeExt(ext)
+	ext = NormalizeExt(ext)
 
 	absDir := filepath.Join(f.baseDir, prefix)
 
@@ -82,7 +84,7 @@ func (f *FS) save(ctx context.Context, prefix string, r io.Reader, ext string) (
 	return relPath, nil
 }
 
-func normalizeExt(ext string) string {
+func NormalizeExt(ext string) string {
 	ext = strings.ToLower(strings.TrimSpace(ext))
 	if ext == "" {
 		return ".bin"

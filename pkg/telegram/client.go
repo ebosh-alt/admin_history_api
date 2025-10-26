@@ -248,7 +248,6 @@ func (c *Client) sendMultipart(ctx context.Context, method string, fields map[st
 	}
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
-
 	}(resp.Body)
 
 	data, _ := io.ReadAll(resp.Body)

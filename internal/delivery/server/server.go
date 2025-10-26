@@ -1,11 +1,11 @@
 package server
 
 import (
+	"context"
+
 	"admin_history/config"
 	"admin_history/internal/delivery/http/middleware"
-	"admin_history/internal/usecase"
-	"context"
-	_ "fmt"
+	usecase "admin_history/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -14,7 +14,7 @@ type Server struct {
 	log        *zap.Logger
 	cfg        *config.Config
 	serv       *gin.Engine
-	Usecase    usecase.InterfaceUsecase
+	usecase    usecase.InterfaceUsecase
 	middleware *middleware.Middleware
 }
 

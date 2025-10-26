@@ -1,10 +1,12 @@
 package entities
 
 import (
-	protos "admin_history/pkg/proto/gen/go"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"time"
+
+	protos "admin_history/pkg/proto/gen/go"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -296,6 +298,7 @@ func (q *Questionnaire) ToProto() *protos.Questionnaire {
 
 	return out
 }
+
 func (d *QuestionnaireDTO) ToEntity() *Questionnaire {
 	var q Questionnaire
 	if d.ID != nil {
@@ -452,4 +455,13 @@ type ReviewFilter struct {
 	UserID   *int64
 	DateFrom *time.Time
 	DateTo   *time.Time
+}
+
+type MediaUpload struct {
+	DemoPhotos       []*multipart.FileHeader
+	FinalPhotos      []*multipart.FileHeader
+	DemoVideo        *multipart.FileHeader
+	GeneratedVideo   *multipart.FileHeader
+	DeliveryPhoto    *multipart.FileHeader
+	FinalPhotoScenes []string
 }

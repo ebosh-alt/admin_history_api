@@ -1,9 +1,10 @@
 package connection
 
 import (
-	"admin_history/config"
 	"context"
 	"fmt"
+
+	"admin_history/config"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"

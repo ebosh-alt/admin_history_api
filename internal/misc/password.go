@@ -4,7 +4,6 @@ import "golang.org/x/crypto/bcrypt"
 
 // HashPassword генерирует bcrypt-хэш из переданного пароля.
 func HashPassword(rawPassword string, pepper string) (string, error) {
-
 	passwordWithPepper := rawPassword + pepper
 	const cost = 12
 

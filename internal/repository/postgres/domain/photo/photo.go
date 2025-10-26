@@ -1,10 +1,11 @@
 package photo
 
 import (
-	"admin_history/internal/entities"
-	"admin_history/internal/repository"
 	"context"
 	"fmt"
+
+	"admin_history/internal/entities"
+	"admin_history/internal/repository"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -37,7 +38,6 @@ func New(db *pgxpool.Pool) repository.PhotoRepository {
 }
 
 func (r *Repo) GetPhotosQuestionnaire(ctx context.Context, questionnaireID int64, typePhoto string) ([]entities.Photo, error) {
-
 	var (
 		rows pgx.Rows
 		err  error
