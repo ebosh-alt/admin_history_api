@@ -1,11 +1,11 @@
 package server
 
 import (
+	"admin_history/internal/delivery/http/middleware"
+	usecase "admin_history/internal/usecase"
 	"context"
 
 	"admin_history/config"
-	"admin_history/internal/delivery/http/middleware"
-	usecase "admin_history/internal/usecase"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
